@@ -70,8 +70,8 @@ export class TransactionFormComponent {
   transaction: Partial<Transaction> = {
     description: '',
     amount: 0,
-    type: 'income',
-    category: 'salary'
+    type: 'expense',
+    category: 'food'
   };
 
   incomeCategories: IncomeCategory[] = ['salary', 'freelance', 'investments', 'gifts', 'other_income'];
@@ -79,9 +79,10 @@ export class TransactionFormComponent {
 
   @Output() addTransaction = new EventEmitter<Transaction>();
 
-  get availableCategories(): (IncomeCategory | ExpenseCategory)[] {
-    return this.transaction.type === 'income' ? this.incomeCategories : this.expenseCategories;
-  }
+get availableCategories(): (IncomeCategory | ExpenseCategory)[] {
+  return this.transaction.type === 'income' ? this.incomeCategories : this.expenseCategories;
+}
+
 
   onTypeChange() {
     this.transaction.category = this.transaction.type === 'income' ? 'salary' : 'food';
@@ -108,8 +109,8 @@ export class TransactionFormComponent {
     this.transaction = {
       description: '',
       amount: 0,
-      type: 'income',
-      category: 'salary'
+      type: 'expense',
+      category: 'food'
     };
   }
 }
