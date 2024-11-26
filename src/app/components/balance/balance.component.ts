@@ -24,20 +24,20 @@ import { Transaction } from '../../models/transaction.model';
         </div>
       </div>
     </div>
-  `
+  `,
 })
 export class BalanceComponent {
   @Input() transactions: Transaction[] = [];
 
   get totalIncome() {
     return this.transactions
-      .filter(t => t.type === 'income')
+      .filter((t) => t.type === 'income')
       .reduce((sum, t) => sum + t.amount, 0);
   }
 
   get totalExpenses() {
     return this.transactions
-      .filter(t => t.type === 'expense')
+      .filter((t) => t.type === 'expense')
       .reduce((sum, t) => sum + t.amount, 0);
   }
 
