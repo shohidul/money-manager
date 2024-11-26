@@ -1,32 +1,38 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TransactionFormComponent } from './components/transaction-form/transaction-form.component';
-import { BalanceComponent } from './components/balance/balance.component';
-import { TransactionListComponent } from './components/transaction-list/transaction-list.component';
-import { Transaction } from './models/transaction.model';
+import { RouterOutlet } from '@angular/router';
+import { DbService } from './services/db.service';
+import { SideMenuComponent } from './components/side-menu/side-menu.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [
-    CommonModule,
-    TransactionFormComponent,
-    BalanceComponent,
-    TransactionListComponent
-  ],
+  imports: [CommonModule, RouterOutlet, SideMenuComponent],
   template: `
-    <div class="container">
-      <h1 style="text-align: center; margin-bottom: 2rem;">Money Manager</h1>
-      <app-balance [transactions]="transactions" />
-      <app-transaction-form (addTransaction)="onAddTransaction($event)" />
-      <app-transaction-list [transactions]="transactions" />
+    <div class="app-container">
+      <app-side-menu />
+      <main>
+        <router-outlet />
+      </main>
     </div>
-  `
+  `,
+  styles: [`
+    .app-container {
+      display: flex;
+      height: 100vh;
+    }
+    
+    main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+    }
+  `]
 })
-export class AppComponent {
-  transactions: Transaction[] = [];
+export class AppComponent implements OnInit {
+  constructor(private dbService: DbService) {}
 
-  onAddTransaction(transaction: Transaction) {
-    this.transactions = [transaction, ...this.transactions];
+  async ngOnInit() {
+    await this.dbService.initializeDB();
   }
 }
