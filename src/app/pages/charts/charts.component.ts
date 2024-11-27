@@ -9,6 +9,7 @@ import { CommonModule } from '@angular/common';
 import { Chart, registerables } from 'chart.js';
 import { DbService, Transaction, Category } from '../../services/db.service';
 import { startOfMonth, endOfMonth, format } from 'date-fns';
+import { Router } from '@angular/router';
 
 Chart.register(...registerables);
 
@@ -19,7 +20,12 @@ Chart.register(...registerables);
   template: `
     <div class="charts">
       <header class="top-bar">
-        <h2>Analytics</h2>
+        <div class="flex gap-2">
+          <button class="back-button" (click)="goBack()">
+            <span class="material-icons">arrow_back</span>
+          </button>
+          <h2>Analytics</h2>
+        </div>
         <input 
           type="month" 
           [value]="currentMonth"
@@ -68,17 +74,28 @@ Chart.register(...registerables);
   `,
   styles: [
     `
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1rem;
+      background-color: var(--surface-color);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .back-button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 50%;
+    }
+
     .charts {
       max-width: 800px;
       margin: 0 auto;
       padding: 1rem;
-    }
-
-    .top-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
     }
 
     .month-picker {
@@ -174,17 +191,12 @@ export class ChartsComponent implements OnInit, AfterViewInit {
   expandedCategories: number[] = [];
   charts: Map<string, Chart> = new Map();
 
-  constructor(private dbService: DbService) {}
+  constructor(private dbService: DbService, private router: Router) {}
 
   async ngOnInit() {
     await this.loadCategories();
     await this.loadTransactions();
 
-    console.log(this.currentMonth);
-    console.log(this.transactions);
-    console.log(this.categories);
-    console.log(this.categoryStats);
-    console.log(this.expandedCategories);
     this.createDonutChart();
   }
 
@@ -345,5 +357,9 @@ export class ChartsComponent implements OnInit, AfterViewInit {
     const input = event.target as HTMLInputElement;
     this.currentMonth = input.value;
     this.loadTransactions();
+  }
+
+  goBack() {
+    this.router.navigate(['/']);
   }
 }
