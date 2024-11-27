@@ -53,7 +53,7 @@ Chart.register(...registerables);
         <div *ngFor="let stat of categoryStats" class="category-stat">
           <div class="category-header" (click)="toggleCategory(stat.categoryId)">
             <div class="category-info">
-              <span class="material-icons">{{ getCategoryIcon(stat.categoryId) }}</span>
+              <span class="material-symbols-rounded">{{ getCategoryIcon(stat.categoryId) }}</span>
               <span>{{ stat.category }}</span>
             </div>
             <span class="amount">{{ stat.amount | currency }}</span>
