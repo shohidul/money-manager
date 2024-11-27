@@ -135,14 +135,30 @@ export class DbService {
       ['categories', 'transactions'],
       'readwrite'
     );
-    await Promise.all([
-      transaction.objectStore('categories').clear(),
-      transaction.objectStore('transactions').clear(),
-    ]);
+
+    // Clear transactions completely
+    await transaction.objectStore('transactions').clear();
+
+    // Clear only custom categories (isCustom: true)
+    const categoryStore = transaction.objectStore('categories');
+    const allCategories = await categoryStore.getAll();
+    const customCategories = allCategories.filter(
+      (category) => category.isCustom
+    );
+
+    for (const customCategory of customCategories) {
+      await categoryStore.delete(customCategory.id as number);
+    }
+
+    await transaction.done;
   }
 
-  async restoreData(data: { transactions: any[]; categories: Category[] }) {
+  async restoreData(data: {
+    transactions: Transaction[];
+    categories: Category[];
+  }) {
     const { transactions, categories } = data;
+
     const transaction = this.db.transaction(
       ['categories', 'transactions'],
       'readwrite'
@@ -156,16 +172,18 @@ export class DbService {
         await categoryStore.put(category);
       }
 
-      // Restore transactions
-      for (const txn of data.transactions) {
-        txn.date = new Date(txn.date).toISOString(); // Normalize to ISO string
-        await transactionStore.put(txn); // Insert or update the record
+      // Restore transactions as new
+      for (const txn of transactions) {
+        const newTransaction = { ...txn }; // Copy transaction
+        delete newTransaction.id; // Remove the existing ID
+        newTransaction.date = new Date(txn.date); // Ensure date is in proper format
+        await transactionStore.add(newTransaction); // Add as a new transaction
       }
 
       await transaction.done;
-      console.log('Data restored successfully!');
+      console.log('Data restored as new successfully!');
     } catch (error) {
-      console.error('Error during restore:', error);
+      console.error('Error during restore as new:', error);
     }
   }
 }
