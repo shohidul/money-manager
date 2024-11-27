@@ -12,7 +12,7 @@ import { Transaction, categoryIcons } from '../../models/transaction.model';
       <ul class="transaction-list">
         <li *ngFor="let transaction of transactions" class="transaction-item">
           <div class="transaction-info">
-            <span class="material-icons category-icon" [class]="transaction.type">
+            <span class="material-symbols-rounded category-icon" [class]="transaction.type">
               {{ categoryIcons[transaction.category] }}
             </span>
             <div class="transaction-details">
@@ -30,7 +30,7 @@ import { Transaction, categoryIcons } from '../../models/transaction.model';
         </li>
       </ul>
     </div>
-  `
+  `,
 })
 export class TransactionListComponent {
   @Input() transactions: Transaction[] = [];
@@ -39,7 +39,7 @@ export class TransactionListComponent {
   formatCategory(category: string): string {
     return category
       .split('_')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
   }
 }
