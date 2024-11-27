@@ -23,7 +23,7 @@ import { Router } from '@angular/router';
         <div class="category-list">
           <div *ngFor="let category of categories" class="category-item">
             <div class="category-info">
-              <span class="material-icons">{{ category.icon }}</span>
+              <span class="material-symbols-rounded">{{ category.icon }}</span>
               <span>{{ category.name }}</span>
               <span class="category-type">{{ category.type }}</span>
             </div>
@@ -41,9 +41,9 @@ import { Router } from '@angular/router';
       <div class="card">
         <h3>Data Management</h3>
         <div class="settings-group">
-          <button class="export-button" (click)="exportData()">
+          <button class="backup-button" (click)="backupData()">
             <span class="material-icons">download</span>
-            Export Data
+            Backup Data
           </button>
           <button class="clear-button" (click)="clearData()">
             <span class="material-icons">delete</span>
@@ -132,7 +132,7 @@ import { Router } from '@angular/router';
       gap: 1rem;
     }
 
-    .export-button {
+    .backup-button {
       display: flex;
       align-items: center;
       gap: 0.5rem;
@@ -144,7 +144,7 @@ import { Router } from '@angular/router';
       cursor: pointer;
     }
 
-    .export-button:hover {
+    .backup-button:hover {
       background-color: #1976d2;
     }
 
@@ -200,7 +200,7 @@ export class SettingsComponent implements OnInit {
     await this.loadCategories();
   }
 
-  async exportData() {
+  async backupData() {
     const startDate = new Date(0); // Beginning of time
     const endDate = new Date(); // Current date
 
@@ -222,7 +222,7 @@ export class SettingsComponent implements OnInit {
 
     const a = document.createElement('a');
     a.href = url;
-    a.download = `money-manager-export-${format(
+    a.download = `money-manager-backup-${format(
       new Date(),
       'yyyy-MM-dd'
     )}.json`;
