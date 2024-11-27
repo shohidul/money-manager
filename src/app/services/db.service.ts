@@ -31,7 +31,7 @@ export interface Category {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class DbService {
   private db!: IDBPDatabase<MoneyManagerDB>;
@@ -43,28 +43,48 @@ export class DbService {
       upgrade(db) {
         const txStore = db.createObjectStore('transactions', {
           keyPath: 'id',
-          autoIncrement: true
+          autoIncrement: true,
         });
         txStore.createIndex('by-date', 'date');
 
         const categoryStore = db.createObjectStore('categories', {
           keyPath: 'id',
-          autoIncrement: true
+          autoIncrement: true,
         });
 
         // Add default categories
         const defaultCategories: Omit<Category, 'id'>[] = [
           { name: 'Salary', icon: 'payments', type: 'income', isCustom: false },
-          { name: 'Food', icon: 'restaurant', type: 'expense', isCustom: false },
-          { name: 'Transport', icon: 'directions_car', type: 'expense', isCustom: false },
-          { name: 'Shopping', icon: 'shopping_cart', type: 'expense', isCustom: false },
-          { name: 'Entertainment', icon: 'movie', type: 'expense', isCustom: false }
+          {
+            name: 'Food',
+            icon: 'restaurant',
+            type: 'expense',
+            isCustom: false,
+          },
+          {
+            name: 'Transport',
+            icon: 'directions_car',
+            type: 'expense',
+            isCustom: false,
+          },
+          {
+            name: 'Shopping',
+            icon: 'shopping_cart',
+            type: 'expense',
+            isCustom: false,
+          },
+          {
+            name: 'Entertainment',
+            icon: 'movie',
+            type: 'expense',
+            isCustom: false,
+          },
         ];
 
-        defaultCategories.forEach(category => {
+        defaultCategories.forEach((category) => {
           categoryStore.add(category);
         });
-      }
+      },
     });
   }
 
