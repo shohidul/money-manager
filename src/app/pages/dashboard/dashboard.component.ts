@@ -57,13 +57,13 @@ import { MonthPickerComponent } from '../../components/month-picker/month-picker
                  class="transaction-item"
                  (click)="editTransaction(transaction)">
               <!-- <div class="transaction-icon"> -->
-                <span class="material-icons" [class]="transaction.type">
+                <span class="material-symbols-rounded" [class]="transaction.type">
                   {{ getCategoryIcon(transaction.categoryId) }}
                 </span>
               <!-- </div> -->
               <div class="transaction-details">
-                <span class="memo">{{ transaction.memo }}</span>
-                <span class="category">{{ getCategoryName(transaction.categoryId) }}</span>
+                <span class="time">{{ transaction.date | date: 'shortTime' }}</span>
+                <span class="memo">{{ transaction.memo ? transaction.memo : getCategoryName(transaction.categoryId) }}</span>
               </div>
               <span class="amount">
                 {{ transaction.type === 'income' ? '' : '-' }}{{ transaction.amount | number:'1.0-2' }}
@@ -172,9 +172,9 @@ import { MonthPickerComponent } from '../../components/month-picker/month-picker
 
     .transaction-item {
       display: flex;
-      /*align-items: center;*/
+      align-items: self-end;
       gap: 1rem;
-      padding: 0.75rem 1rem;
+      padding: 0.1rem 1rem 0.8rem 1rem;
       cursor: pointer;
       transition: background-color 0.2s;
       border-bottom: 1px solid #f5f5f5;
@@ -193,6 +193,13 @@ import { MonthPickerComponent } from '../../components/month-picker/month-picker
 
     .transaction-details {
       flex: 1;
+    }
+
+    .transaction-details .time {
+      display: block;
+      font-size: 0.65rem; /* Extra small font size */
+      color: #999; /* Optional: subtle color */
+      margin-top: 0.25rem; /* Space between memo and time */
     }
 
     .memo {
