@@ -100,9 +100,8 @@ import { DbService, Category, Transaction } from '../../services/db.service';
 
     .top-bar {
       display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: 1rem;
+      gap: 0.5rem;
+      padding: 0.5rem;
       background-color: var(--surface-color);
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
