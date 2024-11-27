@@ -7,55 +7,55 @@
     "@angular/common": {
       "src": "../../../../../node_modules/@angular/common/fesm2022/common.mjs",
       "file": "@angular_common.js",
-      "fileHash": "505038e8",
+      "fileHash": "f83f620a",
       "needsInterop": false
     },
     "@angular/core": {
       "src": "../../../../../node_modules/@angular/core/fesm2022/core.mjs",
       "file": "@angular_core.js",
-      "fileHash": "edfc5d11",
+      "fileHash": "489aa593",
       "needsInterop": false
     },
     "@angular/forms": {
       "src": "../../../../../node_modules/@angular/forms/fesm2022/forms.mjs",
       "file": "@angular_forms.js",
-      "fileHash": "37057e64",
+      "fileHash": "213f78a6",
       "needsInterop": false
     },
     "@angular/platform-browser": {
       "src": "../../../../../node_modules/@angular/platform-browser/fesm2022/platform-browser.mjs",
       "file": "@angular_platform-browser.js",
-      "fileHash": "8eff195c",
+      "fileHash": "8fbcb281",
       "needsInterop": false
     },
     "@angular/router": {
       "src": "../../../../../node_modules/@angular/router/fesm2022/router.mjs",
       "file": "@angular_router.js",
-      "fileHash": "f276a560",
+      "fileHash": "d5f03662",
       "needsInterop": false
     },
     "chart.js": {
       "src": "../../../../../node_modules/chart.js/dist/chart.js",
       "file": "chart__js.js",
-      "fileHash": "48159952",
+      "fileHash": "9a32ed4a",
       "needsInterop": false
     },
     "date-fns": {
       "src": "../../../../../node_modules/date-fns/index.mjs",
       "file": "date-fns.js",
-      "fileHash": "d4b0c562",
+      "fileHash": "e5b72fac",
       "needsInterop": false
     },
     "idb": {
       "src": "../../../../../node_modules/idb/build/index.js",
       "file": "idb.js",
-      "fileHash": "0f22a9a5",
+      "fileHash": "742a6fa0",
       "needsInterop": false
     },
     "rxjs": {
       "src": "../../../../../node_modules/rxjs/dist/esm5/index.js",
       "file": "rxjs.js",
-      "fileHash": "f13a4195",
+      "fileHash": "75cbb086",
       "needsInterop": false
     }
   },
