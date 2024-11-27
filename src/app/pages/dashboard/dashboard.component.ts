@@ -28,16 +28,16 @@ import { MonthPickerComponent } from '../../components/month-picker/month-picker
       <div class="overview card">
         <div class="stat-item">
           <span class="label">Income</span>
-          <span class="amount">+{{ totalIncome | currency }}</span>
+          <span class="amount">{{ totalIncome | number:'1.0-2' }}</span>
         </div>
         <div class="stat-item">
           <span class="label">Expense</span>
-          <span class="amount">-{{ totalExpense | currency }}</span>
+          <span class="amount">{{ totalExpense | number:'1.0-2' }}</span>
         </div>
         <div class="stat-item">
           <span class="label">Balance</span>
           <span class="amount">
-            {{ balance | currency }}
+            {{ balance | number:'1.0-2' }}
           </span>
         </div>
       </div>
@@ -46,8 +46,12 @@ import { MonthPickerComponent } from '../../components/month-picker/month-picker
         <div class="transaction-list">
           <div *ngFor="let group of transactionGroups" class="transaction-group card">
             <div class="date-header">
-              <span>{{ group.date | date:'mediumDate' }}</span>
-              <span class="total">{{ group.total | currency }}</span>
+              <span>{{ group.date | date: 'MM/dd E' }}</span>
+              <span class="total">
+                <span *ngIf="group.totalIncome > 0">Income: {{ group.totalIncome | number:'1.0-2' }}</span>
+                &nbsp;&nbsp;
+                <span *ngIf="group.totalExpense > 0">Expense: {{ group.totalExpense | number:'1.0-2' }}</span>
+              </span>
             </div>
             <div *ngFor="let transaction of group.transactions" 
                  class="transaction-item"
@@ -62,7 +66,7 @@ import { MonthPickerComponent } from '../../components/month-picker/month-picker
                 <span class="category">{{ getCategoryName(transaction.categoryId) }}</span>
               </div>
               <span class="amount">
-                {{ transaction.type === 'income' ? '+' : '-' }}{{ transaction.amount | currency }}
+                {{ transaction.type === 'income' ? '' : '-' }}{{ transaction.amount | number:'1.0-2' }}
               </span>
             </div>
           </div>
@@ -120,7 +124,17 @@ import { MonthPickerComponent } from '../../components/month-picker/month-picker
     .stat-item {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.2rem;
+      position: relative;
+    }
+
+    .stat-item:not(:last-child)::after {
+      content: '|';
+      position: absolute;
+      right: -0.5rem; /* Adjust based on spacing between items */
+      top: 50%;
+      transform: translateY(-50%);
+      color: #ccc; /* Customize the color */
     }
 
     .label {
@@ -140,7 +154,7 @@ import { MonthPickerComponent } from '../../components/month-picker/month-picker
     .transaction-list {
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      /*gap: 1rem;*/
     }
 
     .transaction-list .card{
@@ -150,7 +164,7 @@ import { MonthPickerComponent } from '../../components/month-picker/month-picker
     .date-header {
       display: flex;
       justify-content: space-between;
-      padding: 1.5rem 1rem 0.5rem 1rem;
+      padding: 1rem 1rem 0.5rem 1rem;
       color: var(--text-secondary);
       font-size: 0.875rem;
       border-bottom: 1px solid #f5f5f5;
@@ -218,11 +232,14 @@ export class DashboardComponent implements OnInit {
     const date = new Date(this.currentMonth);
     const startDate = startOfMonth(date);
     const endDate = endOfMonth(date);
-
-    this.transactions = await this.dbService.getTransactions(
-      startDate,
-      endDate
+    console.log(startDate);
+    console.log(endDate);
+    const data = await this.dbService.getTransactions(startDate, endDate);
+    console.log(data);
+    this.transactions = Array.from(data.values()).sort(
+      (a, b) => b.date.getTime() - a.date.getTime()
     );
+
     this.calculateTotals();
     this.groupTransactions();
   }
@@ -248,16 +265,18 @@ export class DashboardComponent implements OnInit {
         groups.set(dateKey, {
           date: transaction.date,
           transactions: [],
-          total: 0,
+          totalIncome: 0,
+          totalExpense: 0,
         });
       }
 
       const group = groups.get(dateKey);
       group.transactions.push(transaction);
-      group.total +=
-        transaction.type === 'income'
-          ? transaction.amount
-          : -transaction.amount;
+      if (transaction.type === 'income') {
+        group.totalIncome += transaction.amount;
+      } else {
+        group.totalExpense += transaction.amount;
+      }
     });
 
     this.transactionGroups = Array.from(groups.values()).sort(
