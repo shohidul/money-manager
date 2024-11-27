@@ -35,7 +35,7 @@ import { DbService, Category, Transaction } from '../../services/db.service';
           [class.selected]="selectedCategory?.id === category.id"
           (click)="selectCategory(category)"
         >
-          <span class="material-icons">{{ category.icon }}</span>
+          <span class="material-symbols-rounded">{{ category.icon }}</span>
           <span class="category-name">{{ category.name }}</span>
         </div>
         <div class="category-item add-category" (click)="showAddCategory = true">
@@ -46,7 +46,7 @@ import { DbService, Category, Transaction } from '../../services/db.service';
 
       <div *ngIf="selectedCategory" class="bottom-sheet">
         <div class="sheet-header">
-          <span class="material-icons">{{ selectedCategory.icon }}</span>
+          <span class="material-symbols-rounded">{{ selectedCategory.icon }}</span>
           <input 
             type="text" 
             [(ngModel)]="memo" 
@@ -79,7 +79,7 @@ import { DbService, Category, Transaction } from '../../services/db.service';
               [class.selected]="newCategory.icon === icon"
               class="icon-button"
             >
-              <span class="material-icons">{{ icon }}</span>
+              <span class="material-symbols-rounded">{{ icon }}</span>
             </button>
           </div>
           <div class="modal-actions">
