@@ -97,6 +97,15 @@ export class DbService {
     return index.getAll(IDBKeyRange.bound(startDate, endDate));
   }
 
+  async getTransactionsDirect(startDate: Date, endDate: Date) {
+    const allTransactions = await this.db
+      .transaction('transactions')
+      .store.getAll();
+    return allTransactions.filter(
+      (txn) => new Date(txn.date) >= startDate && new Date(txn.date) <= endDate
+    );
+  }
+
   async addCategory(category: Omit<Category, 'id'>) {
     return this.db.add('categories', category);
   }
@@ -119,5 +128,44 @@ export class DbService {
 
   async deleteCategory(id: number) {
     return this.db.delete('categories', id);
+  }
+
+  async clearAllData() {
+    const transaction = this.db.transaction(
+      ['categories', 'transactions'],
+      'readwrite'
+    );
+    await Promise.all([
+      transaction.objectStore('categories').clear(),
+      transaction.objectStore('transactions').clear(),
+    ]);
+  }
+
+  async restoreData(data: { transactions: any[]; categories: Category[] }) {
+    const { transactions, categories } = data;
+    const transaction = this.db.transaction(
+      ['categories', 'transactions'],
+      'readwrite'
+    );
+    const categoryStore = transaction.objectStore('categories');
+    const transactionStore = transaction.objectStore('transactions');
+
+    try {
+      // Restore categories
+      for (const category of categories) {
+        await categoryStore.put(category);
+      }
+
+      // Restore transactions
+      for (const txn of data.transactions) {
+        txn.date = new Date(txn.date).toISOString(); // Normalize to ISO string
+        await transactionStore.put(txn); // Insert or update the record
+      }
+
+      await transaction.done;
+      console.log('Data restored successfully!');
+    } catch (error) {
+      console.error('Error during restore:', error);
+    }
   }
 }
