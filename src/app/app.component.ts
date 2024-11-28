@@ -11,7 +11,7 @@ import { Subscription } from 'rxjs';
   standalone: true,
   imports: [CommonModule, RouterOutlet, SideMenuComponent],
   template: `
-    <div class="app-container" [class.menu-open]="isSideMenuOpen">
+    <div class="app-container">
       <app-side-menu 
         [isOpen]="isSideMenuOpen" 
         (menuClosed)="closeSideMenu()"
@@ -26,7 +26,6 @@ import { Subscription } from 'rxjs';
       display: flex;
       height: 100vh;
       position: relative;
-      transition: transform 0.3s ease;
     }
     
     main {
@@ -38,16 +37,8 @@ import { Subscription } from 'rxjs';
     }
 
     @media (max-width: 768px) {
-      .app-container {
-        transform: translateX(0);
-      }
-
-      .app-container.menu-open {
-        transform: translateX(250px);
-      }
-
       main {
-        width: 100vw;
+        width: 100%;
       }
     }
   `]
