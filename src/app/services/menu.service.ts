@@ -1,4 +1,4 @@
-import { Injectable, HostListener } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
@@ -9,16 +9,10 @@ export class MenuService {
   menuState$ = this.menuState.asObservable();
 
   toggleMenu() {
-    if (this.isMobileView()) {
-      this.menuState.next(!this.menuState.value);
-    }
+    this.menuState.next(!this.menuState.value);
   }
 
   closeMenu() {
     this.menuState.next(false);
-  }
-
-  private isMobileView(): boolean {
-    return window.innerWidth <= 768; // Define mobile breakpoint
   }
 }
