@@ -12,6 +12,11 @@ export const routes: Routes = [
       import('./pages/add-transaction/add-transaction.component').then(m => m.AddTransactionComponent)
   },
   {
+    path: 'add-category',
+    loadComponent: () => 
+      import('./pages/add-category/add-category.component').then(m => m.AddCategoryComponent)
+  },
+  {
     path: 'charts',
     loadComponent: () => 
       import('./pages/charts/charts.component').then(m => m.ChartsComponent)
