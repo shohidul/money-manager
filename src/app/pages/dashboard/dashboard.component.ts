@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { DbService, Transaction, Category } from '../../services/db.service';
+import { DbService } from '../../services/db.service';
 import { MenuService } from '../../services/menu.service';
-import { startOfMonth, endOfMonth, format } from 'date-fns';
 import { MonthPickerComponent } from '../../components/month-picker/month-picker.component';
+import { startOfMonth, endOfMonth, format } from 'date-fns';
 
 @Component({
   selector: 'app-dashboard',
@@ -217,14 +217,17 @@ import { MonthPickerComponent } from '../../components/month-picker/month-picker
 })
 export class DashboardComponent implements OnInit {
   currentMonth = format(new Date(), 'yyyy-MM');
-  transactions: Transaction[] = [];
-  categories: Category[] = [];
+  transactions: any[] = [];
+  categories: any[] = [];
   transactionGroups: any[] = [];
   totalIncome = 0;
   totalExpense = 0;
   balance = 0;
 
-  constructor(private dbService: DbService, private menuService: MenuService) {}
+  constructor(
+    private dbService: DbService,
+    private menuService: MenuService
+  ) {}
 
   async ngOnInit() {
     await this.loadCategories();
@@ -239,13 +242,9 @@ export class DashboardComponent implements OnInit {
     const date = new Date(this.currentMonth);
     const startDate = startOfMonth(date);
     const endDate = endOfMonth(date);
-    console.log(startDate);
-    console.log(endDate);
-    const data = await this.dbService.getTransactions(startDate, endDate);
-    console.log(data);
-    this.transactions = Array.from(data.values()).sort(
-      (a, b) => b.date.getTime() - a.date.getTime()
-    );
+    
+    const transactions = await this.dbService.getTransactions(startDate, endDate);
+    this.transactions = transactions.sort((a, b) => b.date.getTime() - a.date.getTime());
 
     this.calculateTotals();
     this.groupTransactions();
@@ -253,32 +252,34 @@ export class DashboardComponent implements OnInit {
 
   calculateTotals() {
     this.totalIncome = this.transactions
-      .filter((t) => t.type === 'income')
+      .filter(t => t.type === 'income')
       .reduce((sum, t) => sum + t.amount, 0);
 
     this.totalExpense = this.transactions
-      .filter((t) => t.type === 'expense')
+      .filter(t => t.type === 'expense')
       .reduce((sum, t) => sum + t.amount, 0);
 
     this.balance = this.totalIncome - this.totalExpense;
   }
 
   groupTransactions() {
-    const groups = new Map<string, any>();
+    const groups = new Map();
 
-    this.transactions.forEach((transaction) => {
+    this.transactions.forEach(transaction => {
       const dateKey = format(transaction.date, 'yyyy-MM-dd');
+      
       if (!groups.has(dateKey)) {
         groups.set(dateKey, {
           date: transaction.date,
           transactions: [],
           totalIncome: 0,
-          totalExpense: 0,
+          totalExpense: 0
         });
       }
 
       const group = groups.get(dateKey);
       group.transactions.push(transaction);
+      
       if (transaction.type === 'income') {
         group.totalIncome += transaction.amount;
       } else {
@@ -286,18 +287,17 @@ export class DashboardComponent implements OnInit {
       }
     });
 
-    this.transactionGroups = Array.from(groups.values()).sort(
-      (a, b) => b.date.getTime() - a.date.getTime()
-    );
+    this.transactionGroups = Array.from(groups.values())
+      .sort((a, b) => b.date.getTime() - a.date.getTime());
   }
 
   getCategoryIcon(categoryId: number): string {
-    const category = this.categories.find((c) => c.id === categoryId);
+    const category = this.categories.find(c => c.id === categoryId);
     return category?.icon || 'help';
   }
 
   getCategoryName(categoryId: number): string {
-    const category = this.categories.find((c) => c.id === categoryId);
+    const category = this.categories.find(c => c.id === categoryId);
     return category?.name || 'Unknown';
   }
 
@@ -306,8 +306,9 @@ export class DashboardComponent implements OnInit {
     this.loadTransactions();
   }
 
-  editTransaction(transaction: Transaction) {
+  editTransaction(transaction: any) {
     console.log('Edit transaction:', transaction);
+    // TODO: Implement edit functionality
   }
 
   toggleMenu() {
