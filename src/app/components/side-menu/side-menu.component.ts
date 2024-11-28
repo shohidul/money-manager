@@ -21,22 +21,65 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
           <span class="material-icons">pie_chart</span>
           Charts
         </a>
+        <a routerLink="/export" routerLinkActive="active" (click)="close()">
+          <span class="material-icons">download</span>
+          Export
+        </a>
+        <a routerLink="/tutorial" routerLinkActive="active" (click)="close()">
+          <span class="material-icons">help_outline</span>
+          Tutorial
+        </a>
         <a routerLink="/settings" routerLinkActive="active" (click)="close()">
           <span class="material-icons">settings</span>
           Settings
         </a>
+        <a routerLink="/about" routerLinkActive="active" (click)="close()">
+          <span class="material-icons">info</span>
+          About
+        </a>
       </div>
     </nav>
+    <div class="menu-overlay" [class.visible]="isOpen" (click)="close()"></div>
   `,
-  styles: [
-    `
+  styles: [`
+    :host {
+      display: contents;
+    }
+
     .side-menu {
       width: 250px;
       background: var(--surface-color);
       height: 100vh;
-      border-right: 1px solid rgba(0, 0, 0, 0.12);
       padding: 1rem;
       flex-shrink: 0;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+    }
+
+    .side-menu.open {
+      transform: translateX(0);
+    }
+
+    .menu-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .menu-overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
     }
 
     .menu-header {
@@ -79,18 +122,18 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
       color: white;
     }
 
-    @media (max-width: 768px) {
+    @media (min-width: 769px) {
       .side-menu {
-        position: fixed;
-        top: 0;
-        left: 0; /* Keep it at the same position */
-        z-index: 999;
-        transform: translateX(-250px);
-        transition: transform 0.2s ease;
+        position: sticky;
+        transform: none;
+        border-right: 1px solid rgba(0, 0, 0, 0.12);
+      }
+
+      .menu-overlay {
+        display: none;
       }
     }
-  `,
-  ],
+  `]
 })
 export class SideMenuComponent {
   @Input() isOpen = false;
