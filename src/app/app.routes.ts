@@ -1,29 +1,56 @@
 import { Routes } from '@angular/router';
+import { pinGuard } from './guards/pin.guard';
 
 export const routes: Routes = [
   {
     path: '',
-    loadComponent: () => 
-      import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent)
+    canActivate: [pinGuard],
+    children: [
+      {
+        path: '',
+        loadComponent: () => 
+          import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent)
+      },
+      {
+        path: 'add-transaction',
+        loadComponent: () => 
+          import('./pages/add-transaction/add-transaction.component').then(m => m.AddTransactionComponent)
+      },
+      {
+        path: 'add-category',
+        loadComponent: () => 
+          import('./pages/add-category/add-category.component').then(m => m.AddCategoryComponent)
+      },
+      {
+        path: 'charts',
+        loadComponent: () => 
+          import('./pages/charts/charts.component').then(m => m.ChartsComponent)
+      },
+      {
+        path: 'settings',
+        loadComponent: () => 
+          import('./pages/settings/settings.component').then(m => m.SettingsComponent)
+      },
+      {
+        path: 'about',
+        loadComponent: () => 
+          import('./pages/about/about.component').then(m => m.AboutComponent)
+      },
+      {
+        path: 'export',
+        loadComponent: () => 
+          import('./pages/export/export.component').then(m => m.ExportComponent)
+      },
+      {
+        path: 'tutorial',
+        loadComponent: () => 
+          import('./pages/tutorial/tutorial.component').then(m => m.TutorialComponent)
+      }
+    ]
   },
   {
-    path: 'add-transaction',
+    path: 'pin',
     loadComponent: () => 
-      import('./pages/add-transaction/add-transaction.component').then(m => m.AddTransactionComponent)
-  },
-  {
-    path: 'add-category',
-    loadComponent: () => 
-      import('./pages/add-category/add-category.component').then(m => m.AddCategoryComponent)
-  },
-  {
-    path: 'charts',
-    loadComponent: () => 
-      import('./pages/charts/charts.component').then(m => m.ChartsComponent)
-  },
-  {
-    path: 'settings',
-    loadComponent: () => 
-      import('./pages/settings/settings.component').then(m => m.SettingsComponent)
+      import('./pages/pin/pin.component').then(m => m.PinComponent)
   }
 ];
