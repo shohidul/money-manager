@@ -1,61 +1,67 @@
 {
-  "hash": "02a5b46d",
-  "configHash": "38607dbf",
-  "lockfileHash": "4060a843",
-  "browserHash": "ec436a92",
+  "hash": "c6e7f8f3",
+  "configHash": "9a6015b5",
+  "lockfileHash": "3ed71720",
+  "browserHash": "b2896557",
   "optimized": {
     "@angular/common": {
       "src": "../../../../../node_modules/@angular/common/fesm2022/common.mjs",
       "file": "@angular_common.js",
-      "fileHash": "3c45e472",
+      "fileHash": "aeb45f85",
       "needsInterop": false
     },
     "@angular/core": {
       "src": "../../../../../node_modules/@angular/core/fesm2022/core.mjs",
       "file": "@angular_core.js",
-      "fileHash": "98f3c775",
+      "fileHash": "0c497f85",
       "needsInterop": false
     },
     "@angular/forms": {
       "src": "../../../../../node_modules/@angular/forms/fesm2022/forms.mjs",
       "file": "@angular_forms.js",
-      "fileHash": "83e07fe8",
+      "fileHash": "55480b9a",
       "needsInterop": false
     },
     "@angular/platform-browser": {
       "src": "../../../../../node_modules/@angular/platform-browser/fesm2022/platform-browser.mjs",
       "file": "@angular_platform-browser.js",
-      "fileHash": "595198a5",
+      "fileHash": "5258a17b",
       "needsInterop": false
     },
     "@angular/router": {
       "src": "../../../../../node_modules/@angular/router/fesm2022/router.mjs",
       "file": "@angular_router.js",
-      "fileHash": "6ac74f97",
+      "fileHash": "0431dec1",
       "needsInterop": false
     },
     "chart.js": {
       "src": "../../../../../node_modules/chart.js/dist/chart.js",
       "file": "chart__js.js",
-      "fileHash": "d718cf3a",
+      "fileHash": "c8b9cb83",
       "needsInterop": false
     },
     "date-fns": {
       "src": "../../../../../node_modules/date-fns/index.mjs",
       "file": "date-fns.js",
-      "fileHash": "bb2951f2",
+      "fileHash": "caa7fbb2",
       "needsInterop": false
     },
     "idb": {
       "src": "../../../../../node_modules/idb/build/index.js",
       "file": "idb.js",
-      "fileHash": "52ebf1a8",
+      "fileHash": "c1bbd487",
       "needsInterop": false
     },
     "rxjs": {
       "src": "../../../../../node_modules/rxjs/dist/esm5/index.js",
       "file": "rxjs.js",
-      "fileHash": "0256a433",
+      "fileHash": "1058252b",
+      "needsInterop": false
+    },
+    "xlsx": {
+      "src": "../../../../../node_modules/xlsx/xlsx.mjs",
+      "file": "xlsx.js",
+      "fileHash": "7732961c",
       "needsInterop": false
     }
   },
