@@ -50,13 +50,6 @@ import { RouterModule } from '@angular/router';
       .mobile-header {
         display: flex;
       }
-
-      .calculator-sheet{
-        position: fixed;
-        bottom: 0;
-        right: 0;
-        left: 0;
-      }
     }
 
     .title {
