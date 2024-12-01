@@ -1,118 +1,142 @@
-import {
-  Component,
-  OnInit,
-  ViewChild,
-  ElementRef,
-  AfterViewInit,
-} from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Chart, registerables } from 'chart.js';
-import { DbService, Transaction, Category } from '../../services/db.service';
-import { startOfMonth, endOfMonth, format } from 'date-fns';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { DbService } from '../../services/db.service';
+import { ChartService } from '../../services/chart.service';
+import { startOfMonth, endOfMonth, format } from 'date-fns';
+import { MobileHeaderComponent } from '../../components/mobile-header/mobile-header.component';
 
-Chart.register(...registerables);
+type ChartType = 'all' | 'income' | 'expense';
 
 @Component({
   selector: 'app-charts',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule, MobileHeaderComponent],
   template: `
     <div class="charts">
-      <header class="top-bar">
-        <div class="flex gap-2">
-          <button class="back-button" (click)="goBack()">
-            <span class="material-icons">arrow_back</span>
-          </button>
-          <h2>Analytics</h2>
-        </div>
-        <input 
-          type="month" 
-          [value]="currentMonth"
-          (change)="onMonthChange($event)"
-          class="month-picker"
-        >
-      </header>
+      <app-mobile-header
+        title="Analytics"
+        [showBackButton]="true"
+        (back)="goBack()"
+      />
 
-      <div class="chart-container card">
-        <canvas #donutChart></canvas>
-        <div class="legend">
-          <div *ngFor="let stat of categoryStats" class="legend-item">
-            <div class="legend-color" [style.background-color]="stat.color"></div>
-            <div class="legend-info">
-              <span class="legend-label">{{ stat.category }}</span>
-              <span class="legend-value">{{ stat.percentage }}%</span>
-            </div>
-            <span class="legend-amount">{{ stat.amount | currency }}</span>
+      <div class="content">
+        <div class="filters">
+          <div class="filter-buttons">
+            <button 
+              *ngFor="let type of chartTypes"
+              [class.active]="selectedType === type"
+              (click)="setType(type)"
+            >
+              {{ type | titlecase }}
+            </button>
           </div>
         </div>
-      </div>
 
-      <div class="transactions-by-category card">
-        <h3>Transactions by Category</h3>
-        <div *ngFor="let stat of categoryStats" class="category-stat">
-          <div class="category-header" (click)="toggleCategory(stat.categoryId)">
-            <div class="category-info">
-              <span class="material-symbols-rounded">{{ getCategoryIcon(stat.categoryId) }}</span>
-              <span>{{ stat.category }}</span>
-            </div>
-            <span class="amount">{{ stat.amount | currency }}</span>
+        <div class="chart-container card">
+          <div class="chart-wrapper">
+            <canvas #donutChart></canvas>
           </div>
-          <div *ngIf="expandedCategories.includes(stat.categoryId)" class="category-details">
-            <canvas [id]="'chart-' + stat.categoryId"></canvas>
-            <div class="transaction-list">
-              <div *ngFor="let tx of getTransactionsByCategory(stat.categoryId)" class="transaction-item">
-                <span>{{ tx.date | date:'mediumDate' }}</span>
-                <span>{{ tx.memo }}</span>
-                <span>{{ tx.amount | currency }}</span>
+          <div class="legend">
+            @for (stat of categoryStats; track stat.categoryId) {
+              <div class="legend-item">
+                <div class="legend-color" [style.background-color]="stat.color"></div>
+                <div class="legend-info">
+                  <span class="category-name">
+                    <span class="material-symbols-rounded">{{ getCategoryIcon(stat.categoryId) }}</span>
+                    {{ stat.category }}
+                  </span>
+                  <span class="amount">{{ stat.amount | number:'1.0-0' }}</span>
+                </div>
+                <span class="percentage">{{ stat.percentage }}%</span>
               </div>
-            </div>
+            }
           </div>
+        </div>
+
+        <div class="transactions-by-category">
+          @for (stat of categoryStats; track stat.categoryId) {
+            <div class="category-details card">
+              <div class="category-header" (click)="toggleCategory(stat.categoryId)">
+                <div class="category-info">
+                  <span class="material-symbols-rounded">{{ getCategoryIcon(stat.categoryId) }}</span>
+                  <span>{{ stat.category }}</span>
+                </div>
+                <span class="amount">{{ stat.amount | number:'1.0-0' }}</span>
+              </div>
+              @if (expandedCategories.includes(stat.categoryId)) {
+                <div class="category-transactions">
+                  <canvas [id]="'chart-' + stat.categoryId"></canvas>
+                  <div class="transaction-list">
+                    @for (tx of getTransactionsByCategory(stat.categoryId); track tx.id) {
+                      <div class="transaction-item">
+                        <span>{{ tx.date | date:'mediumDate' }}</span>
+                        <span>{{ tx.memo }}</span>
+                        <span>{{ tx.amount | number:'1.0-0' }}</span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
         </div>
       </div>
     </div>
   `,
-  styles: [
-    `
-    .top-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      padding: 1rem;
-      background-color: var(--surface-color);
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .back-button {
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 0.5rem;
-      border-radius: 50%;
-    }
-
+  styles: [`
     .charts {
       max-width: 800px;
       margin: 0 auto;
+    }
+
+    .content {
       padding: 1rem;
     }
 
-    .month-picker {
+    .filters {
+      margin-bottom: 1rem;
+    }
+
+    .filter-buttons {
+      display: flex;
+      gap: 0.5rem;
+      background: white;
       padding: 0.5rem;
-      border: 1px solid rgba(0, 0, 0, 0.12);
-      border-radius: 4px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .filter-buttons button {
+      flex: 1;
+      padding: 0.75rem;
+      border: none;
+      border-radius: 6px;
+      background: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .filter-buttons button.active {
+      background-color: var(--primary-color);
+      color: white;
     }
 
     .chart-container {
-      position: relative;
-      margin-bottom: 2rem;
       display: flex;
-      height: 250px;
+      gap: 2rem;
+      align-items: flex-start;
+    }
+
+    .chart-wrapper {
+      flex: 1;
+      max-width: 300px;
+      height: 300px;
     }
 
     .legend {
-      margin-top: 1rem;
+      flex: 1;
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
@@ -121,7 +145,14 @@ Chart.register(...registerables);
     .legend-item {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.75rem;
+      padding: 0.5rem;
+      border-radius: 8px;
+      transition: background-color 0.2s;
+    }
+
+    .legend-item:hover {
+      background-color: rgba(0, 0, 0, 0.04);
     }
 
     .legend-color {
@@ -134,37 +165,42 @@ Chart.register(...registerables);
       flex: 1;
       display: flex;
       justify-content: space-between;
+      align-items: center;
     }
 
-    .category-stat {
-      margin-bottom: 1rem;
+    .category-name {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .percentage {
+      min-width: 48px;
+      text-align: right;
+      font-weight: 500;
+    }
+
+    .category-details {
+      margin-top: 1rem;
     }
 
     .category-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0.75rem;
+      padding: 1rem;
       cursor: pointer;
-      border-radius: 8px;
-      transition: background-color 0.2s;
-    }
-
-    .category-header:hover {
-      background-color: rgba(0, 0, 0, 0.04);
     }
 
     .category-info {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.75rem;
     }
 
-    .category-details {
+    .category-transactions {
       padding: 1rem;
-      background-color: rgba(0, 0, 0, 0.02);
-      border-radius: 8px;
-      margin-top: 0.5rem;
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
     }
 
     .transaction-list {
@@ -176,79 +212,80 @@ Chart.register(...registerables);
       grid-template-columns: auto 1fr auto;
       gap: 1rem;
       padding: 0.5rem;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
     }
-  `,
-  ],
+
+    @media (max-width: 768px) {
+      .chart-container {
+        flex-direction: column;
+      }
+
+      .chart-wrapper {
+        max-width: none;
+      }
+    }
+  `]
 })
 export class ChartsComponent implements OnInit, AfterViewInit {
   @ViewChild('donutChart') private donutChartRef!: ElementRef;
 
-  currentMonth = format(new Date(), 'yyyy-MM');
-  transactions: Transaction[] = [];
-  categories: Category[] = [];
+  selectedType: ChartType = 'all';
+  chartTypes: ChartType[] = ['all', 'income', 'expense'];
+  transactions: any[] = [];
+  categories: any[] = [];
   categoryStats: any[] = [];
   expandedCategories: number[] = [];
-  charts: Map<string, Chart> = new Map();
+  chartColors = [
+    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
+    '#9966FF', '#FF9F40', '#FF6384', '#36A2EB'
+  ];
 
-  constructor(private dbService: DbService, private router: Router) {}
+  constructor(
+    private dbService: DbService,
+    private chartService: ChartService,
+    private router: Router
+  ) {}
 
   async ngOnInit() {
-    await this.loadCategories();
-    await this.loadTransactions();
-
-    this.createDonutChart();
+    await this.loadData();
   }
 
   ngAfterViewInit() {
-    // console.log(this.currentMonth);
-    // console.log(this.transactions);
-    // console.log(this.categories);
-    // console.log(this.categoryStats);
-    // console.log(this.expandedCategories);
-    // this.createDonutChart();
+    this.createDonutChart();
   }
 
-  async loadCategories() {
-    this.categories = await this.dbService.getCategories();
-  }
-
-  async loadTransactions() {
-    const date = new Date(this.currentMonth);
+  async loadData() {
+    const date = new Date();
     const startDate = startOfMonth(date);
     const endDate = endOfMonth(date);
-
-    this.transactions = await this.dbService.getTransactions(
-      startDate,
-      endDate
-    );
+    
+    this.transactions = await this.dbService.getTransactions(startDate, endDate);
+    this.categories = await this.dbService.getCategories();
     this.calculateStats();
+  }
+
+  setType(type: ChartType) {
+    this.selectedType = type;
+    this.calculateStats();
+    this.createDonutChart();
   }
 
   calculateStats() {
     const stats = new Map<number, any>();
-    const colors = [
-      '#FF6384',
-      '#36A2EB',
-      '#FFCE56',
-      '#4BC0C0',
-      '#9966FF',
-      '#FF9F40',
-      '#FF6384',
-      '#36A2EB',
-      '#FFCE56',
-      '#4BC0C0',
-    ];
-
     let totalAmount = 0;
-    this.transactions.forEach((tx) => {
+
+    const filteredTransactions = this.transactions.filter(tx => 
+      this.selectedType === 'all' || tx.type === this.selectedType
+    );
+
+    filteredTransactions.forEach(tx => {
       if (!stats.has(tx.categoryId)) {
-        const category = this.categories.find((c) => c.id === tx.categoryId);
+        const category = this.categories.find(c => c.id === tx.categoryId);
         stats.set(tx.categoryId, {
           categoryId: tx.categoryId,
           category: category?.name || 'Unknown',
           amount: 0,
-          color: colors[stats.size % colors.length],
+          color: this.chartColors[stats.size % this.chartColors.length],
         });
       }
 
@@ -258,88 +295,29 @@ export class ChartsComponent implements OnInit, AfterViewInit {
     });
 
     this.categoryStats = Array.from(stats.values())
-      .map((stat) => ({
+      .map(stat => ({
         ...stat,
-        percentage: Math.round((stat.amount / totalAmount) * 100),
+        percentage: Math.round((stat.amount / totalAmount) * 100)
       }))
       .sort((a, b) => b.amount - a.amount);
   }
 
   createDonutChart() {
     const ctx = this.donutChartRef.nativeElement.getContext('2d');
-
-    new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: this.categoryStats.map((stat) => stat.category),
-        datasets: [
-          {
-            data: this.categoryStats.map((stat) => stat.amount),
-            backgroundColor: this.categoryStats.map((stat) => stat.color),
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            display: false,
-          },
-        },
-      },
-    });
-  }
-
-  createCategoryChart(categoryId: number) {
-    const canvas = document.getElementById(
-      `chart-${categoryId}`
-    ) as HTMLCanvasElement;
-    if (!canvas) return;
-
-    const transactions = this.getTransactionsByCategory(categoryId);
-    const dates = transactions.map((tx) => format(tx.date, 'MMM d'));
-    const amounts = transactions.map((tx) => tx.amount);
-
-    const existingChart = this.charts.get(`chart-${categoryId}`);
-    if (existingChart) {
-      existingChart.destroy();
-    }
-
-    const chart = new Chart(canvas, {
-      type: 'line',
-      data: {
-        labels: dates,
-        datasets: [
-          {
-            label: 'Amount',
-            data: amounts,
-            borderColor: this.categoryStats.find(
-              (stat) => stat.categoryId === categoryId
-            )?.color,
-            tension: 0.4,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            display: false,
-          },
-        },
-      },
-    });
-
-    this.charts.set(`chart-${categoryId}`, chart);
+    this.chartService.createDonutChart(
+      ctx,
+      this.categoryStats,
+      this.categoryStats.map(stat => stat.color)
+    );
   }
 
   getCategoryIcon(categoryId: number): string {
-    return this.categories.find((c) => c.id === categoryId)?.icon || 'help';
+    return this.categories.find(c => c.id === categoryId)?.icon || 'help';
   }
 
-  getTransactionsByCategory(categoryId: number): Transaction[] {
+  getTransactionsByCategory(categoryId: number) {
     return this.transactions
-      .filter((tx) => tx.categoryId === categoryId)
+      .filter(tx => tx.categoryId === categoryId)
       .sort((a, b) => b.date.getTime() - a.date.getTime());
   }
 
@@ -350,13 +328,25 @@ export class ChartsComponent implements OnInit, AfterViewInit {
       setTimeout(() => this.createCategoryChart(categoryId), 0);
     } else {
       this.expandedCategories.splice(index, 1);
+      this.chartService.destroyChart(`chart-${categoryId}`);
     }
   }
 
-  onMonthChange(event: Event) {
-    const input = event.target as HTMLInputElement;
-    this.currentMonth = input.value;
-    this.loadTransactions();
+  createCategoryChart(categoryId: number) {
+    const canvas = document.getElementById(`chart-${categoryId}`) as HTMLCanvasElement;
+    if (!canvas) return;
+
+    const transactions = this.getTransactionsByCategory(categoryId);
+    const chartData = {
+      labels: transactions.map(tx => format(tx.date, 'MMM d')),
+      values: transactions.map(tx => tx.amount)
+    };
+
+    this.chartService.createLineChart(
+      canvas,
+      chartData,
+      this.categoryStats.find(stat => stat.categoryId === categoryId)?.color
+    );
   }
 
   goBack() {
