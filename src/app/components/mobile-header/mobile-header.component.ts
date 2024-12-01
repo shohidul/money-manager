@@ -7,22 +7,22 @@ import { RouterModule } from '@angular/router';
   standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
-    <header class="mobile-header">
-      @if (showBackButton) {
-        <button class="back-button" (click)="goBack()">
-          <span class="material-icons">arrow_back</span>
-        </button>
-      } @else {
-        <button class="menu-button" (click)="toggleMenu()">
-          <span class="material-icons">menu</span>
-        </button>
-      }
+    <header 
+      class="mobile-header" 
+      [class.show-on-desktop]="showOnDesktop">
+      <button *ngIf="showBackButton" class="back-button" (click)="goBack()">
+        <span class="material-icons">arrow_back</span>
+      </button>
+      <button *ngIf="!showBackButton" class="menu-button" (click)="toggleMenu()">
+        <span class="material-icons">menu</span>
+      </button>
       <h1 class="title">{{ title }}</h1>
-      @if (showActions) {
+      <ng-container *ngIf="showActions; else spacer">
         <ng-content></ng-content>
-      } @else {
+      </ng-container>
+      <ng-template #spacer>
         <div class="spacer"></div>
-      }
+      </ng-template>
     </header>
   `,
   styles: [`
@@ -34,6 +34,21 @@ import { RouterModule } from '@angular/router';
       background-color: var(--surface-color);
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       margin: -1rem -1rem 1rem -1rem;
+    }
+
+    .mobile-header.show-on-desktop {
+      display: flex;
+    }
+
+    @media (min-width: 768px) {
+      .show-on-desktop {
+        margin-left: 0;
+      }
+    }
+    @media (max-width: 768px) {
+      .mobile-header {
+        display: flex;
+      }
     }
 
     .title {
@@ -61,18 +76,13 @@ import { RouterModule } from '@angular/router';
     .spacer {
       width: 40px;
     }
-
-    @media (max-width: 768px) {
-      .mobile-header {
-        display: flex;
-      }
-    }
   `]
 })
 export class MobileHeaderComponent {
   @Input() title = '';
   @Input() showBackButton = false;
   @Input() showActions = false;
+  @Input() showOnDesktop = false;
   @Output() menuToggle = new EventEmitter<void>();
   @Output() back = new EventEmitter<void>();
 
