@@ -4,159 +4,133 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { categoryGroups, CategoryIcon } from '../../data/category-icons';
 import { DbService } from '../../services/db.service';
+import { MobileHeaderComponent } from '../../components/mobile-header/mobile-header.component';
 
 @Component({
   selector: 'app-add-category',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MobileHeaderComponent],
   template: `
     <div class="add-category">
-      <header class="top-bar">
-        <button class="back-button" (click)="goBack()">
-          <span class="material-icons">arrow_back</span>
-        </button>
-        <h2>Add Category</h2>
-        <button class="save-button" (click)="saveCategory()" [disabled]="!selectedIcon">
-          <span class="material-icons">check_circle</span>
-        </button>
-      </header>
+      <app-mobile-header
+        title="Add Category"
+        [showBackButton]="true"
+        [showOnDesktop]="true" 
+        (back)="goBack()"
+      />
 
-      <div class="category-form">
-        <div class="type-selector">
-          <button 
-            [class.active]="selectedType === 'expense'"
-            (click)="selectedType = 'expense'"
-          >
-            Expense
-          </button>
-          <button 
-            [class.active]="selectedType === 'income'"
-            (click)="selectedType = 'income'"
-          >
-            Income
-          </button>
-        </div>
+      <div class="content">
+        <div class="category-form card">
+          <div class="selected-icon-input">
+            @if (selectedIcon) {
+              <span class="material-symbols-rounded">{{ selectedIcon.icon }}</span>
+            } @else {
+              <span class="material-symbols-rounded placeholder">category</span>
+            }
+            <input 
+              type="text" 
+              [(ngModel)]="categoryName"
+              placeholder="Category Name"
+              class="category-name-input"
+            >
+          </div>
 
-        <input 
-          type="text" 
-          [(ngModel)]="categoryName"
-          placeholder="Category Name"
-          class="category-name-input"
-        >
-
-        <div class="category-groups">
-          @for (group of filteredGroups; track group.name) {
-            <div class="category-group">
-              <h3>{{ group.name }}</h3>
-              <div class="icon-grid">
-                @for (icon of group.icons; track icon.name) {
-                  <button 
-                    class="icon-button" 
-                    [class.selected]="selectedIcon === icon"
-                    (click)="selectIcon(icon)"
-                  >
-                    <span class="material-symbols-rounded">{{ icon.icon }}</span>
-                    <span class="icon-name">{{ icon.name }}</span>
-                  </button>
-                }
+          <div class="category-groups">
+            @for (group of categoryGroups; track group.name) {
+              <div class="category-group">
+                <h3>{{ group.name }}</h3>
+                <div class="icon-grid">
+                  @for (icon of group.icons; track icon.name) {
+                    <button 
+                      class="icon-button" 
+                      [class.selected]="selectedIcon?.icon === icon.icon"
+                      (click)="selectIcon(icon)"
+                    >
+                      <span class="material-symbols-rounded">{{ icon.icon }}</span>
+                      <span class="icon-name">{{ icon.name }}</span>
+                    </button>
+                  }
+                </div>
               </div>
-            </div>
-          }
+            }
+          </div>
         </div>
       </div>
+
+      <button 
+        class="save-button" 
+        [disabled]="!isValid"
+        (click)="saveCategory()"
+      >
+        Save Category
+      </button>
     </div>
   `,
-  styles: [
-    `
+  styles: [`
     .add-category {
       height: 100vh;
       display: flex;
       flex-direction: column;
     }
 
-    .top-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1rem;
-      background-color: var(--surface-color);
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .back-button, .save-button {
-      background: none;
-      border: none;
-      padding: 0.5rem;
-      cursor: pointer;
-      border-radius: 50%;
-    }
-
-    .back-button:hover, .save-button:hover {
-      background-color: rgba(0, 0, 0, 0.04);
-    }
-
-    .save-button .material-icons{
-      color: var(--primary-color);
-    }
-
-    .save-button:disabled .material-icons{
-      color: unset;
-    }
-
-    .save-button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      width: 100%;
     }
 
     .category-form {
-      flex: 1;
-      overflow-y: auto;
-      padding: 1rem;
-    }
-
-    .type-selector {
       display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .selected-icon-input {
+      display: flex;
+      align-items: center;
       gap: 1rem;
-      margin-bottom: 1rem;
-    }
-
-    .type-selector button {
-      flex: 1;
-      padding: 0.75rem;
-      border: none;
+      background: white;
+      padding: 1rem;
       border-radius: 8px;
-      background-color: rgba(0, 0, 0, 0.04);
-      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
-    .type-selector button.active {
-      background-color: var(--primary-color);
-      color: white;
+    .selected-icon-input .placeholder {
+      color: var(--text-secondary);
     }
 
     .category-name-input {
-      width: 100%;
-      padding: 0.75rem;
-      border: 1px solid rgba(0, 0, 0, 0.12);
-      border-radius: 8px;
-      margin-bottom: 1rem;
+      flex: 1;
+      border: none;
+      font-size: 1rem;
+      outline: none;
+      padding: 0.5rem;
+      background: rgba(0, 0, 0, 0.04);
+      border-radius: 4px;
     }
 
     .category-groups {
       display: flex;
       flex-direction: column;
-      gap: 1.5rem;
+      gap: 2rem;
     }
 
     .category-group h3 {
-      margin-bottom: 0.5rem;
+      margin-bottom: 1rem;
       color: var(--text-secondary);
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding-left: 0.5rem;
     }
 
     .icon-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
       gap: 1rem;
+      padding: 1rem;
     }
 
     .icon-button {
@@ -164,16 +138,18 @@ import { DbService } from '../../services/db.service';
       flex-direction: column;
       align-items: center;
       gap: 0.5rem;
-      padding: 0.75rem;
+      padding: 1rem;
       border: none;
       border-radius: 8px;
-      background: none;
+      background: white;
       cursor: pointer;
-      text-align: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: all 0.2s;
     }
 
     .icon-button:hover {
-      background-color: rgba(0, 0, 0, 0.04);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
     .icon-button.selected {
@@ -183,26 +159,37 @@ import { DbService } from '../../services/db.service';
 
     .icon-name {
       font-size: 0.75rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 100%;
+      text-align: center;
     }
-  `,
-  ],
+
+    .save-button {
+      position: sticky;
+      bottom: 0;
+      width: 100%;
+      padding: 1rem;
+      border: none;
+      background: var(--primary-color);
+      color: white;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .save-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  `]
 })
 export class AddCategoryComponent {
   categoryGroups = categoryGroups;
-  selectedType: 'income' | 'expense' = 'expense';
   categoryName = '';
   selectedIcon: CategoryIcon | null = null;
 
   constructor(private dbService: DbService, private router: Router) {}
 
-  get filteredGroups() {
-    return this.categoryGroups.filter((group) =>
-      group.icons.some((icon) => icon.type === this.selectedType)
-    );
+  get isValid(): boolean {
+    return !!this.selectedIcon && !!this.categoryName.trim();
   }
 
   selectIcon(icon: CategoryIcon) {
@@ -218,7 +205,7 @@ export class AddCategoryComponent {
     const category = {
       name: this.categoryName.trim(),
       icon: this.selectedIcon.icon,
-      type: this.selectedType,
+      type: this.selectedIcon.type,
       isCustom: true,
     };
 
