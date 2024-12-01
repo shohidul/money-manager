@@ -68,6 +68,7 @@ import { MobileHeaderComponent } from '../../components/mobile-header/mobile-hea
       height: 100vh;
       display: flex;
       flex-direction: column;
+      position: relative;
     }
 
     .top-bar {
@@ -162,11 +163,11 @@ export class AddTransactionComponent {
   constructor(private dbService: DbService, private router: Router) {}
 
   toggleCalculator() {
-    this.showCalculator = !this.showCalculator; // Toggle the visibility state
+    this.showCalculator = true; // Toggle the visibility state
   }
   
   onChildToggle() {
-    this.toggleCalculator(); // Handle toggle request from the child
+    this.showCalculator = false; // Handle toggle request from the child
   }
   
   get filteredGroups() {
