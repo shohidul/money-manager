@@ -26,8 +26,8 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
           Export
         </a>
         <a routerLink="/tutorial" routerLinkActive="active" (click)="close()">
-          <span class="material-icons">help_outline</span>
-          Tutorial
+          <span class="material-icons">help</span>
+          How to Use
         </a>
         <a routerLink="/settings" routerLinkActive="active" (click)="close()">
           <span class="material-icons">settings</span>
@@ -39,7 +39,9 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         </a>
       </div>
     </nav>
-    <div class="menu-overlay" [class.visible]="isOpen" (click)="close()"></div>
+    @if (isOpen) {
+      <div class="menu-overlay" (click)="close()"></div>
+    }
   `,
   styles: [`
     :host {
@@ -52,16 +54,8 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
       height: 100vh;
       padding: 1rem;
       flex-shrink: 0;
-      position: fixed;
-      top: 0;
-      left: 0;
+      position: relative;
       z-index: 1000;
-      transform: translateX(-100%);
-      transition: transform 0.3s ease;
-    }
-
-    .side-menu.open {
-      transform: translateX(0);
     }
 
     .menu-overlay {
@@ -72,14 +66,6 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
       bottom: 0;
       background: rgba(0, 0, 0, 0.5);
       z-index: 999;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-    }
-
-    .menu-overlay.visible {
-      opacity: 1;
-      pointer-events: auto;
     }
 
     .menu-header {
@@ -122,15 +108,15 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
       color: white;
     }
 
-    @media (min-width: 769px) {
+    @media (max-width: 768px) {
       .side-menu {
-        position: sticky;
-        transform: none;
-        border-right: 1px solid rgba(0, 0, 0, 0.12);
+        position: fixed;
+        left: -250px;
+        transition: transform 0.3s ease;
       }
 
-      .menu-overlay {
-        display: none;
+      .side-menu.open {
+        transform: translateX(250px);
       }
     }
   `]
