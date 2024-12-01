@@ -4,20 +4,21 @@ import { Router, RouterLink } from '@angular/router';
 import { DbService } from '../../services/db.service';
 import { categoryGroups } from '../../data/category-icons';
 import { CalculatorSheetComponent } from '../../components/calculator-sheet/calculator-sheet.component';
+import { MobileHeaderComponent } from '../../components/mobile-header/mobile-header.component';
 
 @Component({
   selector: 'app-add-transaction',
   standalone: true,
-  imports: [CommonModule, CalculatorSheetComponent, RouterLink],
+  imports: [CommonModule, CalculatorSheetComponent, RouterLink, MobileHeaderComponent],
   template: `
     <div class="add-transaction">
-      <header class="top-bar">
-        <button class="back-button" (click)="goBack()">
-          <span class="material-icons">arrow_back</span>
-        </button>
-        <h2>Add Transaction</h2>
-      </header>
-
+      <app-mobile-header
+        title="Add Transaction"
+        [showBackButton]="true"
+        [showOnDesktop]="true" 
+        (back)="goBack()"
+      />
+      
       <div class="type-tabs">
         <button 
           *ngFor="let type of types" 
