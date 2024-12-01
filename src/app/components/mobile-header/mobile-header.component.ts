@@ -43,11 +43,19 @@ import { RouterModule } from '@angular/router';
     @media (min-width: 768px) {
       .show-on-desktop {
         margin-left: 0;
+        margin-right: 0;
       }
     }
     @media (max-width: 768px) {
       .mobile-header {
         display: flex;
+      }
+
+      .calculator-sheet{
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        left: 0;
       }
     }
 
