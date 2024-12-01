@@ -248,10 +248,11 @@ export class ChartsComponent implements OnInit, AfterViewInit {
 
   async ngOnInit() {
     await this.loadData();
+    this.createDonutChart();
   }
 
   ngAfterViewInit() {
-    this.createDonutChart();
+    // this.createDonutChart();
   }
 
   async loadData() {
