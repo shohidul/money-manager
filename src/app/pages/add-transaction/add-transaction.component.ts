@@ -51,7 +51,9 @@ import { MobileHeaderComponent } from '../../components/mobile-header/mobile-hea
 
       @if (selectedIcon) {
         <app-calculator-sheet
+          [isVisible]="showCalculator"
           [categoryIcon]="selectedIcon.icon"
+          (toggle)="onChildToggle()"
           (amountChange)="onAmountChange($event)"
           (memoChange)="memo = $event"
           (dateChange)="transactionDate = $event"
@@ -155,9 +157,18 @@ export class AddTransactionComponent {
   amount = 0;
   memo = '';
   transactionDate = new Date();
+  showCalculator = false;
 
   constructor(private dbService: DbService, private router: Router) {}
 
+  toggleCalculator() {
+    this.showCalculator = !this.showCalculator; // Toggle the visibility state
+  }
+  
+  onChildToggle() {
+    this.toggleCalculator(); // Handle toggle request from the child
+  }
+  
   get filteredGroups() {
     return this.categoryGroups.filter((group) =>
       group.icons.some((icon) => icon.type === this.selectedType)
@@ -166,6 +177,7 @@ export class AddTransactionComponent {
 
   selectCategory(icon: any) {
     this.selectedIcon = icon;
+    this.toggleCalculator();
   }
 
   onAmountChange(amount: number) {
