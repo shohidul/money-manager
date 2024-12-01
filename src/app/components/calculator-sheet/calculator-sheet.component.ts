@@ -56,12 +56,18 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
   `,
   styles: [`
     .calculator-sheet {
-      position: fixed;
+      position: absolute;
       bottom: -100%; /* Hidden by default */
       left: 0;
       right: 0;
       background: var(--surface-color);
       transition: bottom 0.5s ease; /* Smooth transition for sliding */
+    }
+
+     @media (max-width: 768px) {
+      .calculator-sheet{
+        position: fixed;
+      }
     }
     
     .calculator-sheet.slide-up {
