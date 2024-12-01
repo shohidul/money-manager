@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Chart, ChartConfiguration, DoughnutController, ArcElement, } from 'chart.js';
+import { Chart, CategoryScale, ChartConfiguration, DoughnutController, ArcElement, LineController, LineElement, PointElement, LinearScale, Title, Tooltip, Legend } from 'chart.js';
 
 @Injectable({
   providedIn: 'root'
@@ -10,8 +10,9 @@ export class ChartService {
     constructor() {
     // Register all required components for Chart.js
     Chart.register(
+      CategoryScale,
       DoughnutController,
-      ArcElement,
+      ArcElement, LineController, LineElement, PointElement, LinearScale, Title
     );
   }
 
