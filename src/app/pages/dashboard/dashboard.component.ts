@@ -1,15 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { DbService } from '../../services/db.service';
+import { DbService, Transaction } from '../../services/db.service';
 import { MenuService } from '../../services/menu.service';
 import { MonthPickerComponent } from '../../components/month-picker/month-picker.component';
+import { TransactionEditDialogComponent } from '../../components/transaction-edit-dialog/transaction-edit-dialog.component';
 import { startOfMonth, endOfMonth, format } from 'date-fns';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, MonthPickerComponent],
+  imports: [CommonModule, RouterLink, MonthPickerComponent, TransactionEditDialogComponent],
   template: `
     <div class="dashboard">
       <div class="top-actions">
@@ -56,16 +57,14 @@ import { startOfMonth, endOfMonth, format } from 'date-fns';
             <div *ngFor="let transaction of group.transactions" 
                  class="transaction-item"
                  (click)="editTransaction(transaction)">
-              <!-- <div class="transaction-icon"> -->
-                <span class="material-symbols-rounded" [class]="transaction.type">
-                  {{ getCategoryIcon(transaction.categoryId) }}
-                </span>
-              <!-- </div> -->
+              <span class="material-symbols-rounded" [class]="transaction.type">
+                {{ getCategoryIcon(transaction.categoryId) }}
+              </span>
               <div class="transaction-details">
                 <span class="time">{{ transaction.date | date: 'shortTime' }}</span>
                 <span class="memo">{{ transaction.memo ? transaction.memo : getCategoryName(transaction.categoryId) }}</span>
               </div>
-              <span class="amount">
+              <span class="amount" [class]="transaction.type">
                 {{ transaction.type === 'income' ? '' : '-' }}{{ transaction.amount | number:'1.0-2' }}
               </span>
             </div>
@@ -76,6 +75,15 @@ import { startOfMonth, endOfMonth, format } from 'date-fns';
       <a routerLink="/add-transaction" class="fab">
         <span class="material-icons">add</span>
       </a>
+
+      @if (selectedTransaction) {
+        <app-transaction-edit-dialog
+          [transaction]="selectedTransaction"
+          (save)="onTransactionSave($event)"
+          (delete)="onTransactionDelete()"
+          (cancel)="closeEditDialog()"
+        />
+      }
     </div>
   `,
   styles: [
@@ -110,7 +118,7 @@ import { startOfMonth, endOfMonth, format } from 'date-fns';
 
     @media (min-width: 769px) {
       .menu-button {
-        display: none; /* Hide on screens wider than 768px */
+        display: none;
       }
     }
 
@@ -131,20 +139,15 @@ import { startOfMonth, endOfMonth, format } from 'date-fns';
     .stat-item:not(:last-child)::after {
       content: '|';
       position: absolute;
-      right: -0.5rem; /* Adjust based on spacing between items */
+      right: -0.5rem;
       top: 50%;
       transform: translateY(-50%);
-      color: #ccc; /* Customize the color */
+      color: #ccc;
     }
 
     .label {
       color: var(--text-secondary);
       font-size: 0.875rem;
-    }
-
-    .amount {
-      /*font-size: 1.25rem;
-      font-weight: 500;*/
     }
 
     .overview .amount {
@@ -154,10 +157,9 @@ import { startOfMonth, endOfMonth, format } from 'date-fns';
     .transaction-list {
       display: flex;
       flex-direction: column;
-      /*gap: 1rem;*/
     }
 
-    .transaction-list .card{
+    .transaction-list .card {
       padding: 0 !important;
     }
 
@@ -185,21 +187,15 @@ import { startOfMonth, endOfMonth, format } from 'date-fns';
       background-color: rgba(0, 0, 0, 0.04);
     }
 
-    .transaction-icon {
-      /* padding: 0.5rem;
-      border-radius: 50%;
-      background-color: rgba(0, 0, 0, 0.04);*/
-    }
-
     .transaction-details {
       flex: 1;
     }
 
     .transaction-details .time {
       display: block;
-      font-size: 0.65rem; /* Extra small font size */
-      color: #999; /* Optional: subtle color */
-      margin-top: 0.25rem; /* Space between memo and time */
+      font-size: 0.65rem;
+      color: #999;
+      margin-top: 0.25rem;
     }
 
     .memo {
@@ -217,12 +213,13 @@ import { startOfMonth, endOfMonth, format } from 'date-fns';
 })
 export class DashboardComponent implements OnInit {
   currentMonth = format(new Date(), 'yyyy-MM');
-  transactions: any[] = [];
+  transactions: Transaction[] = [];
   categories: any[] = [];
   transactionGroups: any[] = [];
   totalIncome = 0;
   totalExpense = 0;
   balance = 0;
+  selectedTransaction: Transaction | null = null;
 
   constructor(
     private dbService: DbService,
@@ -306,9 +303,26 @@ export class DashboardComponent implements OnInit {
     this.loadTransactions();
   }
 
-  editTransaction(transaction: any) {
-    console.log('Edit transaction:', transaction);
-    // TODO: Implement edit functionality
+  editTransaction(transaction: Transaction) {
+    this.selectedTransaction = { ...transaction };
+  }
+
+  async onTransactionSave(transaction: Transaction) {
+    await this.dbService.updateTransaction(transaction);
+    await this.loadTransactions();
+    this.closeEditDialog();
+  }
+
+  async onTransactionDelete() {
+    if (this.selectedTransaction) {
+      await this.dbService.deleteTransaction(this.selectedTransaction.id!);
+      await this.loadTransactions();
+      this.closeEditDialog();
+    }
+  }
+
+  closeEditDialog() {
+    this.selectedTransaction = null;
   }
 
   toggleMenu() {
