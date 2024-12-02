@@ -7,6 +7,7 @@ import { BehaviorSubject } from 'rxjs';
 export class PinService {
   private readonly PIN_KEY = 'app_pin';
   private readonly LOCK_STATUS_KEY = 'app_locked';
+  private readonly AUTO_LOCK_KEY = 'auto_lock';
   private isLockedSubject = new BehaviorSubject<boolean>(this.getInitialLockStatus());
   isLocked$ = this.isLockedSubject.asObservable();
 
@@ -17,7 +18,7 @@ export class PinService {
 
     // Auto-lock when app goes to background
     document.addEventListener('visibilitychange', () => {
-      if (document.hidden && this.hasPin()) {
+      if (document.hidden && this.hasPin() && this.isAutoLockEnabled()) {
         this.setLocked(true);
       }
     });
@@ -30,6 +31,7 @@ export class PinService {
   setPin(pin: string): void {
     localStorage.setItem(this.PIN_KEY, pin);
     this.setLocked(true);
+    this.setAutoLock(true); // Enable auto-lock by default when setting PIN
   }
 
   verifyPin(pin: string): boolean {
@@ -42,6 +44,7 @@ export class PinService {
 
   removePin(): void {
     localStorage.removeItem(this.PIN_KEY);
+    localStorage.removeItem(this.AUTO_LOCK_KEY);
     this.setLocked(false);
   }
 
@@ -52,5 +55,13 @@ export class PinService {
 
   isLocked(): boolean {
     return this.isLockedSubject.value;
+  }
+
+  setAutoLock(enabled: boolean): void {
+    localStorage.setItem(this.AUTO_LOCK_KEY, enabled.toString());
+  }
+
+  isAutoLockEnabled(): boolean {
+    return localStorage.getItem(this.AUTO_LOCK_KEY) === 'true';
   }
 }
