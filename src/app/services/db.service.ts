@@ -28,6 +28,7 @@ export interface Category {
   icon: string;
   type: 'income' | 'expense';
   isCustom: boolean;
+  order?: number;
 }
 
 @Injectable({
@@ -36,82 +37,41 @@ export interface Category {
 export class DbService {
   private db!: IDBPDatabase<MoneyManagerDB>;
   private readonly DB_NAME = 'money-manager-db';
-  private readonly VERSION = 1;
+  private readonly VERSION = 2;
 
   async initializeDB() {
     this.db = await openDB<MoneyManagerDB>(this.DB_NAME, this.VERSION, {
-      upgrade(db) {
-        const txStore = db.createObjectStore('transactions', {
-          keyPath: 'id',
-          autoIncrement: true,
-        });
-        txStore.createIndex('by-date', 'date');
+      upgrade(db, oldVersion, newVersion) {
+        if (oldVersion < 1) {
+          const txStore = db.createObjectStore('transactions', {
+            keyPath: 'id',
+            autoIncrement: true,
+          });
+          txStore.createIndex('by-date', 'date');
 
-        const categoryStore = db.createObjectStore('categories', {
-          keyPath: 'id',
-          autoIncrement: true,
-        });
+          const categoryStore = db.createObjectStore('categories', {
+            keyPath: 'id',
+            autoIncrement: true,
+          });
+        }
+        
+        if (oldVersion < 2) {
+          const categoryStore = db.transaction('categories', 'readwrite').objectStore('categories');
+          categoryStore.openCursor().then(function addOrder(cursor): Promise<void> | undefined {
+            if (!cursor) return; // If no cursor, exit function
+            const category = cursor.value;
+            category.order = cursor.key;
+            categoryStore.put(category);
+            return cursor.continue().then(addOrder); // Continue to the next cursor
+          });
+        }
 
-        // Add default categories
-        const defaultCategories: Omit<Category, 'id'>[] = [
-          { name: 'Salary', icon: 'payments', type: 'income', isCustom: false },
-          {
-            name: 'Food',
-            icon: 'restaurant',
-            type: 'expense',
-            isCustom: false,
-          },
-          {
-            name: 'Transport',
-            icon: 'directions_car',
-            type: 'expense',
-            isCustom: false,
-          },
-          {
-            name: 'Shopping',
-            icon: 'shopping_cart',
-            type: 'expense',
-            isCustom: false,
-          },
-          {
-            name: 'Entertainment',
-            icon: 'movie',
-            type: 'expense',
-            isCustom: false,
-          },
-        ];
-
-        defaultCategories.forEach((category) => {
-          categoryStore.add(category);
-        });
       },
     });
   }
 
   async addTransaction(transaction: Omit<Transaction, 'id'>) {
     return this.db.add('transactions', transaction);
-  }
-
-  async getTransactions(startDate: Date, endDate: Date) {
-    const index = this.db.transaction('transactions').store.index('by-date');
-    return index.getAll(IDBKeyRange.bound(startDate, endDate));
-  }
-
-  async getTransactionsDirect(startDate: Date, endDate: Date) {
-    const allTransactions = await this.db
-      .transaction('transactions')
-      .store.getAll();
-    return allTransactions.filter(
-      (txn) => new Date(txn.date) >= startDate && new Date(txn.date) <= endDate
-    );
-  }
-
-  async addCategory(category: Omit<Category, 'id'>) {
-    return this.db.add('categories', category);
-  }
-
-  async getCategories() {
-    return this.db.getAll('categories');
   }
 
   async updateTransaction(transaction: Transaction) {
@@ -122,8 +82,38 @@ export class DbService {
     return this.db.delete('transactions', id);
   }
 
+  async getTransactions(startDate: Date, endDate: Date) {
+    const index = this.db.transaction('transactions').store.index('by-date');
+    return index.getAll(IDBKeyRange.bound(startDate, endDate));
+  }
+
+  async getTransaction(id: number) {
+    return this.db.get('transactions', id);
+  }
+
+  async addCategory(category: Omit<Category, 'id'>) {
+    const categories = await this.getCategories();
+    const maxOrder = Math.max(...categories.map(c => c.order || 0), 0);
+    return this.db.add('categories', { ...category, order: maxOrder + 1 });
+  }
+
+  async getCategories() {
+    const categories = await this.db.getAll('categories');
+    return categories.sort((a, b) => (a.order || 0) - (b.order || 0));
+  }
+
   async updateCategory(category: Category) {
     return this.db.put('categories', category);
+  }
+
+  async updateCategoryOrder(categories: Category[]) {
+    const tx = this.db.transaction('categories', 'readwrite');
+    await Promise.all(
+      categories.map((category, index) => 
+        tx.store.put({ ...category, order: index })
+      )
+    );
+    await tx.done;
   }
 
   async deleteCategory(id: number) {
@@ -135,21 +125,15 @@ export class DbService {
       ['categories', 'transactions'],
       'readwrite'
     );
-
-    // Clear transactions completely
     await transaction.objectStore('transactions').clear();
-
-    // Clear only custom categories (isCustom: true)
     const categoryStore = transaction.objectStore('categories');
     const allCategories = await categoryStore.getAll();
     const customCategories = allCategories.filter(
       (category) => category.isCustom
     );
-
     for (const customCategory of customCategories) {
       await categoryStore.delete(customCategory.id as number);
     }
-
     await transaction.done;
   }
 
@@ -158,32 +142,26 @@ export class DbService {
     categories: Category[];
   }) {
     const { transactions, categories } = data;
-
-    const transaction = this.db.transaction(
-      ['categories', 'transactions'],
-      'readwrite'
-    );
-    const categoryStore = transaction.objectStore('categories');
-    const transactionStore = transaction.objectStore('transactions');
-
+    const tx = this.db.transaction(['categories', 'transactions'], 'readwrite');
+    
     try {
-      // Restore categories
       for (const category of categories) {
-        await categoryStore.put(category);
+        await tx.objectStore('categories').put(category);
       }
 
-      // Restore transactions as new
       for (const txn of transactions) {
-        const newTransaction = { ...txn }; // Copy transaction
-        delete newTransaction.id; // Remove the existing ID
-        newTransaction.date = new Date(txn.date); // Ensure date is in proper format
-        await transactionStore.add(newTransaction); // Add as a new transaction
+        const newTransaction = { 
+          ...txn,
+          date: new Date(txn.date)
+        };
+        delete newTransaction.id;
+        await tx.objectStore('transactions').add(newTransaction);
       }
 
-      await transaction.done;
-      console.log('Data restored as new successfully!');
+      await tx.done;
     } catch (error) {
-      console.error('Error during restore as new:', error);
+      console.error('Error during restore:', error);
+      throw error;
     }
   }
 }
