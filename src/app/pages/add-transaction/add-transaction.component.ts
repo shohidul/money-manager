@@ -23,11 +23,15 @@ import { MobileHeaderComponent } from '../../components/mobile-header/mobile-hea
         <button 
           *ngFor="let type of types" 
           [class.active]="selectedType === type"
-          (click)="selectedType = type"
+          (click)="onTypeChange(type)"
           class="type-tab"
         >
           {{ type | titlecase }}
         </button>
+      </div>
+
+      <div class="categories-header">
+        <h3>Select Category</h3>
       </div>
 
       <div class="categories-grid">
@@ -71,21 +75,18 @@ import { MobileHeaderComponent } from '../../components/mobile-header/mobile-hea
       position: relative;
     }
 
-    .top-bar {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
+    .categories-header {
+      position: sticky;
+      top: 0;
+      background: var(--background-color);
       padding: 1rem;
-      background-color: var(--surface-color);
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      z-index: 10;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
     }
 
-    .back-button {
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 0.5rem;
-      border-radius: 50%;
+    .categories-header h3 {
+      margin: 0;
+      color: var(--text-secondary);
     }
 
     .type-tabs {
@@ -162,14 +163,12 @@ export class AddTransactionComponent {
 
   constructor(private dbService: DbService, private router: Router) {}
 
-  toggleCalculator() {
-    this.showCalculator = true; // Toggle the visibility state
+  onTypeChange(type: 'income' | 'expense') {
+    this.selectedType = type;
+    this.selectedIcon = null;
+    this.showCalculator = false;
   }
-  
-  onChildToggle() {
-    this.showCalculator = false; // Handle toggle request from the child
-  }
-  
+
   get filteredGroups() {
     return this.categoryGroups.filter((group) =>
       group.icons.some((icon) => icon.type === this.selectedType)
@@ -179,6 +178,15 @@ export class AddTransactionComponent {
   selectCategory(icon: any) {
     this.selectedIcon = icon;
     this.toggleCalculator();
+  }
+
+  toggleCalculator() {
+    this.showCalculator = true;
+  }
+  
+  onChildToggle() {
+    this.showCalculator = false;
+    this.selectedIcon = null;
   }
 
   onAmountChange(amount: number) {
@@ -203,13 +211,11 @@ export class AddTransactionComponent {
   }
 
   private async ensureCategory() {
-    // First try to find an existing category
     const categories = await this.dbService.getCategories();
     let category = categories.find(
       (c) => c.icon === this.selectedIcon.icon && c.type === this.selectedType
     );
 
-    // If not found, create it
     if (!category) {
       const id = await this.dbService.addCategory({
         name: this.selectedIcon.name,
