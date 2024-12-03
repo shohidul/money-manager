@@ -9,29 +9,29 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   template: `
     <nav class="side-menu" [class.open]="isOpen">
       <div class="menu-header">
-        <span class="material-icons">account_balance_wallet</span>
+        <span class="material-icons">wallet</span>
         <h1>Money Manager</h1>
       </div>
       <div class="menu-items">
         <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="close()">
-          <span class="material-icons">dashboard</span>
-          Dashboard
+          <span class="material-icons">view_stream</span>
+          Transactions
         </a>
         <a routerLink="/charts" routerLinkActive="active" (click)="close()">
-          <span class="material-icons">pie_chart</span>
+          <span class="material-icons">donut_large</span>
           Charts
         </a>
         <a routerLink="/export" routerLinkActive="active" (click)="close()">
           <span class="material-icons">download</span>
           Export
         </a>
-        <a routerLink="/tutorial" routerLinkActive="active" (click)="close()">
-          <span class="material-icons">help</span>
-          How to Use
-        </a>
         <a routerLink="/settings" routerLinkActive="active" (click)="close()">
           <span class="material-icons">settings</span>
           Settings
+        </a>
+        <a routerLink="/tutorial" routerLinkActive="active" (click)="close()">
+          <span class="material-icons">help</span>
+          How to Use
         </a>
         <a routerLink="/about" routerLinkActive="active" (click)="close()">
           <span class="material-icons">info</span>
@@ -75,6 +75,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
       padding: 1rem;
       border-bottom: 1px solid rgba(0, 0, 0, 0.12);
       margin-bottom: 1rem;
+      color: var(--text-primary);
     }
 
     .menu-header h1 {
