@@ -52,7 +52,6 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
       width: 250px;
       background: var(--surface-color);
       height: 100vh;
-      padding: 1rem;
       flex-shrink: 0;
       position: relative;
       z-index: 1000;
@@ -72,7 +71,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      padding: 1rem;
+      padding: 2rem 2rem 1.75rem 2rem;
       border-bottom: 1px solid rgba(0, 0, 0, 0.12);
       margin-bottom: 1rem;
       color: var(--text-primary);
@@ -93,10 +92,9 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      padding: 0.75rem 1rem;
+      padding: 0.75rem 2rem;
       text-decoration: none;
       color: var(--text-primary);
-      border-radius: 8px;
       transition: background-color 0.2s;
     }
 
