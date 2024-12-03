@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
@@ -7,8 +7,9 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
   selector: 'app-calculator-sheet',
   standalone: true,
   imports: [CommonModule, FormsModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="calculator-sheet" [ngClass]="animationState">
+    <div class="calculator-sheet" [class.open]="isVisible">
       <div class="sheet-header">
         <div class="category-info">
           <span class="material-symbols-rounded color-primary">{{ categoryIcon }}</span>
@@ -17,7 +18,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
             <input 
               type="text" 
               [(ngModel)]="memo" 
-              (ngModelChange)="memoChange.emit($event)"
+              (ngModelChange)="onMemoChange($event)"
               placeholder="Add memo"
               class="memo-input"
             >
@@ -31,15 +32,15 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
               type="date" 
               [value]="selectedDate | date:'yyyy-MM-dd'"
               (change)="onDateChange($event)"
-              max="{{ today | date:'yyyy-MM-dd' }}"
+              [max]="today | date:'yyyy-MM-dd'"
             >
           </div>
         }
       <div class="sheet-body">
         <div class="keypad-number">
-          <button *ngFor="let key of numericKeys" (click)="onKeyPress(key)" class="key">
-            {{ key }}
-          </button>
+          @for (key of numericKeys; track key) {
+            <button (click)="onKeyPress(key)" class="key">{{ key }}</button>
+          }
         </div>
         <div class="keypad-function">
           <button (click)="onKeyPress('date')" class="key" style="padding: .9rem;">
@@ -57,26 +58,24 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
   styles: [`
     .calculator-sheet {
       position: fixed;
-      bottom: -100%; /* Hidden by default */
+      bottom: 0;
       left: 0;
       right: 0;
       background: var(--surface-color);
-      transition: bottom 0.5s ease; /* Smooth transition for sliding */
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+      z-index: 1000;
     }
 
-     @media (min-width: 768px) {
-      .calculator-sheet{
+    .calculator-sheet.open {
+      transform: translateY(0);
+    }
+
+    @media (min-width: 768px) {
+      .calculator-sheet {
         left: 266px;
         right: 1rem;
       }
-    }
-    
-    .calculator-sheet.slide-up {
-      bottom: 0; /* Slide up into view */
-    }
-    
-    .calculator-sheet.slide-down {
-      bottom: -100%; /* Slide down out of view */
     }
 
     .sheet-header {
@@ -92,11 +91,13 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
       margin-bottom: 0.5rem;
       flex-grow: 1;
     }
-    .memo{
+    
+    .memo {
       display: flex;
       align-items: center;
       color: var(--text-muted);
     }
+    
     .memo-input {
       flex: 1;
       border: none;
@@ -116,23 +117,24 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
       color: var(--text-primary);
     }
 
-    .sheet-body{
+    .sheet-body {
       display: grid;
       grid-template-columns: 75% 25%;
       gap: 1px;
       background-color: rgba(0, 0, 0, 0.08);
     }
+    
     .keypad-number {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 1px;
       background: rgba(0, 0, 0, 0.08);
     }
+    
     .keypad-function {
       display: grid;
       gap: 1px;
       background: rgba(0, 0, 0, 0.08);
-      grid-template-columns: repeat(1, 1fr);
     }
 
     .key {
@@ -144,14 +146,11 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
       display: flex;
       align-items: center;
       justify-content: center;
+      touch-action: manipulation;
     }
 
     .key:active {
       background: rgba(0, 0, 0, 0.04);
-    }
-
-    .function-key {
-      color: var(--text-secondary);
     }
 
     .operator-key {
@@ -174,9 +173,17 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
       border: 1px solid rgba(0, 0, 0, 0.12);
       border-radius: 8px;
     }
+
+    .date-icon {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 0.75rem;
+      line-height: 1.2;
+    }
   `]
 })
-export class CalculatorSheetComponent {
+export class CalculatorSheetComponent implements OnChanges {
   @Input() categoryIcon = 'help';
   @Input() initialAmount = '0';
   @Input() isVisible = false;
@@ -187,7 +194,7 @@ export class CalculatorSheetComponent {
   @Output() dateChange = new EventEmitter<Date>();
   @Output() save = new EventEmitter<void>();
 
-  numericKeys = ['7', '8', '9', '4', '5', '6', '1', '2', '3', '.', '0', '⌫'];
+  readonly numericKeys = ['7', '8', '9', '4', '5', '6', '1', '2', '3', '.', '0', '⌫'];
   memo = '';
   amount = '0';
   operator = '';
@@ -196,29 +203,36 @@ export class CalculatorSheetComponent {
   showDatePicker = false;
   selectedDate = new Date();
   today = new Date();
-  animationState = ''; // Track animation state ('slide-up' or 'slide-down')
 
-  ngOnChanges() {
-    this.animationState = this.isVisible ? 'slide-up' : 'slide-down';
-  }
-
-  requestToggle() {
-    this.toggle.emit(); // Notify the parent to toggle visibility
-  }
+  private calculationTimeout: any;
 
   constructor(private domSanitizer: DomSanitizer) {}
 
-  get displayAmount(): string {
-    if (this.amount === '0' && !this.isCalculating) {
-      return '0';
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['isVisible'] && !changes['isVisible'].firstChange) {
+      if (!changes['isVisible'].currentValue) {
+        this.resetCalculator();
+      }
     }
-    // Return the raw amount with special characters if present
-    return this.amount;
+  }
+
+  private resetCalculator() {
+    this.amount = '0';
+    this.operator = '';
+    this.prevAmount = 0;
+    this.isCalculating = false;
+    this.memo = '';
+    this.selectedDate = new Date();
+    this.showDatePicker = false;
+  }
+
+  get displayAmount(): string {
+    return this.amount === '0' && !this.isCalculating ? '0' : this.amount;
   }
 
   get formattedDateIcon(): SafeHtml {
     const isToday = this.selectedDate.toDateString() === this.today.toDateString();
-    const month = this.selectedDate.getMonth() + 1; // Months are 0-indexed
+    const month = this.selectedDate.getMonth() + 1;
     const day = this.selectedDate.getDate();
     const year = this.selectedDate.getFullYear();
 
@@ -230,15 +244,17 @@ export class CalculatorSheetComponent {
   }
 
   onKeyPress(key: string) {
+    if (this.calculationTimeout) {
+      clearTimeout(this.calculationTimeout);
+    }
     
-    const numericPart = this.amount.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+    const numericPart = this.amount.replace(/[^0-9]/g, '');
     if (numericPart.length >= 8 && !isNaN(Number(key)) && key !== '⌫') {
-      // Prevent adding more digits if 8 digits are already present
       return;
     }
   
     switch (key) {
-      case '⌫': // Backspace
+      case '⌫':
         if (this.amount[this.amount.length - 1] === '+' || this.amount[this.amount.length - 1] === '-') {
           this.isCalculating = false;
         }
@@ -254,19 +270,17 @@ export class CalculatorSheetComponent {
         if (!this.isCalculating) {
           this.operator = key;
           this.prevAmount = Number(this.amount);
-          this.amount = `${this.amount}${key}`; // Append the operator
+          this.amount = `${this.amount}${key}`;
           this.isCalculating = true;
         } else {
           this.calculateResult();
-          this.onKeyPress(key);
+          this.calculationTimeout = setTimeout(() => this.onKeyPress(key), 100);
         }
         break;
         
       case '.':
         const lastOperatorIndex = Math.max(this.amount.lastIndexOf('+'), this.amount.lastIndexOf('-'));
         const afterOperator = this.amount.slice(lastOperatorIndex + 1);
-      
-        // Check if there's already a '.' in the current segment
         if (!afterOperator.includes('.')) {
           this.amount += key;
         }
@@ -274,7 +288,7 @@ export class CalculatorSheetComponent {
         
       case '=':
         if (this.amount === '0') {
-          this.requestToggle();
+          this.toggle.emit();
         } else {
           this.calculateResult();
         }
@@ -293,10 +307,9 @@ export class CalculatorSheetComponent {
     this.amountChange.emit(Number(this.amount.replace(/[^0-9.]/g, '')));
   }
 
-
-  calculateResult(){
+  calculateResult() {
     if (this.isCalculating) {
-      const parts = this.amount.split(/[+\-]/); // Split on '+' or '-'
+      const parts = this.amount.split(/[+\-]/);
       const currentAmount = Number(parts[parts.length - 1].replace(/[^0-9.]/g, ''));
       
       this.amount = String(
@@ -316,5 +329,9 @@ export class CalculatorSheetComponent {
     this.selectedDate = new Date(input.value);
     this.dateChange.emit(this.selectedDate);
     this.showDatePicker = false;
+  }
+
+  onMemoChange(value: string) {
+    this.memoChange.emit(value);
   }
 }
