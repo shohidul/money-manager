@@ -86,8 +86,7 @@ import { startOfMonth, endOfMonth, format } from 'date-fns';
       }
     </div>
   `,
-  styles: [
-    `
+  styles: [`
     .dashboard {
       max-width: 800px;
       margin: 0 auto;
@@ -208,8 +207,7 @@ import { startOfMonth, endOfMonth, format } from 'date-fns';
       font-size: 0.875rem;
       color: var(--text-secondary);
     }
-  `,
-  ],
+  `]
 })
 export class DashboardComponent implements OnInit {
   currentMonth = format(new Date(), 'yyyy-MM');
