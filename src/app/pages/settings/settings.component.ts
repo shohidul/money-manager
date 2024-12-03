@@ -2,16 +2,18 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { CdkDragDrop, moveItemInArray, DragDropModule } from '@angular/cdk/drag-drop';
 import { DbService } from '../../services/db.service';
 import { PinService } from '../../services/pin.service';
 import { PinDialogComponent } from '../../components/pin-dialog/pin-dialog.component';
 import { MobileHeaderComponent } from '../../components/mobile-header/mobile-header.component';
 import { format } from 'date-fns';
+import { categoryGroups } from '../../data/category-icons';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule, PinDialogComponent, MobileHeaderComponent],
+  imports: [CommonModule, FormsModule, PinDialogComponent, MobileHeaderComponent, DragDropModule],
   template: `
     <div class="settings">
       <app-mobile-header
@@ -45,7 +47,7 @@ import { format } from 'date-fns';
                 <div class="switch-button">
                   <input 
                     type="checkbox" 
-                    [checked]="pinService.isLocked()"
+                    [checked]="pinService.isAutoLockEnabled()"
                     (change)="toggleAutoLock()"
                     id="autoLock"
                   >
@@ -80,7 +82,7 @@ import { format } from 'date-fns';
               </button>
             </div>
           </div>
-          <div class="category-list">
+          <div class="category-list" cdkDropList (cdkDropListDropped)="onCategoryDrop($event)">
             @for (category of filteredCategories; track category.id) {
               <div class="category-item" cdkDrag>
                 <div class="category-info">
@@ -96,6 +98,9 @@ import { format } from 'date-fns';
                     <span class="material-icons">delete</span>
                   </button>
                 }
+                <div class="drag-handle">
+                  <span class="material-icons">drag_indicator</span>
+                </div>
               </div>
             }
           </div>
@@ -180,6 +185,11 @@ import { format } from 'date-fns';
       justify-content: space-between;
       align-items: center;
       margin-bottom: 1rem;
+      position: sticky;
+      top: 0;
+      background: white;
+      padding: 1rem;
+      z-index: 1;
     }
 
     .category-filters {
@@ -212,7 +222,8 @@ import { format } from 'date-fns';
       align-items: center;
       padding: 0.75rem;
       border-radius: 8px;
-      background-color: rgba(0, 0, 0, 0.04);
+      background-color: white;
+      border: 1px solid rgba(0, 0, 0, 0.08);
       cursor: move;
     }
 
@@ -241,7 +252,13 @@ import { format } from 'date-fns';
       background-color: rgba(0, 0, 0, 0.08);
     }
 
-    .data-mgt-group{
+    .drag-handle {
+      color: var(--text-secondary);
+      cursor: move;
+      padding: 0.5rem;
+    }
+
+    .data-mgt-group {
       margin-top: 1rem;
       display: flex;
       flex-wrap: wrap;
@@ -261,10 +278,6 @@ import { format } from 'date-fns';
       flex-grow: 1;
     }
 
-    .backup-button:hover {
-      background-color: #1976d2;
-    }
-
     .clear-button, .restore-button {
       display: flex;
       align-items: center;
@@ -272,22 +285,14 @@ import { format } from 'date-fns';
       padding: 0.75rem 1rem;
       border: none;
       border-radius: 4px;
-      background-color: #f44336; /* Red for clear button */
+      background-color: #f44336;
       color: white;
       cursor: pointer;
       flex-grow: 1;
     }
 
-    .clear-button:hover {
-      background-color: #d32f2f;
-    }
-
     .restore-button {
-      background-color: #4caf50; /* Green for restore button */
-    }
-
-    .restore-button:hover {
-      background-color: #388e3c;
+      background-color: #4caf50;
     }
 
     .pin-overlay {
@@ -301,12 +306,6 @@ import { format } from 'date-fns';
       align-items: center;
       justify-content: center;
       z-index: 1000;
-    }
-
-    .pin-overlay app-pin-dialog {
-      background-color: white;
-      border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
     .switch-button {
@@ -352,6 +351,26 @@ import { format } from 'date-fns';
     .switch-button input:checked + label:before {
       transform: translateX(26px);
     }
+
+    .cdk-drag-preview {
+      box-sizing: border-box;
+      border-radius: 4px;
+      box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+                  0 8px 10px 1px rgba(0, 0, 0, 0.14),
+                  0 3px 14px 2px rgba(0, 0, 0, 0.12);
+    }
+
+    .cdk-drag-placeholder {
+      opacity: 0;
+    }
+
+    .cdk-drag-animating {
+      transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+    }
+
+    .category-list.cdk-drop-list-dragging .category-item:not(.cdk-drag-placeholder) {
+      transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+    }
   `]
 })
 export class SettingsComponent implements OnInit {
@@ -367,6 +386,7 @@ export class SettingsComponent implements OnInit {
 
   async ngOnInit() {
     await this.loadCategories();
+    await this.initializeDefaultCategories();
   }
 
   get filteredCategories() {
@@ -379,6 +399,29 @@ export class SettingsComponent implements OnInit {
     this.categories = await this.dbService.getCategories();
   }
 
+  async initializeDefaultCategories() {
+    const existingCategories = await this.dbService.getCategories();
+    
+    for (const group of categoryGroups) {
+      for (const icon of group.icons) {
+        const exists = existingCategories.some(
+          c => c.icon === icon.icon && c.type === icon.type
+        );
+        
+        if (!exists) {
+          await this.dbService.addCategory({
+            name: icon.name,
+            icon: icon.icon,
+            type: icon.type,
+            isCustom: false
+          });
+        }
+      }
+    }
+    
+    await this.loadCategories();
+  }
+
   async deleteCategory(category: any) {
     const confirm = window.confirm(
       `Are you sure you want to delete the category "${category.name}"?`
@@ -389,9 +432,14 @@ export class SettingsComponent implements OnInit {
     await this.loadCategories();
   }
 
+  async onCategoryDrop(event: CdkDragDrop<any[]>) {
+    moveItemInArray(this.categories, event.previousIndex, event.currentIndex);
+    await this.dbService.updateCategoryOrder(this.categories);
+  }
+
   async backupData() {
-    const startDate = new Date(0); // Beginning of time
-    const endDate = new Date(); // Current date
+    const startDate = new Date(0);
+    const endDate = new Date();
 
     const transactions = await this.dbService.getTransactions(
       startDate,
@@ -463,7 +511,8 @@ export class SettingsComponent implements OnInit {
   }
 
   toggleAutoLock() {
-    this.pinService.setLocked(!this.pinService.isLocked());
+    const newState = !this.pinService.isAutoLockEnabled();
+    this.pinService.setAutoLock(newState);
   }
 
   onPinSet(pin: string) {
