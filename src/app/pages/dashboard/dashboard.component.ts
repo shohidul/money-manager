@@ -21,8 +21,8 @@ import { startOfMonth, endOfMonth, format } from 'date-fns';
           [currentMonth]="currentMonth"
           (monthChange)="onMonthChange($event)"
         />
-        <button class="refresh-button" (click)="loadTransactions()">
-          <span class="material-icons">refresh</span>
+        <button class="sync-button" (click)="loadTransactions()">
+          <span class="material-icons">sync</span>
         </button>
       </div>
 
@@ -100,7 +100,7 @@ import { startOfMonth, endOfMonth, format } from 'date-fns';
       margin-bottom: 1rem;
     }
 
-    .menu-button, .refresh-button {
+    .menu-button, .sync-button {
       background: none;
       border: none;
       padding: 0.5rem;
@@ -111,7 +111,7 @@ import { startOfMonth, endOfMonth, format } from 'date-fns';
       justify-content: center;
     }
 
-    .menu-button:hover, .refresh-button:hover {
+    .menu-button:hover, .sync-button:hover {
       background-color: rgba(0, 0, 0, 0.04);
     }
 
