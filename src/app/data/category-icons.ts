@@ -18,7 +18,7 @@ export interface CategoryIcon {
 export const defaultCategories: DefaultCategories[] = [
   { name: 'Food', icon: 'fork_spoon', type: 'expense'},
   { name: 'Bills', icon: 'bolt', type: 'expense'},
-  { name: 'Transortation', icon: 'directions_bus', type: 'expense'},
+  { name: 'Transportation', icon: 'directions_bus', type: 'expense'},
   { name: 'Home', icon: 'home', type: 'expense'},
   { name: 'Car', icon: 'directions_car', type: 'expense'},
   { name: 'Entertainment', icon: 'stadia_controller', type: 'expense'},
