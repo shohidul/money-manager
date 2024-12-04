@@ -1,3 +1,9 @@
+export interface DefaultCategories {
+  name: string;
+  icon: string;
+  type: 'income' | 'expense';
+}
+
 export interface CategoryGroup {
   name: string;
   icons: CategoryIcon[];
@@ -9,9 +15,57 @@ export interface CategoryIcon {
   type: 'income' | 'expense';
 }
 
+export const defaultCategories: DefaultCategories[] = [
+  { name: 'Food', icon: 'fork_spoon', type: 'expense'},
+  { name: 'Bills', icon: 'bolt', type: 'expense'},
+  { name: 'Transortation', icon: 'directions_bus', type: 'expense'},
+  { name: 'Home', icon: 'home', type: 'expense'},
+  { name: 'Car', icon: 'directions_car', type: 'expense'},
+  { name: 'Entertainment', icon: 'stadia_controller', type: 'expense'},
+  { name: 'Shopping', icon: 'shopping_bag', type: 'expense'},
+  { name: 'Clothing', icon: 'apparel', type: 'expense'},
+  { name: 'Insurance', icon: 'verified_user', type: 'expense'},
+  { name: 'Tax', icon: 'description', type: 'expense'},
+  { name: 'Telephone', icon: 'phone_in_talk', type: 'expense'},
+  { name: 'Cigarette', icon: 'smoking_rooms', type: 'expense'},
+  { name: 'Health', icon: 'health_and_safety', type: 'expense'},
+  { name: 'Sport', icon: 'sports_and_outdoors', type: 'expense'},
+  { name: 'Fitness', icon: 'fitness_center', type: 'expense'},
+  { name: 'Baby', icon: 'child_care', type: 'expense'},
+  { name: 'Pet', icon: 'pets', type: 'expense'},
+  { name: 'Beauty', icon: 'health_and_beauty', type: 'expense'},
+  { name: 'Electronics', icon: 'devices_other', type: 'expense'},
+  { name: 'Hamburger', icon: 'lunch_dining', type: 'expense'},
+  { name: 'Wine', icon: 'liquor', type: 'expense'},
+  { name: 'Grocery', icon: 'grocery', type: 'expense'},
+  { name: 'Snacks', icon: 'icecream', type: 'expense'},
+  { name: 'Gift', icon: 'featured_seasonal_and_gifts', type: 'expense'},
+  { name: 'Social', icon: 'group', type: 'expense'},
+  { name: 'Travel', icon: 'flight_takeoff', type: 'expense'},
+  { name: 'Education', icon: 'school', type: 'expense'},
+  { name: 'Fruits', icon: 'nutrition', type: 'expense'},
+  { name: 'Book', icon: 'book_5', type: 'expense'},
+  { name: 'Office', icon: 'attach_file', type: 'expense'},
+  { name: 'Phone recharge', icon: 'phone_iphone', type: 'expense'},
+  { name: 'Donation', icon: 'payments', type: 'expense'},
+  { name: 'Furniture', icon: 'king_bed', type: 'expense'},
+  { name: 'Family', icon: 'family_restroom', type: 'expense'},
+  { name: 'Internet', icon: 'wifi', type: 'expense'},
+  { name: 'Others', icon: 'category', type: 'expense'},
+  { name: 'Salary', icon: 'payments', type: 'income' },
+  { name: 'Business', icon: 'store', type: 'income' },
+  { name: 'Freelance', icon: 'computer', type: 'income' },
+  { name: 'Investment', icon: 'trending_up', type: 'income' },
+  { name: 'Rental', icon: 'apartment', type: 'income' },
+  { name: 'Gift', icon: 'redeem', type: 'income' },
+  { name: 'Interest', icon: 'savings', type: 'income' },
+  { name: 'Bonus', icon: 'stars', type: 'income' },
+  { name: 'Other Income', icon: 'account_balance_wallet', type: 'income' }
+]
+
 export const categoryGroups: CategoryGroup[] = [
   {
-    name: 'Food & Dining',
+    name: 'Food',
     icons: [
       { name: 'Restaurant', icon: 'restaurant', type: 'expense' },
       { name: 'Cafe', icon: 'local_cafe', type: 'expense' },
