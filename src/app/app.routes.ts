@@ -52,5 +52,10 @@ export const routes: Routes = [
     path: 'pin',
     loadComponent: () => 
       import('./pages/pin/pin.component').then(m => m.PinComponent)
+  },
+    // Fallback route for undefined paths, redirects to the home page
+  {
+    path: '**',
+    redirectTo: ''  // Redirecting to the home page (index)
   }
 ];
