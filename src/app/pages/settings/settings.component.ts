@@ -7,7 +7,7 @@ import { MobileHeaderComponent } from '../../components/mobile-header/mobile-hea
 import { SecurityCardComponent } from './components/security-card.component';
 import { CategoriesCardComponent } from './components/categories-card.component';
 import { DataManagementCardComponent } from './components/data-management-card.component';
-import { categoryGroups } from '../../data/category-icons';
+import { defaultCategories } from '../../data/category-icons';
 import { format } from 'date-fns';
 
 @Component({
@@ -65,7 +65,7 @@ export class SettingsComponent implements OnInit {
   ) {}
 
   async ngOnInit() {
-    // await this.loadCategories();
+    await this.loadCategories();
     await this.initializeDefaultCategories();
   }
 
@@ -76,21 +76,19 @@ export class SettingsComponent implements OnInit {
   async initializeDefaultCategories() {
     const existingCategories = await this.dbService.getCategories();
     
-    for (const group of categoryGroups) {
-      for (const icon of group.icons) {
+    for (const category of defaultCategories) {
         const exists = existingCategories.some(
-          c => c.icon === icon.icon && c.type === icon.type
+          c => c.icon === category.icon && c.type === category.type
         );
         
         if (!exists) {
           await this.dbService.addCategory({
-            name: icon.name,
-            icon: icon.icon,
-            type: icon.type,
+            name: category.name,
+            icon: category.icon,
+            type: category.type,
             isCustom: false
           });
         }
-      }
     }
     
     await this.loadCategories();
