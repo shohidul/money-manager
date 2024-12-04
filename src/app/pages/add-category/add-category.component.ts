@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -6,6 +6,7 @@ import { categoryGroups, CategoryIcon } from '../../data/category-icons';
 import { DbService } from '../../services/db.service';
 import { MobileHeaderComponent } from '../../components/mobile-header/mobile-header.component';
 import { Location } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-add-category',
@@ -184,13 +185,20 @@ import { Location } from '@angular/common';
     }
   `]
 })
-export class AddCategoryComponent {
+  
+export class AddCategoryComponent implements OnInit {
+  type: 'income' | 'expense' | null = null;
   categoryGroups = categoryGroups;
   categoryName = '';
   selectedIcon: CategoryIcon | null = null;
 
-  constructor(private dbService: DbService, private router: Router, private location: Location) {}
+  constructor(private dbService: DbService, private router: Router, private location: Location, private route: ActivatedRoute) {}
 
+  ngOnInit(): void {
+    const typeFromQuery = this.route.snapshot.queryParamMap.get('type');
+    this.type = typeFromQuery as 'income' | 'expense' | null;
+  }
+  
   get isValid(): boolean {
     return !!this.selectedIcon && !!this.categoryName.trim();
   }
@@ -208,7 +216,7 @@ export class AddCategoryComponent {
     const category = {
       name: this.categoryName.trim(),
       icon: this.selectedIcon.icon,
-      type: this.selectedIcon.type,
+      type: this.type ?? 'expense',
       isCustom: true,
     };
 
