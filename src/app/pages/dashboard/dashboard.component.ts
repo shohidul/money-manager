@@ -64,7 +64,7 @@ import { startOfMonth, endOfMonth, format } from 'date-fns';
                 <span class="time">{{ transaction.date | date: 'shortTime' }}</span>
                 <span class="memo">{{ transaction.memo ? transaction.memo : getCategoryName(transaction.categoryId) }}</span>
               </div>
-              <span class="amount" [class]="transaction.type">
+              <span class="amount">
                 {{ transaction.type === 'income' ? '' : '-' }}{{ transaction.amount | number:'1.0-2' }}
               </span>
             </div>
