@@ -59,7 +59,7 @@ type SortType = 'order' | 'name';
       <div class="category-list" cdkDropList (cdkDropListDropped)="onDrop($event)">
         @for (category of sortedCategories; track category.id) {
           <div class="category-item" cdkDrag>
-            <div class="order-number">{{ (category.order ?? 0) + 1 }}</div>
+            <div class="order-number">{{ category.order }}</div>
             <div class="category-info">
               <span class="material-symbols-rounded">{{ category.icon }}</span>
               <span>{{ category.name }}</span>
