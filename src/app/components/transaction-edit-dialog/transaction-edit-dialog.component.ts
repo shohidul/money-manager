@@ -70,7 +70,6 @@ import { Transaction } from '../../services/db.service';
     .dialog-content {
       background: white;
       padding: 1.5rem;
-      border-radius: 8px;
       width: 90%;
       max-width: 500px;
     }
