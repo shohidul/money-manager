@@ -21,7 +21,7 @@ import { Location } from '@angular/common';
       />
 
       <div class="content">
-        <div class="category-form card">
+        <div class="category-form">
           <div class="selected-icon-input">
             @if (selectedIcon) {
               <span class="material-symbols-rounded">{{ selectedIcon.icon }}</span>
@@ -96,6 +96,8 @@ import { Location } from '@angular/common';
       padding: 1rem;
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      position: sticky;
+      top: 0;
     }
 
     .selected-icon-input .placeholder {
@@ -122,7 +124,7 @@ import { Location } from '@angular/common';
       margin-bottom: 1rem;
       color: var(--text-secondary);
       font-size: 0.875rem;
-      text-transform: uppercase;
+      text-align: center;
       letter-spacing: 0.05em;
       padding-left: 0.5rem;
     }
@@ -135,6 +137,7 @@ import { Location } from '@angular/common';
     }
 
     .icon-button {
+      color: var(--text-secondary);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -142,15 +145,14 @@ import { Location } from '@angular/common';
       padding: 1rem;
       border: none;
       border-radius: 8px;
-      background: white;
+      background: none;
       cursor: pointer;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      /*box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);*/
       transition: all 0.2s;
     }
 
     .icon-button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      background-color: #0000000a;
     }
 
     .icon-button.selected {
