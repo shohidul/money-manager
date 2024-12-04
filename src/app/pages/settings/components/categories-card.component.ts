@@ -92,7 +92,7 @@ type SortType = 'order' | 'name';
       align-items: center;
       margin-bottom: 1rem;
       position: sticky;
-      top: 0;
+      top: -16px;
       background: white;
       padding: 1rem;
       z-index: 1;
