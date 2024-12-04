@@ -13,6 +13,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         <img 
           src="assets/images/logo_foreground.png" 
           alt="Logo" 
+          class="logo"
           (error)="onImageError($event)" 
           *ngIf="!logoFailed" />
         
