@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { DbService } from '../../services/db.service';
-import { categoryGroups } from '../../data/category-icons';
+import { defaultCategories } from '../../data/category-icons';
 import { CalculatorSheetComponent } from '../../components/calculator-sheet/calculator-sheet.component';
 import { MobileHeaderComponent } from '../../components/mobile-header/mobile-header.component';
 
@@ -35,22 +35,20 @@ import { MobileHeaderComponent } from '../../components/mobile-header/mobile-hea
       </div>-->
 
       <div class="categories-grid">
-        @for (group of filteredGroups; track group.name) {
-          @for (icon of group.icons; track icon.name) {
+        @for (category of filteredGroups; track category.name) {
             <button 
               class="category-item"
-              [class.selected]="selectedIcon?.icon === icon.icon"
-              (click)="selectCategory(icon)"
+              [class.selected]="selectedIcon?.icon === category.icon"
+              (click)="selectCategory(category)"
             >
-              <span class="material-symbols-rounded">{{ icon.icon }}</span>
-              <span class="category-name">{{ icon.name }}</span>
+              <span class="material-symbols-rounded">{{ category.icon }}</span>
+              <span class="category-name">{{ category.name }}</span>
             </button>
-          }
         }
-        <a routerLink="/add-category" class="category-item add-category">
+        <a [routerLink]="'/add-category'" [queryParams]="{ type: selectedType }" class="category-item add-category">
           <span class="material-icons">add</span>
           <span class="category-name">Add New</span>
-        </a>
+        </a> 
       </div>
 
       @if (selectedIcon) {
@@ -160,7 +158,7 @@ import { MobileHeaderComponent } from '../../components/mobile-header/mobile-hea
 export class AddTransactionComponent {
   types: ('income' | 'expense')[] = ['expense', 'income'];
   selectedType: 'income' | 'expense' = 'expense';
-  categoryGroups = categoryGroups;
+  defaultCategories = defaultCategories;
   selectedIcon: any = null;
   amount = 0;
   memo = '';
@@ -176,8 +174,8 @@ export class AddTransactionComponent {
   }
 
   get filteredGroups() {
-    return this.categoryGroups.filter((group) =>
-      group.icons.some((icon) => icon.type === this.selectedType)
+    return this.defaultCategories.filter(
+      (category) => category.type === this.selectedType
     );
   }
 
