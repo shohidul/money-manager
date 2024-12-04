@@ -9,8 +9,16 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   template: `
     <nav class="side-menu" [class.open]="isOpen">
       <div class="menu-header">
-        <img src="assets/images/logo_foreground.png" alt="Logo" class="logo" />
-        <!-- <span class="material-icons">wallet</span>-->
+        <!-- Logo with error handler -->
+        <img 
+          src="assets/images/logo_foreground.png" 
+          alt="Logo" 
+          (error)="onImageError($event)" 
+          *ngIf="!logoFailed" />
+        
+        <!-- Fallback icon if logo fails -->
+        <span *ngIf="logoFailed" class="material-icons">wallet</span>
+
         <h1>Money Manager</h1>
       </div>
       <div class="menu-items">
@@ -129,7 +137,16 @@ export class SideMenuComponent {
   @Input() isOpen = false;
   @Output() menuClosed = new EventEmitter<void>();
 
+  logoFailed = false;
+
   close() {
     this.menuClosed.emit();
+  }
+
+  // This function is triggered if the logo image fails to load
+  onImageError(event: Event) {
+    this.logoFailed = true;
+    // Optionally, you can also prevent default image error handling behavior
+    event.preventDefault();
   }
 }
