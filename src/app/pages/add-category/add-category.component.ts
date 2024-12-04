@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { categoryGroups, CategoryIcon } from '../../data/category-icons';
 import { DbService } from '../../services/db.service';
 import { MobileHeaderComponent } from '../../components/mobile-header/mobile-header.component';
+import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-add-category',
@@ -186,7 +187,7 @@ export class AddCategoryComponent {
   categoryName = '';
   selectedIcon: CategoryIcon | null = null;
 
-  constructor(private dbService: DbService, private router: Router) {}
+  constructor(private dbService: DbService, private router: Router, private location: Location) {}
 
   get isValid(): boolean {
     return !!this.selectedIcon && !!this.categoryName.trim();
@@ -210,10 +211,10 @@ export class AddCategoryComponent {
     };
 
     await this.dbService.addCategory(category);
-    this.router.navigate(['/add-transaction']);
+    this.location.back();
   }
 
   goBack() {
-    this.router.navigate(['/add-transaction']);
+    this.location.back();
   }
 }
