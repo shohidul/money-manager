@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <title>Money Manager</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link id="favicon" rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link
@@ -17,5 +17,26 @@
   </head>
   <body>
     <app-root>Loading...</app-root>
+      <script>
+        // Function to check if favicon is loaded and fall back to material icon
+        function checkFavicon() {
+          const favicon = document.getElementById('favicon');
+          const img = new Image();
+          img.onload = function() {
+            console.log('Favicon loaded successfully!');
+          };
+          img.onerror = function() {
+            // Favicon load failed, use a Material icon as fallback
+            const materialIconLink = document.createElement('link');
+            materialIconLink.rel = 'icon';
+            materialIconLink.href = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" height="32" width="32"><text x="0" y="32" font-size="32" font-family="Material Icons">wallet</text></svg>';
+            document.head.appendChild(materialIconLink);
+          };
+          img.src = favicon.href;
+        }
+    
+        // Run the check when the page is loaded
+        window.onload = checkFavicon;
+      </script>
   </body>
 </html>
