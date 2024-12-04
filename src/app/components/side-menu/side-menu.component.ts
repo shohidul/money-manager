@@ -9,7 +9,8 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   template: `
     <nav class="side-menu" [class.open]="isOpen">
       <div class="menu-header">
-        <span class="material-icons">wallet</span>
+        <img src="assets/images/logo_foreground.png" alt="Logo" class="logo" />
+        <!-- <span class="material-icons">wallet</span>-->
         <h1>Money Manager</h1>
       </div>
       <div class="menu-items">
@@ -49,7 +50,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
     }
 
     .side-menu {
-      width: 250px;
+      width: 280px;
       background: var(--surface-color);
       height: 100vh;
       flex-shrink: 0;
@@ -76,7 +77,11 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
       margin-bottom: 1rem;
       color: var(--text-primary);
     }
-
+    
+    .menu-header .logo {
+      height: 40px; 
+    }
+    
     .menu-header h1 {
       font-size: 1.25rem;
       font-weight: 500;
@@ -110,12 +115,12 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
     @media (max-width: 768px) {
       .side-menu {
         position: fixed;
-        left: -250px;
+        left: -280px;
         transition: transform 0.3s ease;
       }
 
       .side-menu.open {
-        transform: translateX(250px);
+        transform: translateX(280px);
       }
     }
   `]
