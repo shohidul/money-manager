@@ -104,6 +104,7 @@ type SortType = 'order' | 'name';
       display: flex;
       gap: 1rem;
       align-items: center;
+      flex-wrap: wrap;
     }
 
     .sort-controls {
