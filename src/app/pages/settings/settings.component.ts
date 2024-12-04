@@ -1,19 +1,25 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { CdkDragDrop, moveItemInArray, DragDropModule } from '@angular/cdk/drag-drop';
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { DbService } from '../../services/db.service';
-import { PinService } from '../../services/pin.service';
-import { PinDialogComponent } from '../../components/pin-dialog/pin-dialog.component';
 import { MobileHeaderComponent } from '../../components/mobile-header/mobile-header.component';
-import { format } from 'date-fns';
+import { SecurityCardComponent } from './components/security-card.component';
+import { CategoriesCardComponent } from './components/categories-card.component';
+import { DataManagementCardComponent } from './components/data-management-card.component';
 import { categoryGroups } from '../../data/category-icons';
+import { format } from 'date-fns';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule, PinDialogComponent, MobileHeaderComponent, DragDropModule],
+  imports: [
+    CommonModule,
+    MobileHeaderComponent,
+    SecurityCardComponent,
+    CategoriesCardComponent,
+    DataManagementCardComponent
+  ],
   template: `
     <div class="settings">
       <app-mobile-header
@@ -23,116 +29,20 @@ import { categoryGroups } from '../../data/category-icons';
       />
 
       <div class="content">
-        <div class="card">
-          <h3>Security</h3>
-          <div class="settings-group">
-            <div class="setting-item">
-              <div class="setting-info">
-                <span>PIN Lock</span>
-                <small>Protect your data with a 4-digit PIN</small>
-              </div>
-              <button 
-                class="pin-button"
-                (click)="togglePinDialog()"
-              >
-                {{ pinService.hasPin() ? 'Change PIN' : 'Set PIN' }}
-              </button>
-            </div>
-            @if (pinService.hasPin()) {
-              <div class="setting-item">
-                <div class="setting-info">
-                  <span>Auto-lock</span>
-                  <small>Lock app when switching to background</small>
-                </div>
-                <div class="switch-button">
-                  <input 
-                    type="checkbox" 
-                    [checked]="pinService.isAutoLockEnabled()"
-                    (change)="toggleAutoLock()"
-                    id="autoLock"
-                  >
-                  <label for="autoLock"></label>
-                </div>
-              </div>
-            }
-          </div>
-        </div>
+        <app-security-card />
+        
+        <app-categories-card
+          [categories]="categories"
+          (categoryDrop)="onCategoryDrop($event)"
+          (deleteCategory)="deleteCategory($event)"
+        />
 
-        <div class="card">
-          <div class="section-header">
-            <h3>Categories</h3>
-            <div class="category-filters">
-              <button 
-                [class.active]="categoryFilter === 'all'"
-                (click)="categoryFilter = 'all'"
-              >
-                All
-              </button>
-              <button 
-                [class.active]="categoryFilter === 'income'"
-                (click)="categoryFilter = 'income'"
-              >
-                Income
-              </button>
-              <button 
-                [class.active]="categoryFilter === 'expense'"
-                (click)="categoryFilter = 'expense'"
-              >
-                Expense
-              </button>
-            </div>
-          </div>
-          <div class="category-list" cdkDropList (cdkDropListDropped)="onCategoryDrop($event)">
-            @for (category of filteredCategories; track category.id) {
-              <div class="category-item" cdkDrag>
-                <div class="category-info">
-                  <span class="material-symbols-rounded">{{ category.icon }}</span>
-                  <span>{{ category.name }}</span>
-                  <span class="category-type">{{ category.type }}</span>
-                </div>
-                @if (category.isCustom) {
-                  <button 
-                    class="delete-button"
-                    (click)="deleteCategory(category)"
-                  >
-                    <span class="material-icons">delete</span>
-                  </button>
-                }
-                <div class="drag-handle">
-                  <span class="material-icons">drag_indicator</span>
-                </div>
-              </div>
-            }
-          </div>
-        </div>
-
-        <div class="card">
-          <h3>Data Management</h3>
-          <div class="settings-group data-mgt-group">
-            <button class="backup-button" (click)="backupData()">
-              <span class="material-icons">download</span>
-              Backup Data
-            </button>
-            <button class="clear-button" (click)="clearData()">
-              <span class="material-icons">delete_forever</span>
-              Clear All Data
-            </button>
-            <button class="restore-button" (click)="restoreData()">
-              <span class="material-icons">restore</span>
-              Restore Data
-            </button>
-          </div>
-        </div>
+        <app-data-management-card
+          (backup)="backupData()"
+          (clear)="clearData()"
+          (restore)="restoreData()"
+        />
       </div>
-
-      @if (showPinDialog) {
-        <div class="pin-overlay">
-          <app-pin-dialog
-            mode="set"
-            (pinEntered)="onPinSet($event)"
-          />
-        </div>
-      }
     </div>
   `,
   styles: [`
@@ -144,255 +54,19 @@ import { categoryGroups } from '../../data/category-icons';
     .content {
       padding: 1rem;
     }
-
-    .settings-group {
-      margin-top: 1rem;
-    }
-
-    .setting-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem 0;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-    }
-
-    .setting-item:last-child {
-      border-bottom: none;
-    }
-
-    .setting-info {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .setting-info small {
-      color: var(--text-secondary);
-      margin-top: 0.25rem;
-    }
-
-    .pin-button {
-      padding: 0.5rem 1rem;
-      border: none;
-      border-radius: 20px;
-      background-color: var(--primary-color);
-      color: white;
-      cursor: pointer;
-    }
-
-    .section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-      position: sticky;
-      top: 0;
-      background: white;
-      padding: 1rem;
-      z-index: 1;
-    }
-
-    .category-filters {
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    .category-filters button {
-      padding: 0.5rem 1rem;
-      border: none;
-      border-radius: 20px;
-      background: rgba(0, 0, 0, 0.04);
-      cursor: pointer;
-    }
-
-    .category-filters button.active {
-      background: var(--primary-color);
-      color: white;
-    }
-
-    .category-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .category-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.75rem;
-      border-radius: 8px;
-      background-color: white;
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      cursor: move;
-    }
-
-    .category-info {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    .category-type {
-      font-size: 0.875rem;
-      color: var(--text-secondary);
-      text-transform: capitalize;
-    }
-
-    .delete-button {
-      background: none;
-      border: none;
-      color: var(--secondary-color);
-      cursor: pointer;
-      padding: 0.5rem;
-      border-radius: 50%;
-    }
-
-    .delete-button:hover {
-      background-color: rgba(0, 0, 0, 0.08);
-    }
-
-    .drag-handle {
-      color: var(--text-secondary);
-      cursor: move;
-      padding: 0.5rem;
-    }
-
-    .data-mgt-group {
-      margin-top: 1rem;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-
-    .backup-button {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.75rem 1rem;
-      border: none;
-      border-radius: 4px;
-      background-color: var(--primary-color);
-      color: white;
-      cursor: pointer;
-      flex-grow: 1;
-    }
-
-    .clear-button, .restore-button {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.75rem 1rem;
-      border: none;
-      border-radius: 4px;
-      background-color: #f44336;
-      color: white;
-      cursor: pointer;
-      flex-grow: 1;
-    }
-
-    .restore-button {
-      background-color: #4caf50;
-    }
-
-    .pin-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: rgba(0, 0, 0, 0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-    }
-
-    .switch-button {
-      position: relative;
-      width: 50px;
-      height: 24px;
-    }
-
-    .switch-button input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
-    .switch-button label {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: #ccc;
-      transition: .4s;
-      border-radius: 34px;
-    }
-
-    .switch-button label:before {
-      position: absolute;
-      content: "";
-      height: 20px;
-      width: 20px;
-      left: 2px;
-      bottom: 2px;
-      background-color: white;
-      transition: .4s;
-      border-radius: 50%;
-    }
-
-    .switch-button input:checked + label {
-      background-color: var(--primary-color);
-    }
-
-    .switch-button input:checked + label:before {
-      transform: translateX(26px);
-    }
-
-    .cdk-drag-preview {
-      box-sizing: border-box;
-      border-radius: 4px;
-      box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
-                  0 8px 10px 1px rgba(0, 0, 0, 0.14),
-                  0 3px 14px 2px rgba(0, 0, 0, 0.12);
-    }
-
-    .cdk-drag-placeholder {
-      opacity: 0;
-    }
-
-    .cdk-drag-animating {
-      transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
-    }
-
-    .category-list.cdk-drop-list-dragging .category-item:not(.cdk-drag-placeholder) {
-      transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
-    }
   `]
 })
 export class SettingsComponent implements OnInit {
   categories: any[] = [];
-  showPinDialog = false;
-  categoryFilter: 'all' | 'income' | 'expense' = 'all';
 
   constructor(
     private dbService: DbService,
-    private router: Router,
-    public pinService: PinService
+    private router: Router
   ) {}
 
   async ngOnInit() {
     await this.loadCategories();
     await this.initializeDefaultCategories();
-  }
-
-  get filteredCategories() {
-    return this.categories.filter(category => 
-      this.categoryFilter === 'all' || category.type === this.categoryFilter
-    );
   }
 
   async loadCategories() {
@@ -433,25 +107,27 @@ export class SettingsComponent implements OnInit {
   }
 
   async onCategoryDrop(event: CdkDragDrop<any[]>) {
-    moveItemInArray(this.categories, event.previousIndex, event.currentIndex);
-    await this.dbService.updateCategoryOrder(this.categories);
+    const categories = [...this.categories];
+    const [removed] = categories.splice(event.previousIndex, 1);
+    categories.splice(event.currentIndex, 0, removed);
+    
+    // Update order numbers
+    categories.forEach((category, index) => {
+      category.order = index + 1;
+    });
+    
+    await this.dbService.updateCategoryOrder(categories);
+    await this.loadCategories();
   }
 
   async backupData() {
     const startDate = new Date(0);
     const endDate = new Date();
 
-    const transactions = await this.dbService.getTransactions(
-      startDate,
-      endDate
-    );
+    const transactions = await this.dbService.getTransactions(startDate, endDate);
     const categories = await this.dbService.getCategories();
 
-    const data = {
-      transactions,
-      categories,
-    };
-
+    const data = { transactions, categories };
     const blob = new Blob([JSON.stringify(data, null, 2)], {
       type: 'application/json',
     });
@@ -459,10 +135,7 @@ export class SettingsComponent implements OnInit {
 
     const a = document.createElement('a');
     a.href = url;
-    a.download = `money-manager-backup-${format(
-      new Date(),
-      'yyyy-MM-dd'
-    )}.json`;
+    a.download = `money-manager-backup-${format(new Date(), 'yyyy-MM-dd')}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -491,7 +164,6 @@ export class SettingsComponent implements OnInit {
       const text = await file.text();
       try {
         const data = JSON.parse(text);
-
         if (data.categories && data.transactions) {
           await this.dbService.restoreData(data);
           await this.loadCategories();
@@ -504,21 +176,6 @@ export class SettingsComponent implements OnInit {
       }
     };
     fileInput.click();
-  }
-
-  togglePinDialog() {
-    this.showPinDialog = !this.showPinDialog;
-  }
-
-  toggleAutoLock() {
-    const newState = !this.pinService.isAutoLockEnabled();
-    this.pinService.setAutoLock(newState);
-  }
-
-  onPinSet(pin: string) {
-    this.pinService.setPin(pin);
-    this.showPinDialog = false;
-    alert('PIN has been set successfully');
   }
 
   goBack() {
