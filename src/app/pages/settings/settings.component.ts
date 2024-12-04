@@ -65,7 +65,7 @@ export class SettingsComponent implements OnInit {
   ) {}
 
   async ngOnInit() {
-    await this.loadCategories();
+    // await this.loadCategories();
     await this.initializeDefaultCategories();
   }
 
