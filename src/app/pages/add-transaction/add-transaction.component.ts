@@ -30,9 +30,9 @@ import { MobileHeaderComponent } from '../../components/mobile-header/mobile-hea
         </button>
       </div>
 
-      <div class="categories-header">
+      <!--<div class="categories-header">
         <h3>Select Category</h3>
-      </div>
+      </div>-->
 
       <div class="categories-grid">
         @for (group of filteredGroups; track group.name) {
@@ -93,6 +93,12 @@ import { MobileHeaderComponent } from '../../components/mobile-header/mobile-hea
       display: flex;
       padding: 1rem;
       gap: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .type-tabs {
+        padding: 0 1rem 1rem 1rem;
+      }
     }
 
     .type-tab {
