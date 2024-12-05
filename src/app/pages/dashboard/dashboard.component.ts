@@ -10,10 +10,15 @@ import { startOfMonth, endOfMonth, format } from 'date-fns';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, MonthPickerComponent, TransactionEditDialogComponent],
+  imports: [
+    CommonModule,
+    RouterLink,
+    MonthPickerComponent,
+    TransactionEditDialogComponent,
+  ],
   template: `
     <div class="dashboard">
-      <div class="top-actions">
+      <div class="top-actions card">
         <button class="menu-button" (click)="toggleMenu()">
           <span class="material-icons">menu</span>
         </button>
@@ -86,7 +91,8 @@ import { startOfMonth, endOfMonth, format } from 'date-fns';
       }
     </div>
   `,
-  styles: [`
+  styles: [
+    `
     .dashboard {
       max-width: 800px;
       margin: 0 auto;
@@ -98,6 +104,9 @@ import { startOfMonth, endOfMonth, format } from 'date-fns';
       align-items: center;
       justify-content: space-between;
       margin-bottom: 1rem;
+      position: sticky;
+      top: -16px;
+      z-index: 100;
     }
 
     .menu-button, .sync-button {
@@ -207,7 +216,8 @@ import { startOfMonth, endOfMonth, format } from 'date-fns';
       font-size: 0.875rem;
       color: var(--text-secondary);
     }
-  `]
+  `,
+  ],
 })
 export class DashboardComponent implements OnInit {
   currentMonth = format(new Date(), 'yyyy-MM');
@@ -219,10 +229,7 @@ export class DashboardComponent implements OnInit {
   balance = 0;
   selectedTransaction: Transaction | null = null;
 
-  constructor(
-    private dbService: DbService,
-    private menuService: MenuService
-  ) {}
+  constructor(private dbService: DbService, private menuService: MenuService) {}
 
   async ngOnInit() {
     await this.loadCategories();
@@ -237,9 +244,14 @@ export class DashboardComponent implements OnInit {
     const date = new Date(this.currentMonth);
     const startDate = startOfMonth(date);
     const endDate = endOfMonth(date);
-    
-    const transactions = await this.dbService.getTransactions(startDate, endDate);
-    this.transactions = transactions.sort((a, b) => b.date.getTime() - a.date.getTime());
+
+    const transactions = await this.dbService.getTransactions(
+      startDate,
+      endDate
+    );
+    this.transactions = transactions.sort(
+      (a, b) => b.date.getTime() - a.date.getTime()
+    );
 
     this.calculateTotals();
     this.groupTransactions();
@@ -247,11 +259,11 @@ export class DashboardComponent implements OnInit {
 
   calculateTotals() {
     this.totalIncome = this.transactions
-      .filter(t => t.type === 'income')
+      .filter((t) => t.type === 'income')
       .reduce((sum, t) => sum + t.amount, 0);
 
     this.totalExpense = this.transactions
-      .filter(t => t.type === 'expense')
+      .filter((t) => t.type === 'expense')
       .reduce((sum, t) => sum + t.amount, 0);
 
     this.balance = this.totalIncome - this.totalExpense;
@@ -260,21 +272,21 @@ export class DashboardComponent implements OnInit {
   groupTransactions() {
     const groups = new Map();
 
-    this.transactions.forEach(transaction => {
+    this.transactions.forEach((transaction) => {
       const dateKey = format(transaction.date, 'yyyy-MM-dd');
-      
+
       if (!groups.has(dateKey)) {
         groups.set(dateKey, {
           date: transaction.date,
           transactions: [],
           totalIncome: 0,
-          totalExpense: 0
+          totalExpense: 0,
         });
       }
 
       const group = groups.get(dateKey);
       group.transactions.push(transaction);
-      
+
       if (transaction.type === 'income') {
         group.totalIncome += transaction.amount;
       } else {
@@ -282,17 +294,18 @@ export class DashboardComponent implements OnInit {
       }
     });
 
-    this.transactionGroups = Array.from(groups.values())
-      .sort((a, b) => b.date.getTime() - a.date.getTime());
+    this.transactionGroups = Array.from(groups.values()).sort(
+      (a, b) => b.date.getTime() - a.date.getTime()
+    );
   }
 
   getCategoryIcon(categoryId: number): string {
-    const category = this.categories.find(c => c.id === categoryId);
+    const category = this.categories.find((c) => c.id === categoryId);
     return category?.icon || 'help';
   }
 
   getCategoryName(categoryId: number): string {
-    const category = this.categories.find(c => c.id === categoryId);
+    const category = this.categories.find((c) => c.id === categoryId);
     return category?.name || 'Unknown';
   }
 
