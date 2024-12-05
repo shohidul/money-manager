@@ -7,7 +7,12 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
   template: `
     <div class="pin-dialog">
-      <h2>{{ mode === 'verify' ? 'Enter PIN' : 'Set New PIN' }}</h2>
+      <div class="pin-header">
+        <h2>{{ mode === 'verify' ? 'Enter PIN' : 'Set New PIN' }}</h2>
+        <button class="close-button" (click)="onClose()">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
       
       <div class="pin-display">
         <div *ngFor="let digit of pinDisplay" class="pin-digit">
@@ -41,6 +46,40 @@ import { CommonModule } from '@angular/common';
     .pin-dialog {
       padding: 2rem;
       text-align: center;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+
+    .pin-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+
+    .pin-header h2 {
+      margin: 0;
+    }
+
+    .close-button {
+      position: absolute;
+      right: -1rem;
+      top: -1rem;
+      background: none;
+      border: none;
+      padding: 0.5rem;
+      cursor: pointer;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .close-button:hover {
+      background-color: rgba(0, 0, 0, 0.04);
     }
 
     .pin-display {
@@ -101,6 +140,7 @@ export class PinDialogComponent {
   @Input() mode: 'set' | 'verify' = 'verify';
   @Output() pinEntered = new EventEmitter<string>();
   @Output() forgotPin = new EventEmitter<void>();
+  @Output() close = new EventEmitter<void>();
 
   numbers = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
   currentPin = '';
@@ -128,6 +168,10 @@ export class PinDialogComponent {
 
   onForgotPin() {
     this.forgotPin.emit();
+  }
+
+  onClose() {
+    this.close.emit();
   }
 
   private updatePinDisplay() {
