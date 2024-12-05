@@ -191,12 +191,16 @@ export class AddCategoryComponent implements OnInit {
   categoryGroups = categoryGroups;
   categoryName = '';
   selectedIcon: CategoryIcon | null = null;
+  referer: string = '';
 
   constructor(private dbService: DbService, private router: Router, private location: Location, private route: ActivatedRoute) {}
 
   ngOnInit(): void {
     const typeFromQuery = this.route.snapshot.queryParamMap.get('type');
     this.type = typeFromQuery as 'income' | 'expense' | null;
+
+    const refererFromQuery = this.route.snapshot.queryParamMap.get('referer');
+    this.referer = refererFromQuery || '';
   }
   
   get isValid(): boolean {
@@ -221,10 +225,12 @@ export class AddCategoryComponent implements OnInit {
     };
 
     await this.dbService.addCategory(category);
-    this.location.back();
+    
+    this.goBack();
   }
 
   goBack() {
-    this.location.back();
+    // Navigate back to the previous page with the type query parameter
+    this.router.navigate([this.referer], { queryParams: { type: this.type ?? 'expense' } });
   }
 }
