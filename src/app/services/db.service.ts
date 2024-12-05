@@ -120,7 +120,7 @@ export class DbService {
     return this.db.delete('categories', id);
   }
 
-  async clearAllData() {
+  /*async clearAllData() {
     const transaction = this.db.transaction(
       ['categories', 'transactions'],
       'readwrite'
@@ -134,6 +134,19 @@ export class DbService {
     for (const customCategory of customCategories) {
       await categoryStore.delete(customCategory.id as number);
     }
+    await transaction.done;
+  }*/
+
+  async clearAllData() {
+    const transaction = this.db.transaction(['categories', 'transactions'], 'readwrite');
+    
+    // Clear all data in the 'transactions' store
+    await transaction.objectStore('transactions').clear();
+    
+    // Clear all data in the 'categories' store
+    await transaction.objectStore('categories').clear();
+    
+    // Wait for the transaction to complete
     await transaction.done;
   }
 
