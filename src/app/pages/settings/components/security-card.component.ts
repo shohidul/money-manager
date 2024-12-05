@@ -50,6 +50,7 @@ import { PinDialogComponent } from '../../../components/pin-dialog/pin-dialog.co
           <app-pin-dialog
             mode="set"
             (pinEntered)="onPinSet($event)"
+            (close)="closePinDialog()"
           />
         </div>
       }
@@ -132,7 +133,7 @@ import { PinDialogComponent } from '../../../components/pin-dialog/pin-dialog.co
       left: 0;
       right: 0;
       bottom: 0;
-      background-color: white;
+      background-color: rgba(0, 0, 0, 0.5);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -162,7 +163,11 @@ export class SecurityCardComponent {
 
   onPinSet(pin: string) {
     this.pinService.setPin(pin);
-    this.showPinDialog = false;
+    this.closePinDialog();
     alert('PIN has been set successfully');
+  }
+
+  closePinDialog() {
+    this.showPinDialog = false;
   }
 }
