@@ -68,7 +68,8 @@ import { ActivatedRoute } from '@angular/router';
       </button>
     </div>
   `,
-  styles: [`
+  styles: [
+    `
     .add-category {
       height: 100vh;
       display: flex;
@@ -87,6 +88,7 @@ import { ActivatedRoute } from '@angular/router';
       gap: 2rem;
       max-width: 600px;
       margin: 0 auto;
+      padding-bottom: 50px;
     }
 
     .selected-icon-input {
@@ -183,9 +185,9 @@ import { ActivatedRoute } from '@angular/router';
       opacity: 0.5;
       cursor: not-allowed;
     }
-  `]
+  `,
+  ],
 })
-  
 export class AddCategoryComponent implements OnInit {
   type: 'income' | 'expense' | null = null;
   categoryGroups = categoryGroups;
@@ -193,7 +195,12 @@ export class AddCategoryComponent implements OnInit {
   selectedIcon: CategoryIcon | null = null;
   referer: string = '';
 
-  constructor(private dbService: DbService, private router: Router, private location: Location, private route: ActivatedRoute) {}
+  constructor(
+    private dbService: DbService,
+    private router: Router,
+    private location: Location,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit(): void {
     const typeFromQuery = this.route.snapshot.queryParamMap.get('type');
@@ -202,7 +209,7 @@ export class AddCategoryComponent implements OnInit {
     const refererFromQuery = this.route.snapshot.queryParamMap.get('referer');
     this.referer = refererFromQuery || '';
   }
-  
+
   get isValid(): boolean {
     return !!this.selectedIcon && !!this.categoryName.trim();
   }
@@ -225,12 +232,14 @@ export class AddCategoryComponent implements OnInit {
     };
 
     await this.dbService.addCategory(category);
-    
+
     this.goBack();
   }
 
   goBack() {
     // Navigate back to the previous page with the type query parameter
-    this.router.navigate([this.referer], { queryParams: { type: this.type ?? 'expense' } });
+    this.router.navigate([this.referer], {
+      queryParams: { type: this.type ?? 'expense' },
+    });
   }
 }
