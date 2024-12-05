@@ -1,10 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { DbService } from '../../services/db.service';
-import { defaultCategories } from '../../data/category-icons';
 import { CalculatorSheetComponent } from '../../components/calculator-sheet/calculator-sheet.component';
 import { MobileHeaderComponent } from '../../components/mobile-header/mobile-header.component';
+import { CategoryService } from '../../services/category.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-add-transaction',
@@ -45,7 +46,7 @@ import { MobileHeaderComponent } from '../../components/mobile-header/mobile-hea
               <span class="category-name">{{ category.name }}</span>
             </button>
         }
-        <a [routerLink]="'/add-category'" [queryParams]="{ type: selectedType }" class="category-item add-category">
+        <a [routerLink]="'/add-category'" [queryParams]="{ type: selectedType, referer: currentRoute }" class="category-item add-category">
           <span class="material-icons">add</span>
           <span class="category-name">Add New</span>
         </a> 
@@ -155,17 +156,42 @@ import { MobileHeaderComponent } from '../../components/mobile-header/mobile-hea
   `,
   ],
 })
-export class AddTransactionComponent {
+export class AddTransactionComponent implements OnInit {
   types: ('income' | 'expense')[] = ['expense', 'income'];
   selectedType: 'income' | 'expense' = 'expense';
-  defaultCategories = defaultCategories;
+  categories: any[] = [];
   selectedIcon: any = null;
   amount = 0;
   memo = '';
   transactionDate = new Date();
   showCalculator = false;
+  currentRoute: string;
 
-  constructor(private dbService: DbService, private router: Router) {}
+  constructor(
+    private dbService: DbService,
+    private categoryService: CategoryService,
+    private router: Router,
+    private activatedRoute: ActivatedRoute
+  ) {
+    this.currentRoute = this.router.url.split('?')[0];
+  }
+
+  async ngOnInit() {
+    // Retrieve the 'type' query parameter
+    this.activatedRoute.queryParams.subscribe(params => {
+      this.selectedType = params['type'] ?? 'expense'; // Default to 'expense' if 'type' is not found
+    });
+    
+    // Initialize default categories first
+    await this.categoryService.initializeDefaultCategories();
+    
+    // Load the categories after initialization
+    await this.loadCategories();
+  }
+
+  async loadCategories() {
+    this.categories = await this.categoryService.getAllCategories();
+  }
 
   onTypeChange(type: 'income' | 'expense') {
     this.selectedType = type;
@@ -174,7 +200,7 @@ export class AddTransactionComponent {
   }
 
   get filteredGroups() {
-    return this.defaultCategories.filter(
+    return this.categories.filter(
       (category) => category.type === this.selectedType
     );
   }
