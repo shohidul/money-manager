@@ -9,6 +9,7 @@ import { CategoriesCardComponent } from './components/categories-card.component'
 import { DataManagementCardComponent } from './components/data-management-card.component';
 import { defaultCategories } from '../../data/category-icons';
 import { format } from 'date-fns';
+import { CategoryService } from '../../services/category.service';
 
 @Component({
   selector: 'app-settings',
@@ -61,37 +62,20 @@ export class SettingsComponent implements OnInit {
 
   constructor(
     private dbService: DbService,
+    private categoryService: CategoryService,
     private router: Router
   ) {}
 
   async ngOnInit() {
+    // Initialize default categories first
+    await this.categoryService.initializeDefaultCategories();
+    
+    // Load the categories after initialization
     await this.loadCategories();
-    await this.initializeDefaultCategories();
   }
 
   async loadCategories() {
-    this.categories = await this.dbService.getCategories();
-  }
-
-  async initializeDefaultCategories() {
-    const existingCategories = await this.dbService.getCategories();
-    
-    for (const category of defaultCategories) {
-        const exists = existingCategories.some(
-          c => c.icon === category.icon && c.type === category.type
-        );
-        
-        if (!exists) {
-          await this.dbService.addCategory({
-            name: category.name,
-            icon: category.icon,
-            type: category.type,
-            isCustom: false
-          });
-        }
-    }
-    
-    await this.loadCategories();
+    this.categories = await this.categoryService.getAllCategories();
   }
 
   async deleteCategory(category: any) {
@@ -147,6 +131,7 @@ export class SettingsComponent implements OnInit {
     if (!confirm) return;
 
     await this.dbService.clearAllData();
+    await this.categoryService.initializeDefaultCategories();
     await this.loadCategories();
     alert('All data has been cleared.');
   }
@@ -163,6 +148,7 @@ export class SettingsComponent implements OnInit {
       try {
         const data = JSON.parse(text);
         if (data.categories && data.transactions) {
+          await this.dbService.clearAllData();
           await this.dbService.restoreData(data);
           await this.loadCategories();
           alert('Data has been restored.');
