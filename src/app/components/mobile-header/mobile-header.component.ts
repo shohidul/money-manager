@@ -25,7 +25,8 @@ import { RouterModule } from '@angular/router';
       </ng-template>
     </header>
   `,
-  styles: [`
+  styles: [
+    `
     .mobile-header {
       display: none;
       align-items: center;
@@ -35,7 +36,7 @@ import { RouterModule } from '@angular/router';
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       margin: -1rem -1rem 1rem -1rem;
       position: sticky;
-      top: 0;
+      top: -16px;
       z-index: 100;
     }
 
@@ -80,7 +81,8 @@ import { RouterModule } from '@angular/router';
     .spacer {
       width: 40px;
     }
-  `]
+  `,
+  ],
 })
 export class MobileHeaderComponent {
   @Input() title = '';
