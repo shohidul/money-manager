@@ -10,7 +10,12 @@ import { ActivatedRoute } from '@angular/router';
 @Component({
   selector: 'app-add-transaction',
   standalone: true,
-  imports: [CommonModule, CalculatorSheetComponent, RouterLink, MobileHeaderComponent],
+  imports: [
+    CommonModule,
+    CalculatorSheetComponent,
+    RouterLink,
+    MobileHeaderComponent,
+  ],
   template: `
     <div class="add-transaction">
       <app-mobile-header
@@ -114,11 +119,15 @@ import { ActivatedRoute } from '@angular/router';
       color: white;
     }
 
+    body .main {
+      overflow-y: hidden !important;
+    }
+
     .categories-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
       gap: 1rem;
-      padding: 1rem;
+      padding: 1rem 1rem 3.125rem 1rem;
       overflow-y: auto;
     }
 
@@ -178,13 +187,13 @@ export class AddTransactionComponent implements OnInit {
 
   async ngOnInit() {
     // Retrieve the 'type' query parameter
-    this.activatedRoute.queryParams.subscribe(params => {
+    this.activatedRoute.queryParams.subscribe((params) => {
       this.selectedType = params['type'] ?? 'expense'; // Default to 'expense' if 'type' is not found
     });
-    
+
     // Initialize default categories first
     await this.categoryService.initializeDefaultCategories();
-    
+
     // Load the categories after initialization
     await this.loadCategories();
   }
@@ -213,7 +222,7 @@ export class AddTransactionComponent implements OnInit {
   toggleCalculator() {
     this.showCalculator = true;
   }
-  
+
   onChildToggle() {
     this.showCalculator = false;
     this.selectedIcon = null;
