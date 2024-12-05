@@ -79,10 +79,6 @@ type SortType = 'order' | 'name';
           </div>
         }
       </div>
-      <a routerLink="/add-category" class="add-category-button">
-        <span class="material-icons">add</span>
-        Add New Category
-      </a>
     </div>
   `,
   styles: [`
