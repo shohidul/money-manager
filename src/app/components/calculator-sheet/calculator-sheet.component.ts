@@ -1,4 +1,12 @@
-import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, OnChanges, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  ChangeDetectionStrategy,
+  OnChanges,
+  SimpleChanges,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
@@ -55,7 +63,8 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
       </div>
     </div>
   `,
-  styles: [`
+  styles: [
+    `
     .calculator-sheet {
       position: fixed;
       bottom: 0;
@@ -127,12 +136,15 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
     .keypad-number {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
+      grid-auto-rows: 55px;
       gap: 1px;
       background: rgba(0, 0, 0, 0.08);
     }
     
     .keypad-function {
       display: grid;
+      grid-template-columns: repeat(1, 1fr);
+      grid-auto-rows: 55px;
       gap: 1px;
       background: rgba(0, 0, 0, 0.08);
     }
@@ -181,7 +193,8 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
       font-size: 0.75rem;
       line-height: 1.2;
     }
-  `]
+  `,
+  ],
 })
 export class CalculatorSheetComponent implements OnChanges {
   @Input() categoryIcon = 'help';
@@ -194,7 +207,20 @@ export class CalculatorSheetComponent implements OnChanges {
   @Output() dateChange = new EventEmitter<Date>();
   @Output() save = new EventEmitter<void>();
 
-  readonly numericKeys = ['7', '8', '9', '4', '5', '6', '1', '2', '3', '.', '0', '⌫'];
+  readonly numericKeys = [
+    '7',
+    '8',
+    '9',
+    '4',
+    '5',
+    '6',
+    '1',
+    '2',
+    '3',
+    '.',
+    '0',
+    '⌫',
+  ];
   memo = '';
   amount = '0';
   operator = '';
@@ -203,8 +229,6 @@ export class CalculatorSheetComponent implements OnChanges {
   showDatePicker = false;
   selectedDate = new Date();
   today = new Date();
-
-  private calculationTimeout: any;
 
   constructor(private domSanitizer: DomSanitizer) {}
 
@@ -231,7 +255,8 @@ export class CalculatorSheetComponent implements OnChanges {
   }
 
   get formattedDateIcon(): SafeHtml {
-    const isToday = this.selectedDate.toDateString() === this.today.toDateString();
+    const isToday =
+      this.selectedDate.toDateString() === this.today.toDateString();
     const month = this.selectedDate.getMonth() + 1;
     const day = this.selectedDate.getDate();
     const year = this.selectedDate.getFullYear();
@@ -244,27 +269,26 @@ export class CalculatorSheetComponent implements OnChanges {
   }
 
   onKeyPress(key: string) {
-    if (this.calculationTimeout) {
-      clearTimeout(this.calculationTimeout);
-    }
-    
     const numericPart = this.amount.replace(/[^0-9]/g, '');
     if (numericPart.length >= 8 && !isNaN(Number(key)) && key !== '⌫') {
       return;
     }
-  
+
     switch (key) {
       case '⌫':
-        if (this.amount[this.amount.length - 1] === '+' || this.amount[this.amount.length - 1] === '-') {
+        if (
+          this.amount[this.amount.length - 1] === '+' ||
+          this.amount[this.amount.length - 1] === '-'
+        ) {
           this.isCalculating = false;
         }
         this.amount = this.amount.slice(0, -1) || '0';
         break;
-  
+
       case 'date':
         this.showDatePicker = !this.showDatePicker;
         break;
-  
+
       case '+':
       case '-':
         if (!this.isCalculating) {
@@ -274,18 +298,21 @@ export class CalculatorSheetComponent implements OnChanges {
           this.isCalculating = true;
         } else {
           this.calculateResult();
-          this.calculationTimeout = setTimeout(() => this.onKeyPress(key), 100);
+          this.onKeyPress(key);
         }
         break;
-        
+
       case '.':
-        const lastOperatorIndex = Math.max(this.amount.lastIndexOf('+'), this.amount.lastIndexOf('-'));
+        const lastOperatorIndex = Math.max(
+          this.amount.lastIndexOf('+'),
+          this.amount.lastIndexOf('-')
+        );
         const afterOperator = this.amount.slice(lastOperatorIndex + 1);
         if (!afterOperator.includes('.')) {
           this.amount += key;
         }
         break;
-        
+
       case '=':
         if (this.amount === '0') {
           this.toggle.emit();
@@ -293,7 +320,7 @@ export class CalculatorSheetComponent implements OnChanges {
           this.calculateResult();
         }
         break;
-  
+
       default:
         if (!/^\.\d{2}$/.test(this.amount.slice(-3))) {
           if (this.amount === '0') {
@@ -303,15 +330,17 @@ export class CalculatorSheetComponent implements OnChanges {
           }
         }
     }
-  
+
     this.amountChange.emit(Number(this.amount.replace(/[^0-9.]/g, '')));
   }
 
   calculateResult() {
     if (this.isCalculating) {
       const parts = this.amount.split(/[+\-]/);
-      const currentAmount = Number(parts[parts.length - 1].replace(/[^0-9.]/g, ''));
-      
+      const currentAmount = Number(
+        parts[parts.length - 1].replace(/[^0-9.]/g, '')
+      );
+
       this.amount = String(
         this.operator === '+'
           ? this.prevAmount + currentAmount
