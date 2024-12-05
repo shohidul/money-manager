@@ -15,7 +15,7 @@ import { CommonModule } from '@angular/common';
         </button>
         <button class="clear-button" (click)="clear.emit()">
           <span class="material-icons">delete_forever</span>
-          Clear All Data
+          Reset All Data
         </button>
         <button class="restore-button" (click)="restore.emit()">
           <span class="material-icons">restore</span>
