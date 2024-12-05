@@ -81,7 +81,8 @@ type SortType = 'order' | 'name';
       </div>
     </div>
   `,
-  styles: [`
+  styles: [
+    `
     .section-header {
       display: flex;
       justify-content: space-between;
@@ -94,6 +95,12 @@ type SortType = 'order' | 'name';
       z-index: 1;
       flex-wrap: wrap;
       gap: 1rem;
+    }
+
+    @media (max-width: 769px) {
+      .section-header {
+        top: 15px;
+      }
     }
 
     .category-actions {
@@ -233,7 +240,8 @@ type SortType = 'order' | 'name';
     .add-category-button:hover {
       background-color: rgba(0, 0, 0, 0.04);
     }
-  `]
+  `,
+  ],
 })
 export class CategoriesCardComponent {
   @Input() categories: Category[] = [];
@@ -245,15 +253,16 @@ export class CategoriesCardComponent {
   categoryFilter: 'all' | 'income' | 'expense' = 'all';
 
   get sortedCategories() {
-    const filtered = this.categories.filter(category => 
-      this.categoryFilter === 'all' || category.type === this.categoryFilter
+    const filtered = this.categories.filter(
+      (category) =>
+        this.categoryFilter === 'all' || category.type === this.categoryFilter
     );
 
     return filtered.sort((a, b) => {
       if (this.sortType === 'name') {
         const nameA = a.name.toLowerCase();
         const nameB = b.name.toLowerCase();
-        return this.sortOrder === 'asc' 
+        return this.sortOrder === 'asc'
           ? nameA.localeCompare(nameB)
           : nameB.localeCompare(nameA);
       } else {
