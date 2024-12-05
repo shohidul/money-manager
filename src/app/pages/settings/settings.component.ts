@@ -7,7 +7,6 @@ import { MobileHeaderComponent } from '../../components/mobile-header/mobile-hea
 import { SecurityCardComponent } from './components/security-card.component';
 import { CategoriesCardComponent } from './components/categories-card.component';
 import { DataManagementCardComponent } from './components/data-management-card.component';
-import { defaultCategories } from '../../data/category-icons';
 import { format } from 'date-fns';
 import { CategoryService } from '../../services/category.service';
 
@@ -19,7 +18,7 @@ import { CategoryService } from '../../services/category.service';
     MobileHeaderComponent,
     SecurityCardComponent,
     CategoriesCardComponent,
-    DataManagementCardComponent
+    DataManagementCardComponent,
   ],
   template: `
     <div class="settings">
@@ -46,7 +45,8 @@ import { CategoryService } from '../../services/category.service';
       </div>
     </div>
   `,
-  styles: [`
+  styles: [
+    `
     .settings {
       max-width: 800px;
       margin: 0 auto;
@@ -55,7 +55,8 @@ import { CategoryService } from '../../services/category.service';
     .content {
       padding: 1rem;
     }
-  `]
+  `,
+  ],
 })
 export class SettingsComponent implements OnInit {
   categories: any[] = [];
@@ -69,7 +70,7 @@ export class SettingsComponent implements OnInit {
   async ngOnInit() {
     // Initialize default categories first
     await this.categoryService.initializeDefaultCategories();
-    
+
     // Load the categories after initialization
     await this.loadCategories();
   }
@@ -92,12 +93,12 @@ export class SettingsComponent implements OnInit {
     const categories = [...this.categories];
     const [removed] = categories.splice(event.previousIndex, 1);
     categories.splice(event.currentIndex, 0, removed);
-    
+
     // Update order numbers
     categories.forEach((category, index) => {
       category.order = index + 1;
     });
-    
+
     await this.dbService.updateCategoryOrder(categories);
     await this.loadCategories();
   }
@@ -106,7 +107,10 @@ export class SettingsComponent implements OnInit {
     const startDate = new Date(0);
     const endDate = new Date();
 
-    const transactions = await this.dbService.getTransactions(startDate, endDate);
+    const transactions = await this.dbService.getTransactions(
+      startDate,
+      endDate
+    );
     const categories = await this.dbService.getCategories();
 
     const data = { transactions, categories };
@@ -117,7 +121,10 @@ export class SettingsComponent implements OnInit {
 
     const a = document.createElement('a');
     a.href = url;
-    a.download = `money-manager-backup-${format(new Date(), 'yyyy-MM-dd')}.json`;
+    a.download = `money-manager-backup-${format(
+      new Date(),
+      'yyyy-MM-dd'
+    )}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
