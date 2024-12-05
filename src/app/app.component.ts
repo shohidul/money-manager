@@ -16,12 +16,13 @@ import { Subscription } from 'rxjs';
         [isOpen]="isSideMenuOpen" 
         (menuClosed)="closeSideMenu()"
       />
-      <main>
+      <main class="main">
         <router-outlet />
       </main>
     </div>
   `,
-  styles: [`
+  styles: [
+    `
     .app-container {
       display: flex;
       height: 100vh;
@@ -41,18 +42,16 @@ import { Subscription } from 'rxjs';
         width: 100%;
       }
     }
-  `]
+  `,
+  ],
 })
 export class AppComponent implements OnInit, OnDestroy {
   isSideMenuOpen = false;
   private menuSubscription: Subscription;
 
-  constructor(
-    private dbService: DbService,
-    private menuService: MenuService
-  ) {
+  constructor(private dbService: DbService, private menuService: MenuService) {
     this.menuSubscription = this.menuService.menuState$.subscribe(
-      state => this.isSideMenuOpen = state
+      (state) => (this.isSideMenuOpen = state)
     );
   }
 
