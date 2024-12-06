@@ -186,9 +186,24 @@ export class AddTransactionComponent implements OnInit {
   }
 
   async ngOnInit() {
-    // Retrieve the 'type' query parameter
     this.activatedRoute.queryParams.subscribe((params) => {
-      this.selectedType = params['type'] ?? 'expense'; // Default to 'expense' if 'type' is not found
+      this.selectedType = params['type'] ?? 'expense';
+
+      const editedTransaction = params['editedTransaction']
+        ? JSON.parse(params['editedTransaction'])
+        : null;
+      console.log('Edited Transaction:', editedTransaction);
+      if (editedTransaction) {
+        this.selectedType = editedTransaction.type;
+        this.amount = editedTransaction.amount;
+        const category = this.dbService.getCategoryById(
+          editedTransaction.categoryId
+        );
+        this.selectCategory(category);
+        this.memo = editedTransaction.memo;
+        this.transactionDate = editedTransaction.date;
+        console.log('showCalculator:', this.showCalculator);
+      }
     });
 
     // Initialize default categories first
