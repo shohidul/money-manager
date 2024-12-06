@@ -24,7 +24,8 @@ import { CommonModule } from '@angular/common';
       </div>
     </div>
   `,
-  styles: [`
+  styles: [
+    `
     .data-mgt-group {
       margin-top: 1rem;
       display: flex;
@@ -61,7 +62,8 @@ import { CommonModule } from '@angular/common';
     .restore-button {
       background-color: #4caf50;
     }
-  `]
+  `,
+  ],
 })
 export class DataManagementCardComponent {
   @Output() backup = new EventEmitter<void>();
