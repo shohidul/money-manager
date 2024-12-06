@@ -1,9 +1,16 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  ViewChild,
+  ElementRef,
+  AfterViewInit,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { DbService } from '../../services/db.service';
 import { ChartService } from '../../services/chart.service';
+import { MonthPickerComponent } from '../../components/month-picker/month-picker.component';
 import { startOfMonth, endOfMonth, format } from 'date-fns';
 import { MobileHeaderComponent } from '../../components/mobile-header/mobile-header.component';
 
@@ -12,7 +19,12 @@ type ChartType = 'all' | 'income' | 'expense';
 @Component({
   selector: 'app-charts',
   standalone: true,
-  imports: [CommonModule, FormsModule, MobileHeaderComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MobileHeaderComponent,
+    MonthPickerComponent,
+  ],
   template: `
     <div class="charts">
       <app-mobile-header
@@ -23,6 +35,10 @@ type ChartType = 'all' | 'income' | 'expense';
 
       <div class="content">
         <div class="filters">
+          <app-month-picker
+            [currentMonth]="currentMonth"
+            (monthChange)="onMonthChange($event)"
+          />
           <div class="filter-buttons">
             <button 
               *ngFor="let type of chartTypes"
@@ -85,7 +101,8 @@ type ChartType = 'all' | 'income' | 'expense';
       </div>
     </div>
   `,
-  styles: [`
+  styles: [
+    `
     .charts {
       max-width: 800px;
       margin: 0 auto;
@@ -224,11 +241,13 @@ type ChartType = 'all' | 'income' | 'expense';
         max-width: none;
       }
     }
-  `]
+  `,
+  ],
 })
 export class ChartsComponent implements OnInit, AfterViewInit {
   @ViewChild('donutChart') private donutChartRef!: ElementRef;
 
+  currentMonth = format(new Date(), 'yyyy-MM');
   selectedType: ChartType = 'all';
   chartTypes: ChartType[] = ['all', 'income', 'expense'];
   transactions: any[] = [];
@@ -236,8 +255,14 @@ export class ChartsComponent implements OnInit, AfterViewInit {
   categoryStats: any[] = [];
   expandedCategories: number[] = [];
   chartColors = [
-    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
-    '#9966FF', '#FF9F40', '#FF6384', '#36A2EB'
+    '#FF6384',
+    '#36A2EB',
+    '#FFCE56',
+    '#4BC0C0',
+    '#9966FF',
+    '#FF9F40',
+    '#FF6384',
+    '#36A2EB',
   ];
 
   constructor(
@@ -256,13 +281,21 @@ export class ChartsComponent implements OnInit, AfterViewInit {
   }
 
   async loadData() {
-    const date = new Date();
+    const date = new Date(this.currentMonth);
     const startDate = startOfMonth(date);
     const endDate = endOfMonth(date);
-    
-    this.transactions = await this.dbService.getTransactions(startDate, endDate);
+
+    this.transactions = await this.dbService.getTransactions(
+      startDate,
+      endDate
+    );
     this.categories = await this.dbService.getCategories();
     this.calculateStats();
+  }
+
+  onMonthChange(month: string) {
+    this.currentMonth = month;
+    this.loadData();
   }
 
   setType(type: ChartType) {
@@ -275,13 +308,13 @@ export class ChartsComponent implements OnInit, AfterViewInit {
     const stats = new Map<number, any>();
     let totalAmount = 0;
 
-    const filteredTransactions = this.transactions.filter(tx => 
-      this.selectedType === 'all' || tx.type === this.selectedType
+    const filteredTransactions = this.transactions.filter(
+      (tx) => this.selectedType === 'all' || tx.type === this.selectedType
     );
 
-    filteredTransactions.forEach(tx => {
+    filteredTransactions.forEach((tx) => {
       if (!stats.has(tx.categoryId)) {
-        const category = this.categories.find(c => c.id === tx.categoryId);
+        const category = this.categories.find((c) => c.id === tx.categoryId);
         stats.set(tx.categoryId, {
           categoryId: tx.categoryId,
           category: category?.name || 'Unknown',
@@ -296,9 +329,9 @@ export class ChartsComponent implements OnInit, AfterViewInit {
     });
 
     this.categoryStats = Array.from(stats.values())
-      .map(stat => ({
+      .map((stat) => ({
         ...stat,
-        percentage: Math.round((stat.amount / totalAmount) * 100)
+        percentage: Math.round((stat.amount / totalAmount) * 100),
       }))
       .sort((a, b) => b.amount - a.amount);
   }
@@ -308,17 +341,17 @@ export class ChartsComponent implements OnInit, AfterViewInit {
     this.chartService.createDonutChart(
       ctx,
       this.categoryStats,
-      this.categoryStats.map(stat => stat.color)
+      this.categoryStats.map((stat) => stat.color)
     );
   }
 
   getCategoryIcon(categoryId: number): string {
-    return this.categories.find(c => c.id === categoryId)?.icon || 'help';
+    return this.categories.find((c) => c.id === categoryId)?.icon || 'help';
   }
 
   getTransactionsByCategory(categoryId: number) {
     return this.transactions
-      .filter(tx => tx.categoryId === categoryId)
+      .filter((tx) => tx.categoryId === categoryId)
       .sort((a, b) => b.date.getTime() - a.date.getTime());
   }
 
@@ -334,19 +367,21 @@ export class ChartsComponent implements OnInit, AfterViewInit {
   }
 
   createCategoryChart(categoryId: number) {
-    const canvas = document.getElementById(`chart-${categoryId}`) as HTMLCanvasElement;
+    const canvas = document.getElementById(
+      `chart-${categoryId}`
+    ) as HTMLCanvasElement;
     if (!canvas) return;
 
     const transactions = this.getTransactionsByCategory(categoryId);
     const chartData = {
-      labels: transactions.map(tx => format(tx.date, 'MMM d')),
-      values: transactions.map(tx => tx.amount)
+      labels: transactions.map((tx) => format(tx.date, 'MMM d')),
+      values: transactions.map((tx) => tx.amount),
     };
 
     this.chartService.createLineChart(
       canvas,
       chartData,
-      this.categoryStats.find(stat => stat.categoryId === categoryId)?.color
+      this.categoryStats.find((stat) => stat.categoryId === categoryId)?.color
     );
   }
 
