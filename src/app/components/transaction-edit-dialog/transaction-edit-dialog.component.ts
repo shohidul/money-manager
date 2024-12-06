@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Transaction } from '../../services/db.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-transaction-edit-dialog',
@@ -48,12 +49,15 @@ import { Transaction } from '../../services/db.service';
           <div class="right-actions">
             <button class="cancel-button" (click)="onCancel()">Cancel</button>
             <button class="save-button" (click)="onSave()">Save</button>
+
+            <!-- <button class="save-button" (click)="onEdit()">Edit</button> -->
           </div>
         </div>
       </div>
     </div>
   `,
-  styles: [`
+  styles: [
+    `
     .dialog-overlay {
       position: fixed;
       top: 0;
@@ -127,7 +131,8 @@ import { Transaction } from '../../services/db.service';
       color: white;
       cursor: pointer;
     }
-  `]
+  `,
+  ],
 })
 export class TransactionEditDialogComponent {
   @Input() transaction!: Transaction;
@@ -136,6 +141,8 @@ export class TransactionEditDialogComponent {
   @Output() cancel = new EventEmitter<void>();
 
   editedTransaction!: Transaction;
+
+  constructor(private router: Router) {}
 
   ngOnInit() {
     this.editedTransaction = { ...this.transaction };
@@ -157,5 +164,13 @@ export class TransactionEditDialogComponent {
 
   onCancel() {
     this.cancel.emit();
+  }
+
+  onEdit() {
+    this.router.navigate(['/add-transaction'], {
+      queryParams: {
+        editedTransaction: JSON.stringify(this.editedTransaction),
+      },
+    });
   }
 }
