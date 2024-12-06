@@ -54,18 +54,21 @@ export class DbService {
             autoIncrement: true,
           });
         }
-        
-        if (oldVersion < 2) {
-          const categoryStore = db.transaction('categories', 'readwrite').objectStore('categories');
-          categoryStore.openCursor().then(function addOrder(cursor): Promise<void> | undefined {
-            if (!cursor) return; // If no cursor, exit function
-            const category = cursor.value;
-            category.order = cursor.key;
-            categoryStore.put(category);
-            return cursor.continue().then(addOrder); // Continue to the next cursor
-          });
-        }
 
+        if (oldVersion < 2) {
+          const categoryStore = db
+            .transaction('categories', 'readwrite')
+            .objectStore('categories');
+          categoryStore
+            .openCursor()
+            .then(function addOrder(cursor): Promise<void> | undefined {
+              if (!cursor) return; // If no cursor, exit function
+              const category = cursor.value;
+              category.order = cursor.key;
+              categoryStore.put(category);
+              return cursor.continue().then(addOrder); // Continue to the next cursor
+            });
+        }
       },
     });
   }
@@ -93,8 +96,18 @@ export class DbService {
 
   async addCategory(category: Omit<Category, 'id'>) {
     const categories = await this.getCategories();
-    const maxOrder = Math.max(...categories.map(c => c.order || 0), 0);
+    const maxOrder = Math.max(...categories.map((c) => c.order || 0), 0);
     return this.db.add('categories', { ...category, order: maxOrder + 1 });
+  }
+
+  async getCategoryById(id: string | number | undefined) {
+    if (id === undefined) return null;
+
+    const categories = await this.db.getAll('categories');
+
+    return (
+      categories.find((category) => String(category.id) === String(id)) || null
+    );
   }
 
   async getCategories() {
@@ -109,8 +122,8 @@ export class DbService {
   async updateCategoryOrder(categories: Category[]) {
     const tx = this.db.transaction('categories', 'readwrite');
     await Promise.all(
-      categories.map((category, index) => 
-        tx.store.put({ ...category, order: index })
+      categories.map((category, index) =>
+        tx.store.put({ ...category, order: index + 1 })
       )
     );
     await tx.done;
@@ -138,14 +151,17 @@ export class DbService {
   }*/
 
   async clearAllData() {
-    const transaction = this.db.transaction(['categories', 'transactions'], 'readwrite');
-    
+    const transaction = this.db.transaction(
+      ['categories', 'transactions'],
+      'readwrite'
+    );
+
     // Clear all data in the 'transactions' store
     await transaction.objectStore('transactions').clear();
-    
+
     // Clear all data in the 'categories' store
     await transaction.objectStore('categories').clear();
-    
+
     // Wait for the transaction to complete
     await transaction.done;
   }
@@ -156,16 +172,16 @@ export class DbService {
   }) {
     const { transactions, categories } = data;
     const tx = this.db.transaction(['categories', 'transactions'], 'readwrite');
-    
+
     try {
       for (const category of categories) {
         await tx.objectStore('categories').put(category);
       }
 
       for (const txn of transactions) {
-        const newTransaction = { 
+        const newTransaction = {
           ...txn,
-          date: new Date(txn.date)
+          date: new Date(txn.date),
         };
         delete newTransaction.id;
         await tx.objectStore('transactions').add(newTransaction);
