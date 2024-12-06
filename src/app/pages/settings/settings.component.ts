@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { DbService } from '../../services/db.service';
 import { MobileHeaderComponent } from '../../components/mobile-header/mobile-header.component';
 import { SecurityCardComponent } from './components/security-card.component';
@@ -85,21 +85,54 @@ export class SettingsComponent implements OnInit {
     );
     if (!confirm) return;
 
+    // Delete the category from the database
     await this.dbService.deleteCategory(category.id);
+
+    // Remove the category from the local list
+    this.categories = this.categories.filter((cat) => cat.id !== category.id);
+
+    // Reorder the remaining categories
+    this.categories.forEach((cat, index) => {
+      cat.order = index + 1;
+    });
+
+    // Update the order in the database
+    await this.dbService.updateCategoryOrder(this.categories);
+
+    // Reload the categories (if needed)
     await this.loadCategories();
   }
 
   async onCategoryDrop(event: CdkDragDrop<any[]>) {
     const categories = [...this.categories];
-    const [removed] = categories.splice(event.previousIndex, 1);
-    categories.splice(event.currentIndex, 0, removed);
 
-    // Update order numbers
+    // Get the `order` of the dragged item
+    const oldOrderNum =
+      Number(event.item.element.nativeElement.children[0].textContent) - 1;
+
+    // Calculate the difference and new order
+    const difference = event.previousIndex - event.currentIndex;
+    const newOrderNum = oldOrderNum - difference;
+
+    console.log('Old Order Number:', oldOrderNum);
+    console.log('New Order Number:', newOrderNum);
+    console.log('previousIndex Number:', event.previousIndex);
+    console.log('currentIndex Number:', event.currentIndex);
+
+    // Use `moveItemInArray` to rearrange the categories array
+    moveItemInArray(categories, oldOrderNum, newOrderNum);
+
+    // Update the `order` property for all categories
     categories.forEach((category, index) => {
       category.order = index + 1;
     });
 
+    console.log('Updated Categories:', categories);
+
+    // Save the updated order to the database
     await this.dbService.updateCategoryOrder(categories);
+
+    // Reload the categories (if needed)
     await this.loadCategories();
   }
 
