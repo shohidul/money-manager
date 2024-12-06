@@ -5,8 +5,6 @@ import { RouterLink } from '@angular/router';
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { Category } from '../../../services/db.service';
 
-type SortType = 'order' | 'name';
-
 @Component({
   selector: 'app-categories-card',
   standalone: true,
@@ -36,29 +34,13 @@ type SortType = 'order' | 'name';
               Expense
             </button>
           </div>
-          <div class="sort-controls">
-            <select [(ngModel)]="sortType" (ngModelChange)="onSortChange()" class="sort-type">
-              <option value="order">Sort by Order</option>
-              <option value="name">Sort by Name</option>
-            </select>
-            <button 
-              [class.active]="sortOrder === 'asc'"
-              (click)="setSortOrder('asc')"
-            >
-              <span class="material-icons">arrow_downward</span>
-            </button>
-            <button 
-              [class.active]="sortOrder === 'desc'"
-              (click)="setSortOrder('desc')"
-            >
-              <span class="material-icons">arrow_upward</span>
-            </button>
-          </div>
         </div>
       </div>
+
       <div class="category-list" cdkDropList (cdkDropListDropped)="onDrop($event)">
         @for (category of sortedCategories; track category.id) {
           <div class="category-item" cdkDrag>
+            <div class="category-item-placeholder" *cdkDragPlaceholder></div>
             <div class="order-number">{{ category.order }}</div>
             <div class="category-info">
               <span class="material-symbols-rounded">{{ category.icon }}</span>
@@ -70,7 +52,7 @@ type SortType = 'order' | 'name';
                 class="delete-button"
                 (click)="deleteCategory.emit(category)"
               >
-                <span class="material-icons">delete</span>
+                <span class="material-icons">do_not_disturb_on</span>
               </button>
             }
             <div class="drag-handle">
@@ -83,6 +65,30 @@ type SortType = 'order' | 'name';
   `,
   styles: [
     `
+    .cdk-drag-preview {
+      box-sizing: border-box;
+      border-radius: 4px;
+      box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+                  0 8px 10px 1px rgba(0, 0, 0, 0.14),
+                  0 3px 14px 2px rgba(0, 0, 0, 0.12);
+    }
+
+    .cdk-drag-animating {
+      transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+    }
+
+    .category-list.cdk-drop-list-dragging .category-item:not(.cdk-drag-placeholder) {
+      transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+    }
+
+    .category-item-placeholder {
+      background: #ccc;
+      border: dotted 3px #999;
+      border-radius: 8px;
+      min-height: 70px;
+      transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+    }
+
     .section-header {
       display: flex;
       justify-content: space-between;
@@ -99,7 +105,7 @@ type SortType = 'order' | 'name';
 
     @media (max-width: 769px) {
       .section-header {
-        top: 15px;
+        top: 55px;
       }
     }
 
@@ -108,40 +114,6 @@ type SortType = 'order' | 'name';
       gap: 1rem;
       align-items: center;
       flex-wrap: wrap;
-    }
-
-    .sort-controls {
-      display: flex;
-      gap: 0.25rem;
-      align-items: center;
-    }
-
-    .sort-type {
-      padding: 0.5rem 1rem;
-      border: none;
-      border-radius: 20px;
-      background: rgba(0, 0, 0, 0.04);
-      cursor: pointer;
-      height: 32px;
-    }
-
-    .sort-controls button {
-      padding: 0.5rem;
-      border: none;
-      border-radius: 20px;
-      background: rgba(0, 0, 0, 0.04);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-    }
-
-    .sort-controls button .material-icons{
-      font-size: initial;
-    }
-
-    .sort-controls button.active {
-      background: var(--primary-color);
-      color: white;
     }
 
     .category-filters {
@@ -248,8 +220,6 @@ export class CategoriesCardComponent {
   @Output() categoryDrop = new EventEmitter<CdkDragDrop<any[]>>();
   @Output() deleteCategory = new EventEmitter<Category>();
 
-  sortType: SortType = 'order';
-  sortOrder: 'asc' | 'desc' = 'asc';
   categoryFilter: 'all' | 'income' | 'expense' = 'all';
 
   get sortedCategories() {
@@ -259,26 +229,10 @@ export class CategoriesCardComponent {
     );
 
     return filtered.sort((a, b) => {
-      if (this.sortType === 'name') {
-        const nameA = a.name.toLowerCase();
-        const nameB = b.name.toLowerCase();
-        return this.sortOrder === 'asc'
-          ? nameA.localeCompare(nameB)
-          : nameB.localeCompare(nameA);
-      } else {
-        const orderA = a.order || 0;
-        const orderB = b.order || 0;
-        return this.sortOrder === 'asc' ? orderA - orderB : orderB - orderA;
-      }
+      const orderA = a.order || 0;
+      const orderB = b.order || 0;
+      return orderA - orderB;
     });
-  }
-
-  setSortOrder(order: 'asc' | 'desc') {
-    this.sortOrder = order;
-  }
-
-  onSortChange() {
-    // Trigger re-sort
   }
 
   setCategoryFilter(filter: 'all' | 'income' | 'expense') {
