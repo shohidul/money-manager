@@ -14,14 +14,14 @@ import { MobileHeaderComponent } from '../../components/mobile-header/mobile-hea
   template: `
     <div class="export">
       <app-mobile-header
-        title="Export Data"
+        title="Export"
         [showBackButton]="true"
         (back)="goBack()"
       />
 
       <div class="content">
         <div class="card">
-          <h3>Export Transactions</h3>
+          <h3>Transactions</h3>
           <div class="date-range">
             <div class="form-group">
               <label for="startDate">Start Date</label>
