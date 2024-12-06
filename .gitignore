@@ -1,6 +1,6 @@
-.angular/
+#.angular/
 dist/
 node_modules/
-.bolt/
-favicon.ico
+#.bolt/
+#favicon.ico
 assets/images/*
