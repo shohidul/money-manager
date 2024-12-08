@@ -1,13 +1,21 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Transaction } from '../../services/db.service';
-import { Router } from '@angular/router';
+import { Transaction, isLendBorrowTransaction, isAssetTransaction, isFuelTransaction } from '../../models/transaction-types';
+import { LendBorrowFormComponent } from '../transaction-forms/lend-borrow-form.component';
+import { AssetFormComponent } from '../transaction-forms/asset-form.component';
+import { FuelFormComponent } from '../transaction-forms/fuel-form.component';
 
 @Component({
   selector: 'app-transaction-edit-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule, 
+    FormsModule,
+    LendBorrowFormComponent,
+    AssetFormComponent,
+    FuelFormComponent
+  ],
   template: `
     <div class="dialog-overlay">
       <div class="dialog-content">
@@ -44,13 +52,32 @@ import { Router } from '@angular/router';
           >
         </div>
 
+        @if (isLendBorrowTransaction(editedTransaction)) {
+          <app-lend-borrow-form
+            [transaction]="editedTransaction"
+            (transactionChange)="onTransactionChange($event)"
+          />
+        }
+
+        @if (isAssetTransaction(editedTransaction)) {
+          <app-asset-form
+            [transaction]="editedTransaction"
+            (transactionChange)="onTransactionChange($event)"
+          />
+        }
+
+        @if (isFuelTransaction(editedTransaction)) {
+          <app-fuel-form
+            [transaction]="editedTransaction"
+            (transactionChange)="onTransactionChange($event)"
+          />
+        }
+
         <div class="dialog-actions">
           <button class="delete-button" (click)="onDelete()">Delete</button>
           <div class="right-actions">
             <button class="cancel-button" (click)="onCancel()">Cancel</button>
             <button class="save-button" (click)="onSave()">Save</button>
-
-            <!-- <button class="save-button" (click)="onEdit()">Edit</button> -->
           </div>
         </div>
       </div>
@@ -76,6 +103,9 @@ import { Router } from '@angular/router';
       padding: 1.5rem;
       width: 90%;
       max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      border-radius: 8px;
     }
 
     .form-group {
@@ -142,14 +172,16 @@ export class TransactionEditDialogComponent {
 
   editedTransaction!: Transaction;
 
-  constructor(private router: Router) {}
-
   ngOnInit() {
     this.editedTransaction = { ...this.transaction };
   }
 
   onDateChange(value: string) {
     this.editedTransaction.date = new Date(value);
+  }
+
+  onTransactionChange(transaction: Transaction) {
+    this.editedTransaction = { ...transaction };
   }
 
   onSave() {
@@ -164,13 +196,5 @@ export class TransactionEditDialogComponent {
 
   onCancel() {
     this.cancel.emit();
-  }
-
-  onEdit() {
-    this.router.navigate(['/add-transaction'], {
-      queryParams: {
-        editedTransaction: JSON.stringify(this.editedTransaction),
-      },
-    });
   }
 }
