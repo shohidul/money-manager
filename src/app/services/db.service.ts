@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { openDB, DBSchema, IDBPDatabase } from 'idb';
+import { Transaction, TransactionType } from '../models/transaction-types';
 
 interface MoneyManagerDB extends DBSchema {
   transactions: {
@@ -13,20 +14,11 @@ interface MoneyManagerDB extends DBSchema {
   };
 }
 
-export interface Transaction {
-  id?: number;
-  type: 'income' | 'expense';
-  amount: number;
-  categoryId: number;
-  memo: string;
-  date: Date;
-}
-
 export interface Category {
   id?: number;
   name: string;
   icon: string;
-  type: 'income' | 'expense';
+  type: TransactionType;
   isCustom: boolean;
   order?: number;
 }
@@ -37,7 +29,7 @@ export interface Category {
 export class DbService {
   private db!: IDBPDatabase<MoneyManagerDB>;
   private readonly DB_NAME = 'money-manager-db';
-  private readonly VERSION = 2;
+  private readonly VERSION = 3;
 
   async initializeDB() {
     this.db = await openDB<MoneyManagerDB>(this.DB_NAME, this.VERSION, {
@@ -62,12 +54,26 @@ export class DbService {
           categoryStore
             .openCursor()
             .then(function addOrder(cursor): Promise<void> | undefined {
-              if (!cursor) return; // If no cursor, exit function
+              if (!cursor) return;
               const category = cursor.value;
               category.order = cursor.key;
               categoryStore.put(category);
-              return cursor.continue().then(addOrder); // Continue to the next cursor
+              return cursor.continue().then(addOrder);
             });
+        }
+
+        if (oldVersion < 3) {
+          // Add new transaction types to existing transactions
+          const txStore = db.transaction('transactions', 'readwrite').objectStore('transactions');
+          txStore.openCursor().then(function updateTypes(cursor): Promise<void> | undefined {
+            if (!cursor) return;
+            const tx = cursor.value;
+            if (!tx.type) {
+              tx.type = 'expense';
+            }
+            txStore.put(tx);
+            return cursor.continue().then(updateTypes);
+          });
         }
       },
     });
@@ -102,12 +108,8 @@ export class DbService {
 
   async getCategoryById(id: string | number | undefined) {
     if (id === undefined) return null;
-
     const categories = await this.db.getAll('categories');
-
-    return (
-      categories.find((category) => String(category.id) === String(id)) || null
-    );
+    return categories.find((category) => String(category.id) === String(id)) || null;
   }
 
   async getCategories() {
@@ -133,36 +135,13 @@ export class DbService {
     return this.db.delete('categories', id);
   }
 
-  /*async clearAllData() {
-    const transaction = this.db.transaction(
-      ['categories', 'transactions'],
-      'readwrite'
-    );
-    await transaction.objectStore('transactions').clear();
-    const categoryStore = transaction.objectStore('categories');
-    const allCategories = await categoryStore.getAll();
-    const customCategories = allCategories.filter(
-      (category) => category.isCustom
-    );
-    for (const customCategory of customCategories) {
-      await categoryStore.delete(customCategory.id as number);
-    }
-    await transaction.done;
-  }*/
-
   async clearAllData() {
     const transaction = this.db.transaction(
       ['categories', 'transactions'],
       'readwrite'
     );
-
-    // Clear all data in the 'transactions' store
     await transaction.objectStore('transactions').clear();
-
-    // Clear all data in the 'categories' store
     await transaction.objectStore('categories').clear();
-
-    // Wait for the transaction to complete
     await transaction.done;
   }
 
