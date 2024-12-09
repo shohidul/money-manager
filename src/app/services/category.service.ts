@@ -10,6 +10,7 @@ export class CategoryService {
     const existingCategories = await this.dbService.getCategories();
 
     for (const category of defaultCategories) {
+      console.log(category);
       const exists = existingCategories.some(
         c =>
           c.icon === category.icon &&
