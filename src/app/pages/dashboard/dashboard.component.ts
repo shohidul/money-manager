@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { DbService, Transaction } from '../../services/db.service';
+import { DbService } from '../../services/db.service';
+import { Transaction } from '../../models/transaction-types';
 import { MenuService } from '../../services/menu.service';
 import { MonthPickerComponent } from '../../components/month-picker/month-picker.component';
 import { TransactionEditDialogComponent } from '../../components/transaction-edit-dialog/transaction-edit-dialog.component';
