@@ -63,7 +63,6 @@ export class DbService {
         }
 
         if (oldVersion < 3) {
-          // Add new transaction types to existing transactions
           const txStore = db.transaction('transactions', 'readwrite').objectStore('transactions');
           txStore.openCursor().then(function updateTypes(cursor): Promise<void> | undefined {
             if (!cursor) return;
@@ -91,12 +90,12 @@ export class DbService {
     return this.db.delete('transactions', id);
   }
 
-  async getTransactions(startDate: Date, endDate: Date) {
+  async getTransactions(startDate: Date, endDate: Date): Promise<Transaction[]> {
     const index = this.db.transaction('transactions').store.index('by-date');
     return index.getAll(IDBKeyRange.bound(startDate, endDate));
   }
 
-  async getTransaction(id: number) {
+  async getTransaction(id: number): Promise<Transaction | undefined> {
     return this.db.get('transactions', id);
   }
 
@@ -112,7 +111,7 @@ export class DbService {
     return categories.find((category) => String(category.id) === String(id)) || null;
   }
 
-  async getCategories() {
+  async getCategories(): Promise<Category[]> {
     const categories = await this.db.getAll('categories');
     return categories.sort((a, b) => (a.order || 0) - (b.order || 0));
   }
