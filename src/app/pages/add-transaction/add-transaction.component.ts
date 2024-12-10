@@ -6,7 +6,7 @@ import { CalculatorSheetComponent } from '../../components/calculator-sheet/calc
 import { MobileHeaderComponent } from '../../components/mobile-header/mobile-header.component';
 import { CategoryService } from '../../services/category.service';
 import { ActivatedRoute } from '@angular/router';
-import { TransactionSubType } from '../../models/transaction-types';
+import { TransactionSubType} from '../../models/transaction-types';
 
 @Component({
   selector: 'app-add-transaction',
@@ -46,6 +46,10 @@ import { TransactionSubType } from '../../models/transaction-types';
             <button 
               class="category-item"
               [class.selected]="selectedIcon?.icon === category.icon"
+              [class.asset-category]="category.subType === 'asset'"
+              [class.fuel-category]="category.subType === 'fuel'"
+              [class.lend-category]="category.subType === 'lend'"
+              [class.borrow-category]="category.subType === 'borrow'"
               (click)="selectCategory(category)"
             >
               <span class="material-symbols-rounded">{{ category.icon }}</span>
@@ -152,8 +156,25 @@ import { TransactionSubType } from '../../models/transaction-types';
 
     .category-item.selected {
       background-color: var(--primary-color);
-      color: white;
+      color: white !important;
     }
+    
+    .category-item.asset-category {
+      color: #BC946A; /* Dark red for asset categories */
+    }
+    
+    .category-item.fuel-category {
+      color: #b30000; /* Dark red for fuel categories */
+    }
+    
+    .category-item.lend-category {
+      color: #88492A; /* Green for lend categories */
+    }
+    
+    .category-item.borrow-category {
+      color: #233DA0; /* Blue for borrow categories */
+    }
+
 
     .category-name {
       font-size: 0.75rem;
