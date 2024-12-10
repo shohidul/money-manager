@@ -78,16 +78,13 @@ export const defaultCategories: DefaultCategories[] = [
   { name: 'Personal Loan Given', icon: 'person', type: 'expense', subType: 'lend' },
   { name: 'Business Loan Given', icon: 'business', type: 'expense', subType: 'lend' },
   { name: 'Loan Repaid to Me', icon: 'account_balance', type: 'income', subType: 'lend' },
+  { name: 'Personal Loan Taken', icon: 'person', type: 'income', subType: 'borrow' },
   { name: 'Bank Loan Taken', icon: 'account_balance', type: 'income', subType: 'borrow' },
   { name: 'Loan Payment', icon: 'person_outline', type: 'expense', subType: 'borrow' },
 
   // Asset categories
-  { name: 'Purchase Vehicle', icon: 'directions_car', type: 'expense', subType: 'asset' },
-  { name: 'Purchase Property', icon: 'apartment', type: 'expense', subType: 'asset' },
-  { name: 'Purchase Electronics', icon: 'devices', type: 'expense', subType: 'asset' },
-  { name: 'Sell Property', icon: 'apartment', type: 'income', subType: 'asset' },
-  { name: 'Sell Vehicle', icon: 'directions_car', type: 'income', subType: 'asset' },
-  { name: 'Sell Electronics', icon: 'devices', type: 'income', subType: 'asset' },
+  { name: 'Purchase Asset', icon: 'apartment', type: 'expense', subType: 'asset' },
+  { name: 'Sell Asset', icon: 'apartment', type: 'income', subType: 'asset' },
   
   // Fuel categories
   { name: 'Car Fuel', icon: 'local_gas_station', type: 'expense', subType: 'fuel' },
