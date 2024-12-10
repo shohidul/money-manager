@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { openDB, DBSchema, IDBPDatabase } from 'idb';
-import { Transaction, TransactionType } from '../models/transaction-types';
+import { Transaction, TransactionType, TransactionSubType } from '../models/transaction-types';
 
 interface MoneyManagerDB extends DBSchema {
   transactions: {
@@ -19,6 +19,7 @@ export interface Category {
   name: string;
   icon: string;
   type: TransactionType;
+  subType: TransactionSubType;
   isCustom: boolean;
   order?: number;
 }
@@ -29,7 +30,7 @@ export interface Category {
 export class DbService {
   private db!: IDBPDatabase<MoneyManagerDB>;
   private readonly DB_NAME = 'money-manager-db';
-  private readonly VERSION = 3;
+  private readonly VERSION = 4; // Increased version for schema update
 
   async initializeDB() {
     this.db = await openDB<MoneyManagerDB>(this.DB_NAME, this.VERSION, {
@@ -72,6 +73,31 @@ export class DbService {
             }
             txStore.put(tx);
             return cursor.continue().then(updateTypes);
+          });
+        }
+
+        if (oldVersion < 4) {
+          // Add subType to existing transactions and categories
+          const txStore = db.transaction('transactions', 'readwrite').objectStore('transactions');
+          txStore.openCursor().then(function addSubType(cursor): Promise<void> | undefined {
+            if (!cursor) return;
+            const tx = cursor.value;
+            if (!tx.subType) {
+              tx.subType = 'none';
+            }
+            txStore.put(tx);
+            return cursor.continue().then(addSubType);
+          });
+
+          const categoryStore = db.transaction('categories', 'readwrite').objectStore('categories');
+          categoryStore.openCursor().then(function addSubType(cursor): Promise<void> | undefined {
+            if (!cursor) return;
+            const category = cursor.value;
+            if (!category.subType) {
+              category.subType = 'none';
+            }
+            categoryStore.put(category);
+            return cursor.continue().then(addSubType);
           });
         }
       },
