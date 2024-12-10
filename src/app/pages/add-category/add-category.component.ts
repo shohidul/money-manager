@@ -7,6 +7,7 @@ import { DbService } from '../../services/db.service';
 import { MobileHeaderComponent } from '../../components/mobile-header/mobile-header.component';
 import { Location } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
+import { TransactionSubType } from '../../models/transaction-types';
 
 @Component({
   selector: 'app-add-category',
@@ -190,6 +191,7 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class AddCategoryComponent implements OnInit {
   type: 'income' | 'expense' | null = null;
+  subType: TransactionSubType = 'none';
   categoryGroups = categoryGroups;
   categoryName = '';
   selectedIcon: CategoryIcon | null = null;
@@ -205,6 +207,11 @@ export class AddCategoryComponent implements OnInit {
   ngOnInit(): void {
     const typeFromQuery = this.route.snapshot.queryParamMap.get('type');
     this.type = typeFromQuery as 'income' | 'expense' | null;
+
+    const subTypeFromQuery = this.route.snapshot.queryParamMap.get('subType');
+    if (subTypeFromQuery) {
+      this.subType = subTypeFromQuery as TransactionSubType;
+    }
 
     const refererFromQuery = this.route.snapshot.queryParamMap.get('referer');
     this.referer = refererFromQuery || '';
@@ -228,18 +235,20 @@ export class AddCategoryComponent implements OnInit {
       name: this.categoryName.trim(),
       icon: this.selectedIcon.icon,
       type: this.type ?? 'expense',
+      subType: this.subType,
       isCustom: true,
     };
 
     await this.dbService.addCategory(category);
-
     this.goBack();
   }
 
   goBack() {
-    // Navigate back to the previous page with the type query parameter
     this.router.navigate([this.referer], {
-      queryParams: { type: this.type ?? 'expense' },
+      queryParams: { 
+        type: this.type ?? 'expense',
+        subType: this.subType 
+      },
     });
   }
 }
