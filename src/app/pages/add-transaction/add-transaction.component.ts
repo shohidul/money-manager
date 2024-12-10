@@ -6,6 +6,7 @@ import { CalculatorSheetComponent } from '../../components/calculator-sheet/calc
 import { MobileHeaderComponent } from '../../components/mobile-header/mobile-header.component';
 import { CategoryService } from '../../services/category.service';
 import { ActivatedRoute } from '@angular/router';
+import { TransactionSubType } from '../../models/transaction-types';
 
 @Component({
   selector: 'app-add-transaction',
@@ -168,6 +169,7 @@ import { ActivatedRoute } from '@angular/router';
 export class AddTransactionComponent implements OnInit {
   types: ('income' | 'expense')[] = ['expense', 'income'];
   selectedType: 'income' | 'expense' = 'expense';
+  selectedSubType: TransactionSubType = 'none';
   categories: any[] = [];
   selectedIcon: any = null;
   amount = 0;
@@ -188,13 +190,14 @@ export class AddTransactionComponent implements OnInit {
   async ngOnInit() {
     this.activatedRoute.queryParams.subscribe((params) => {
       this.selectedType = params['type'] ?? 'expense';
+      this.selectedSubType = params['subType'] ?? 'none';
 
       const editedTransaction = params['editedTransaction']
         ? JSON.parse(params['editedTransaction'])
         : null;
-      console.log('Edited Transaction:', editedTransaction);
       if (editedTransaction) {
         this.selectedType = editedTransaction.type;
+        this.selectedSubType = editedTransaction.subType;
         this.amount = editedTransaction.amount;
         const category = this.dbService.getCategoryById(
           editedTransaction.categoryId
@@ -202,14 +205,10 @@ export class AddTransactionComponent implements OnInit {
         this.selectCategory(category);
         this.memo = editedTransaction.memo;
         this.transactionDate = editedTransaction.date;
-        console.log('showCalculator:', this.showCalculator);
       }
     });
 
-    // Initialize default categories first
     await this.categoryService.initializeDefaultCategories();
-
-    // Load the categories after initialization
     await this.loadCategories();
   }
 
@@ -219,18 +218,21 @@ export class AddTransactionComponent implements OnInit {
 
   onTypeChange(type: 'income' | 'expense') {
     this.selectedType = type;
+    this.selectedSubType = 'none';
     this.selectedIcon = null;
     this.showCalculator = false;
   }
 
   get filteredGroups() {
     return this.categories.filter(
-      (category) => category.type === this.selectedType
+      (category) => 
+        category.type === this.selectedType
     );
   }
 
-  selectCategory(icon: any) {
-    this.selectedIcon = icon;
+  selectCategory(categoryIcon: any) {
+    this.selectedIcon = categoryIcon;
+    this.selectedSubType = categoryIcon.subType;
     this.toggleCalculator();
   }
 
@@ -254,6 +256,7 @@ export class AddTransactionComponent implements OnInit {
 
     const transaction = {
       type: this.selectedType,
+      subType: this.selectedSubType,
       amount: this.amount,
       categoryId: category.id!,
       memo: this.memo,
@@ -267,7 +270,10 @@ export class AddTransactionComponent implements OnInit {
   private async ensureCategory() {
     const categories = await this.dbService.getCategories();
     let category = categories.find(
-      (c) => c.icon === this.selectedIcon.icon && c.type === this.selectedType
+      (c) => 
+        c.icon === this.selectedIcon.icon && 
+        c.type === this.selectedType &&
+        c.subType === this.selectedSubType
     );
 
     if (!category) {
@@ -275,6 +281,7 @@ export class AddTransactionComponent implements OnInit {
         name: this.selectedIcon.name,
         icon: this.selectedIcon.icon,
         type: this.selectedType,
+        subType: this.selectedSubType,
         isCustom: false,
       });
       category = {
@@ -282,6 +289,7 @@ export class AddTransactionComponent implements OnInit {
         name: this.selectedIcon.name,
         icon: this.selectedIcon.icon,
         type: this.selectedType,
+        subType: this.selectedSubType,
         isCustom: false,
       };
     }
