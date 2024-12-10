@@ -1,7 +1,7 @@
 export interface DefaultCategories {
   name: string;
   icon: string;
-  type: 'income' | 'expense';
+  type: 'expense' | 'income' ;
   subType: 'none' | 'lend' | 'borrow' | 'asset' | 'fuel';
 }
 
@@ -56,12 +56,7 @@ export const categoryGroups: CategoryGroup[] = [
 ];
 
 export const defaultCategories: DefaultCategories[] = [
-  // Income categories
-  { name: 'Salary', icon: 'payments', type: 'income', subType: 'none' },
-  { name: 'Business', icon: 'store', type: 'income', subType: 'none' },
-  { name: 'Investment', icon: 'trending_up', type: 'income', subType: 'none' },
-  { name: 'Other Income', icon: 'account_balance_wallet', type: 'income', subType: 'none' },
-  
+ 
   // Expense categories
   { name: 'Home', icon: 'home', type: 'expense', subType: 'none' },
   { name: 'Family', icon: 'family_restroom', type: 'expense', subType: 'none' },
@@ -89,5 +84,11 @@ export const defaultCategories: DefaultCategories[] = [
   // Fuel categories
   { name: 'Car Fuel', icon: 'local_gas_station', type: 'expense', subType: 'fuel' },
   { name: 'Motorcycle Fuel', icon: 'two_wheeler', type: 'expense', subType: 'fuel' },
-  { name: 'EV Charging', icon: 'ev_station', type: 'expense', subType: 'fuel' }
+  { name: 'EV Charging', icon: 'ev_station', type: 'expense', subType: 'fuel' },
+
+    // Income categories
+  { name: 'Salary', icon: 'payments', type: 'income', subType: 'none' },
+  { name: 'Business', icon: 'store', type: 'income', subType: 'none' },
+  { name: 'Investment', icon: 'trending_up', type: 'income', subType: 'none' },
+  { name: 'Other Income', icon: 'account_balance_wallet', type: 'income', subType: 'none' }
 ];
