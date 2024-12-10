@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Transaction, isLendBorrowTransaction, isAssetTransaction, isFuelTransaction, LendBorrowTransaction, AssetTransaction, FuelTransaction } from '../../models/transaction-types';
+import { Transaction, isLendBorrowTransaction, isAssetTransaction, isFuelTransaction } from '../../models/transaction-types';
 import { LendBorrowFormComponent } from '../transaction-forms/lend-borrow-form.component';
 import { AssetFormComponent } from '../transaction-forms/asset-form.component';
 import { FuelFormComponent } from '../transaction-forms/fuel-form.component';
@@ -183,7 +183,7 @@ export class TransactionEditDialogComponent {
     this.editedTransaction.date = new Date(value);
   }
 
-  onTransactionChange(transaction: LendBorrowTransaction | AssetTransaction | FuelTransaction) {
+  onTransactionChange(transaction: Transaction) {
     this.editedTransaction = { ...transaction };
   }
 
