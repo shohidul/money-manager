@@ -42,10 +42,11 @@ import { FuelTransaction } from '../../models/transaction-types';
           class="form-input"
           required
         >
-          <option value="petrol">Petrol</option>
-          <option value="diesel">Diesel</option>
-          <option value="electric">Electric</option>
-          <option value="other">Other</option>
+          <option value="Octen">Octen</option>
+          <option value="Petrol">Petrol</option>
+          <option value="Diesel">Diesel</option>
+          <option value="Electric">Electric</option>
+          <option value="Other">Other</option>
         </select>
       </div>
     </div>
