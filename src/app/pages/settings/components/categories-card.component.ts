@@ -22,16 +22,16 @@ import { Category } from '../../../services/db.service';
               All
             </button>
             <button 
-              [class.active]="categoryFilter === 'income'"
-              (click)="setCategoryFilter('income')"
-            >
-              Income
-            </button>
-            <button 
               [class.active]="categoryFilter === 'expense'"
               (click)="setCategoryFilter('expense')"
             >
               Expense
+            </button>
+            <button 
+              [class.active]="categoryFilter === 'income'"
+              (click)="setCategoryFilter('income')"
+            >
+              Income
             </button>
           </div>
         </div>
@@ -223,7 +223,7 @@ export class CategoriesCardComponent {
   @Output() categoryDrop = new EventEmitter<CdkDragDrop<any[]>>();
   @Output() deleteCategory = new EventEmitter<Category>();
 
-  categoryFilter: 'all' | 'income' | 'expense' = 'all';
+  categoryFilter: 'all' | 'expense' | 'income' = 'all';
 
   get sortedCategories() {
     const filtered = this.categories.filter(
@@ -238,7 +238,7 @@ export class CategoriesCardComponent {
     });
   }
 
-  setCategoryFilter(filter: 'all' | 'income' | 'expense') {
+  setCategoryFilter(filter: 'all' | 'expense' |'income' ) {
     this.categoryFilter = filter;
   }
 
