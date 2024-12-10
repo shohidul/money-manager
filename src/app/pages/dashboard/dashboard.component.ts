@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { DbService } from '../../services/db.service';
-import { Transaction } from '../../models/transaction-types';
+import { Transaction, isFuelTransaction, isLendBorrowTransaction, isLend, isBorrow, isAssetTransaction } from '../../models/transaction-types';
 import { MenuService } from '../../services/menu.service';
 import { MonthPickerComponent } from '../../components/month-picker/month-picker.component';
 import { TransactionEditDialogComponent } from '../../components/transaction-edit-dialog/transaction-edit-dialog.component';
@@ -56,8 +56,7 @@ import { startOfMonth, endOfMonth, format } from 'date-fns';
               <span>{{ group.date | date: 'MM/dd E' }}</span>
               <span class="total">
                 <span *ngIf="group.totalIncome > 0">Income: {{ group.totalIncome | number:'1.0-2' }}</span>
-                &nbsp;&nbsp;
-                <span *ngIf="group.totalExpense > 0">Expense: {{ group.totalExpense | number:'1.0-2' }}</span>
+                <span *ngIf="group.totalExpense > 0">&nbsp;&nbsp;&nbsp;Expense: {{ group.totalExpense | number:'1.0-2' }}</span>
               </span>
             </div>
             <div *ngFor="let transaction of group.transactions" 
@@ -67,8 +66,19 @@ import { startOfMonth, endOfMonth, format } from 'date-fns';
                 {{ getCategoryIcon(transaction.categoryId) }}
               </span>
               <div class="transaction-details">
-                <span class="time">{{ transaction.date | date: 'shortTime' }}</span>
+                <span class="small-text">{{ transaction.date | date: 'shortTime' }}</span>
                 <span class="memo">{{ transaction.memo ? transaction.memo : getCategoryName(transaction.categoryId) }}</span>
+                <span *ngIf="isAssetTransaction(transaction)" class="small-text">
+                  {{ transaction.assetName || 'N/A' }}
+                </span>
+                <span *ngIf="isLendBorrowTransaction(transaction)" class="small-text">
+                  {{ transaction.personName || 'Unnamed' }} | Due Date: {{ transaction.dueDate ? (transaction.dueDate | date: 'shortDate') : 'N/A' }}
+                </span>
+                <span *ngIf="isFuelTransaction(transaction)" class="small-text">
+                  {{ transaction.fuelType || '' }} 
+                  {{ transaction.fuelQuantity || 0 }} L | Odo {{ transaction.odometerReading || 0 }} km | Mileage {{ 0 }} km/L
+                </span>
+                
               </div>
               <span class="amount">
                 {{ transaction.type === 'income' ? '' : '-' }}{{ transaction.amount | number:'1.0-2' }}
@@ -183,7 +193,7 @@ import { startOfMonth, endOfMonth, format } from 'date-fns';
 
     .transaction-item {
       display: flex;
-      align-items: self-end;
+      align-items: center;
       gap: 1rem;
       padding: 0.1rem 1rem 0.8rem 1rem;
       cursor: pointer;
@@ -200,7 +210,7 @@ import { startOfMonth, endOfMonth, format } from 'date-fns';
       flex: 1;
     }
 
-    .transaction-details .time {
+    .transaction-details .small-text {
       display: block;
       font-size: 0.65rem;
       color: #999;
@@ -229,6 +239,11 @@ export class DashboardComponent implements OnInit {
   totalExpense = 0;
   balance = 0;
   selectedTransaction: Transaction | null = null;
+  isFuelTransaction = isFuelTransaction;
+  isLendBorrowTransaction = isLendBorrowTransaction;
+  isLend = isLend;
+  isBorrow = isBorrow;
+  isAssetTransaction = isAssetTransaction;
 
   constructor(private dbService: DbService, private menuService: MenuService) {}
 
@@ -340,4 +355,22 @@ export class DashboardComponent implements OnInit {
   toggleMenu() {
     this.menuService.toggleMenu();
   }
+
+  calculateMileage(currentTransaction: Transaction, previousTransaction: Transaction): number {
+    let distance = 0; 
+  
+    if (isFuelTransaction(currentTransaction) && isFuelTransaction(previousTransaction)) {
+      distance = currentTransaction.odometerReading - previousTransaction.odometerReading;
+  
+      if (distance <= 0 || currentTransaction.fuelQuantity <= 0) {
+        return 0; 
+      }
+  
+      return distance / currentTransaction.fuelQuantity; // Mileage = distance / fuel
+    }
+  
+    // If not fuel transactions, return 0 or default distance
+    return distance;
+  }
+
 }
