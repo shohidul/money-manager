@@ -10,12 +10,12 @@ export class CategoryService {
     const existingCategories = await this.dbService.getCategories();
 
     for (const category of defaultCategories) {
-      console.log(category);
       const exists = existingCategories.some(
         c =>
           c.icon === category.icon &&
           c.type === category.type &&
-          c.isCustom === false // Only check default categories
+          c.subType === category.subType &&
+          c.isCustom === false
       );
 
       if (!exists) {
@@ -23,6 +23,7 @@ export class CategoryService {
           name: category.name,
           icon: category.icon,
           type: category.type,
+          subType: category.subType,
           isCustom: false
         });
       }
