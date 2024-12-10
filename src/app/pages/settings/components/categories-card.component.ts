@@ -55,7 +55,7 @@ import { Category } from '../../../services/db.service';
                 <span class="material-icons">do_not_disturb_on</span>
               </button>
             }
-            <div class="drag-handle">
+            <div class="drag-handle" cdkDragHandle>
               <span class="material-icons">drag_indicator</span>
             </div>
           </div>
@@ -147,7 +147,6 @@ import { Category } from '../../../services/db.service';
       border-radius: 8px;
       background-color: white;
       border: 1px solid rgba(0, 0, 0, 0.08);
-      cursor: move;
       gap: 1rem;
     }
 
@@ -191,8 +190,12 @@ import { Category } from '../../../services/db.service';
 
     .drag-handle {
       color: var(--text-secondary);
-      cursor: move;
+      cursor: grab;
       padding: 0.5rem;
+    }
+
+    .drag-handle:active{
+      cursor: grabbing;
     }
 
     .add-category-button {
