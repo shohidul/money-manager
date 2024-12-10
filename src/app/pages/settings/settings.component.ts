@@ -114,11 +114,6 @@ export class SettingsComponent implements OnInit {
     const difference = event.previousIndex - event.currentIndex;
     const newOrderNum = oldOrderNum - difference;
 
-    console.log('Old Order Number:', oldOrderNum);
-    console.log('New Order Number:', newOrderNum);
-    console.log('previousIndex Number:', event.previousIndex);
-    console.log('currentIndex Number:', event.currentIndex);
-
     // Use `moveItemInArray` to rearrange the categories array
     moveItemInArray(categories, oldOrderNum, newOrderNum);
 
@@ -126,8 +121,6 @@ export class SettingsComponent implements OnInit {
     categories.forEach((category, index) => {
       category.order = index + 1;
     });
-
-    console.log('Updated Categories:', categories);
 
     // Save the updated order to the database
     await this.dbService.updateCategoryOrder(categories);
