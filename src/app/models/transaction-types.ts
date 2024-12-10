@@ -1,8 +1,10 @@
-export type TransactionType = 'income' | 'expense' | 'lend' | 'borrow' | 'asset' | 'fuel';
+export type TransactionType = 'income' | 'expense';
+export type TransactionSubType = 'none' | 'lend' | 'borrow' | 'asset' | 'fuel';
 
 export interface BaseTransaction {
   id?: number;
   type: TransactionType;
+  subType: TransactionSubType;
   amount: number;
   categoryId: number;
   memo: string;
@@ -23,28 +25,40 @@ export interface AssetTransaction extends BaseTransaction {
 export interface FuelTransaction extends BaseTransaction {
   odometerReading: number;
   fuelQuantity: number;
-  fuelType: 'petrol' | 'diesel' | 'electric' | 'other';
+  fuelType: 'octen' | 'petrol' | 'diesel' | 'electric' | 'other';
 }
 
 export type Transaction = BaseTransaction | LendBorrowTransaction | AssetTransaction | FuelTransaction;
 
 export function isLendBorrowTransaction(tx: Transaction): tx is LendBorrowTransaction {
-  return tx.type === 'lend' || tx.type === 'borrow';
+  return tx.subType === 'lend' || tx.subType === 'borrow';
+}
+
+export function isLend(tx: Transaction): tx is LendBorrowTransaction {
+  return tx.subType === 'lend';
+}
+
+export function isBorrow(tx: Transaction): tx is LendBorrowTransaction {
+  return tx.subType === 'borrow';
 }
 
 export function isAssetTransaction(tx: Transaction): tx is AssetTransaction {
-  return tx.type === 'asset';
+  return tx.subType === 'asset';
 }
 
 export function isFuelTransaction(tx: Transaction): tx is FuelTransaction {
-  return tx.type === 'fuel';
+  return tx.subType === 'fuel';
 }
 
 export const transactionTypeLabels: Record<TransactionType, string> = {
   income: 'Income',
-  expense: 'Expense',
-  lend: 'Lent',
-  borrow: 'Borrowed',
+  expense: 'Expense'
+};
+
+export const transactionSubTypeLabels: Record<TransactionSubType, string> = {
+  none: 'Regular',
+  lend: 'Lend',
+  borrow: 'Borrow',
   asset: 'Asset',
   fuel: 'Fuel'
 };
