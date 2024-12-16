@@ -2,11 +2,19 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { DbService } from '../../services/db.service';
-import { Transaction, isFuelTransaction, isLendBorrowTransaction, isLend, isBorrow, isAssetTransaction } from '../../models/transaction-types';
+import {
+  Transaction,
+  isFuelTransaction,
+  isLendBorrowTransaction,
+  isLend,
+  isBorrow,
+  isAssetTransaction,
+} from '../../models/transaction-types';
 import { MenuService } from '../../services/menu.service';
 import { MonthPickerComponent } from '../../components/month-picker/month-picker.component';
 import { TransactionEditDialogComponent } from '../../components/transaction-edit-dialog/transaction-edit-dialog.component';
 import { startOfMonth, endOfMonth, format } from 'date-fns';
+import { calculateMileage } from '../../utils/fuel.utils';
 
 @Component({
   selector: 'app-dashboard',
@@ -48,7 +56,6 @@ import { startOfMonth, endOfMonth, format } from 'date-fns';
           </span>
         </div>
       </div>
-
       <div class="transactions">
         <div class="transaction-list">
           <div *ngFor="let group of transactionGroups" class="transaction-group card">
@@ -59,29 +66,39 @@ import { startOfMonth, endOfMonth, format } from 'date-fns';
                 <span *ngIf="group.totalExpense > 0">&nbsp;&nbsp;&nbsp;Expense: {{ group.totalExpense | number:'1.0-2' }}</span>
               </span>
             </div>
-            <div *ngFor="let transaction of group.transactions" 
+            <div *ngFor="let tx of group.transactions" 
                  class="transaction-item"
-                 (click)="editTransaction(transaction)">
-              <span class="material-symbols-rounded" [class]="transaction.type">
-                {{ getCategoryIcon(transaction.categoryId) }}
+                 (click)="editTransaction(tx)">
+              <span class="material-symbols-rounded" [class]="tx.type">
+                {{ getCategoryIcon(tx.categoryId) }}
               </span>
               <div class="transaction-details">
-                <span class="small-text">{{ transaction.date | date: 'shortTime' }}</span>
-                <span class="memo">{{ transaction.memo ? transaction.memo : getCategoryName(transaction.categoryId) }}</span>
-                <span *ngIf="isAssetTransaction(transaction)" class="small-text">
-                  {{ transaction.assetName || 'N/A' }}
-                </span>
-                <span *ngIf="isLendBorrowTransaction(transaction)" class="small-text">
-                  {{ transaction.personName || 'Unnamed' }} | Due Date: {{ transaction.dueDate ? (transaction.dueDate | date: 'shortDate') : 'N/A' }}
-                </span>
-                <span *ngIf="isFuelTransaction(transaction)" class="small-text">
-                  {{ transaction.fuelType || '' }} 
-                  {{ transaction.fuelQuantity || 0 }} L | Odo {{ transaction.odometerReading || 0 }} km | Mileage {{ 0 }} km/L
-                </span>
-                
+                <span class="small-text">{{ tx.date | date: 'shortTime' }}</span>
+                <span class="memo">{{ tx.memo ? tx.memo : getCategoryName(tx.categoryId) }}</span>
+
+                @if (isAssetTransaction(tx)) {
+                  <span class="small-text">
+                    {{ tx.assetName || 'N/A' }}
+                  </span>
+                }
+
+                @if (isLendBorrowTransaction(tx)) {
+                  <span class="small-text">
+                    {{ tx.personName || 'Unnamed' }} | Due Date: {{ tx.dueDate ? (tx.dueDate | date: 'shortDate') : 'N/A' }}
+                  </span>
+                }
+
+                @if (isFuelTransaction(tx)) {
+                  <span class="small-text">
+                    {{ tx.fuelType || '' }}
+                    {{ tx.fuelQuantity || 0 }} L | Odo {{ tx.odometerReading || 0 }} km | 
+                    Mileage {{ getMileage(tx) | number:'1.1-1' || 0 }} km/L
+                  </span>
+                }
+
               </div>
               <span class="amount">
-                {{ transaction.type === 'income' ? '' : '-' }}{{ transaction.amount | number:'1.0-2' }}
+                {{ tx.type === 'income' ? '' : '-' }}{{ tx.amount | number:'1.0-2' }}
               </span>
             </div>
           </div>
@@ -102,134 +119,136 @@ import { startOfMonth, endOfMonth, format } from 'date-fns';
       }
     </div>
   `,
-  styles: [
-    `
-    .dashboard {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 1rem;
-    }
 
-    .top-actions {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1rem;
-      position: sticky;
-      top: -16px;
-      z-index: 100;
-    }
+styles: [
+  `
+  .dashboard {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 1rem;
+  }
 
-    .menu-button, .sync-button {
-      background: none;
-      border: none;
-      padding: 0.5rem;
-      cursor: pointer;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+  .top-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    position: sticky;
+    top: -16px;
+    z-index: 100;
+  }
 
-    .menu-button:hover, .sync-button:hover {
-      background-color: rgba(0, 0, 0, 0.04);
-    }
+  .menu-button, .sync-button {
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    cursor: pointer;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
-    @media (min-width: 769px) {
-      .menu-button {
-        display: none;
-      }
-    }
+  .menu-button:hover, .sync-button:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
 
-    .overview {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1rem;
-      text-align: center;
+  @media (min-width: 769px) {
+    .menu-button {
+      display: none;
     }
+  }
 
-    .stat-item {
-      display: flex;
-      flex-direction: column;
-      gap: 0.2rem;
-      position: relative;
-    }
+  .overview {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    text-align: center;
+  }
 
-    .stat-item:not(:last-child)::after {
-      content: '|';
-      position: absolute;
-      right: -0.5rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #ccc;
-    }
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    position: relative;
+  }
 
-    .label {
-      color: var(--text-secondary);
-      font-size: 0.875rem;
-    }
+  .stat-item:not(:last-child)::after {
+    content: '|';
+    position: absolute;
+    right: -0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #ccc;
+  }
 
-    .overview .amount {
-      color: #333333;
-    }
+  .label {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+  }
 
-    .transaction-list {
-      display: flex;
-      flex-direction: column;
-    }
+  .overview .amount {
+    color: #333333;
+  }
 
-    .transaction-list .card {
-      padding: 0 !important;
-    }
+  .transaction-list {
+    display: flex;
+    flex-direction: column;
+  }
 
-    .date-header {
-      display: flex;
-      justify-content: space-between;
-      padding: 1rem 1rem 0.5rem 1rem;
-      color: var(--text-secondary);
-      font-size: 0.875rem;
-      border-bottom: 1px solid #f5f5f5;
-    }
+  .transaction-list .card {
+    padding: 0 !important;
+  }
 
-    .transaction-item {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: 0.1rem 1rem 0.8rem 1rem;
-      cursor: pointer;
-      transition: background-color 0.2s;
-      border-bottom: 1px solid #f5f5f5;
-      font-size: 0.875rem;
-    }
+  .date-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem 1rem 0.5rem 1rem;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    border-bottom: 1px solid #f5f5f5;
+  }
 
-    .transaction-item:hover {
-      background-color: rgba(0, 0, 0, 0.04);
-    }
+  .transaction-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.1rem 1rem 0.8rem 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    border-bottom: 1px solid #f5f5f5;
+    font-size: 0.875rem;
+  }
 
-    .transaction-details {
-      flex: 1;
-    }
+  .transaction-item:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
 
-    .transaction-details .small-text {
-      display: block;
-      font-size: 0.65rem;
-      color: #999;
-      margin-top: 0.25rem;
-    }
+  .transaction-details {
+    flex: 1;
+  }
 
-    .memo {
-      display: block;
-      font-weight: 500;
-    }
+  .transaction-details .small-text {
+    display: block;
+    font-size: 0.65rem;
+    color: #999;
+    margin-top: 0.25rem;
+  }
 
-    .category {
-      display: block;
-      font-size: 0.875rem;
-      color: var(--text-secondary);
-    }
-  `,
-  ],
+  .memo {
+    display: block;
+    font-weight: 500;
+  }
+
+  .category {
+    display: block;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+  }
+`,
+],
 })
+
 export class DashboardComponent implements OnInit {
   currentMonth = format(new Date(), 'yyyy-MM');
   transactions: Transaction[] = [];
@@ -356,21 +375,16 @@ export class DashboardComponent implements OnInit {
     this.menuService.toggleMenu();
   }
 
-  calculateMileage(currentTransaction: Transaction, previousTransaction: Transaction): number {
-    let distance = 0; 
-  
-    if (isFuelTransaction(currentTransaction) && isFuelTransaction(previousTransaction)) {
-      distance = currentTransaction.odometerReading - previousTransaction.odometerReading;
-  
-      if (distance <= 0 || currentTransaction.fuelQuantity <= 0) {
-        return 0; 
-      }
-  
-      return distance / currentTransaction.fuelQuantity; // Mileage = distance / fuel
-    }
-  
-    // If not fuel transactions, return 0 or default distance
-    return distance;
-  }
+  getMileage(currentTransaction: Transaction): number {
+    if (!isFuelTransaction(currentTransaction)) return 0;
 
+    const prevTransaction = this.transactions
+      .filter(isFuelTransaction)
+      .filter((t) => t.date < currentTransaction.date)
+      .sort((a, b) => b.date.getTime() - a.date.getTime())[0];
+
+    if (!prevTransaction) return 0;
+
+    return calculateMileage(currentTransaction, prevTransaction);
+  }
 }
