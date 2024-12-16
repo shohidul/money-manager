@@ -11,10 +11,13 @@ import { Router } from '@angular/router';
 import { DbService } from '../../services/db.service';
 import { ChartService } from '../../services/chart.service';
 import { MonthPickerComponent } from '../../components/month-picker/month-picker.component';
+import { FuelChartsComponent } from '../../components/fuel-charts/fuel-charts.component';
 import { startOfMonth, endOfMonth, format } from 'date-fns';
 import { MobileHeaderComponent } from '../../components/mobile-header/mobile-header.component';
+import { Transaction } from '../../models/transaction-types';
+import { ChangeDetectorRef } from '@angular/core';
 
-type ChartType = 'all' | 'income' | 'expense';
+type ChartType = 'all' | 'income' | 'expense' | 'fuel';
 
 @Component({
   selector: 'app-charts',
@@ -24,6 +27,7 @@ type ChartType = 'all' | 'income' | 'expense';
     FormsModule,
     MobileHeaderComponent,
     MonthPickerComponent,
+    FuelChartsComponent,
   ],
   template: `
     <div class="charts">
@@ -51,10 +55,13 @@ type ChartType = 'all' | 'income' | 'expense';
         </div>
 
         <div class="chart-container card">
-          <div class="chart-wrapper">
-            <canvas #donutChart></canvas>
-          </div>
-          <div class="legend">
+          @if (selectedType === 'fuel') {
+            <app-fuel-charts [transactions]="transactions" />
+          } @else {
+            <div class="chart-wrapper">
+              <canvas #donutChart></canvas>
+            </div>
+            <div class="legend">
             @for (stat of categoryStats; track stat.categoryId) {
               <div class="legend-item">
                 <div class="legend-color" [style.background-color]="stat.color"></div>
@@ -69,8 +76,6 @@ type ChartType = 'all' | 'income' | 'expense';
               </div>
             }
           </div>
-        </div>
-
         <div class="transactions-by-category">
           @for (stat of categoryStats; track stat.categoryId) {
             <div class="category-details card">
@@ -98,159 +103,164 @@ type ChartType = 'all' | 'income' | 'expense';
             </div>
           }
         </div>
+
+          }
+        </div>
       </div>
     </div>
   `,
+
   styles: [
     `
-    .charts {
-      max-width: 800px;
-      margin: 0 auto;
-    }
+  .charts {
+    max-width: 800px;
+    margin: 0 auto;
+  }
 
-    .content {
-      padding: 1rem;
-    }
+  .content {
+    padding: 1rem;
+  }
 
-    .filters {
-      margin-bottom: 1rem;
-    }
+  .filters {
+    margin-bottom: 1rem;
+  }
 
-    .filter-buttons {
-      display: flex;
-      gap: 0.5rem;
-      background: white;
-      padding: 0.5rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
+  .filter-buttons {
+    display: flex;
+    gap: 0.5rem;
+    background: white;
+    padding: 0.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
 
-    .filter-buttons button {
-      flex: 1;
-      padding: 0.75rem;
-      border: none;
-      border-radius: 6px;
-      background: none;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
+  .filter-buttons button {
+    flex: 1;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 6px;
+    background: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
 
-    .filter-buttons button.active {
-      background-color: var(--primary-color);
-      color: white;
-    }
+  .filter-buttons button.active {
+    background-color: var(--primary-color);
+    color: white;
+  }
 
+  /*.chart-container {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+  }*/
+
+  .chart-wrapper {
+    flex: 1;
+    max-width: 300px;
+    height: 300px;
+  }
+
+  .legend {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+  }
+
+  .legend-item:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+
+  .legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+  }
+
+  .legend-info {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .category-name {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .percentage {
+    min-width: 48px;
+    text-align: right;
+    font-weight: 500;
+  }
+
+  .category-details {
+    margin-top: 1rem;
+  }
+
+  .category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    cursor: pointer;
+  }
+
+  .category-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .category-transactions {
+    padding: 1rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  .transaction-list {
+    margin-top: 1rem;
+  }
+
+  .transaction-item {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 1rem;
+    padding: 0.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  @media (max-width: 768px) {
     .chart-container {
-      display: flex;
-      gap: 2rem;
-      align-items: flex-start;
+      flex-direction: column;
     }
 
     .chart-wrapper {
-      flex: 1;
-      max-width: 300px;
-      height: 300px;
+      max-width: none;
     }
-
-    .legend {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.5rem;
-      border-radius: 8px;
-      transition: background-color 0.2s;
-    }
-
-    .legend-item:hover {
-      background-color: rgba(0, 0, 0, 0.04);
-    }
-
-    .legend-color {
-      width: 12px;
-      height: 12px;
-      border-radius: 2px;
-    }
-
-    .legend-info {
-      flex: 1;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .category-name {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .percentage {
-      min-width: 48px;
-      text-align: right;
-      font-weight: 500;
-    }
-
-    .category-details {
-      margin-top: 1rem;
-    }
-
-    .category-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem;
-      cursor: pointer;
-    }
-
-    .category-info {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    .category-transactions {
-      padding: 1rem;
-      border-top: 1px solid rgba(0, 0, 0, 0.08);
-    }
-
-    .transaction-list {
-      margin-top: 1rem;
-    }
-
-    .transaction-item {
-      display: grid;
-      grid-template-columns: auto 1fr auto;
-      gap: 1rem;
-      padding: 0.5rem;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-    }
-
-    @media (max-width: 768px) {
-      .chart-container {
-        flex-direction: column;
-      }
-
-      .chart-wrapper {
-        max-width: none;
-      }
-    }
-  `,
+  }
+`,
   ],
 })
 export class ChartsComponent implements OnInit, AfterViewInit {
-  @ViewChild('donutChart') private donutChartRef!: ElementRef;
+  @ViewChild('donutChart', { static: false })
+  private donutChartRef!: ElementRef;
 
   currentMonth = format(new Date(), 'yyyy-MM');
   selectedType: ChartType = 'all';
-  chartTypes: ChartType[] = ['all', 'income', 'expense'];
-  transactions: any[] = [];
+  chartTypes: ChartType[] = ['all', 'income', 'expense', 'fuel'];
+  transactions: Transaction[] = [];
   categories: any[] = [];
   categoryStats: any[] = [];
   expandedCategories: number[] = [];
@@ -268,40 +278,44 @@ export class ChartsComponent implements OnInit, AfterViewInit {
   constructor(
     private dbService: DbService,
     private chartService: ChartService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   async ngOnInit() {
     await this.loadData();
-    this.createDonutChart();
+    // this.createDonutChart();
   }
 
   ngAfterViewInit() {
-    // this.createDonutChart();
+    this.createDonutChart();
   }
 
   async loadData() {
     const date = new Date(this.currentMonth);
     const startDate = startOfMonth(date);
     const endDate = endOfMonth(date);
-
     this.transactions = await this.dbService.getTransactions(
       startDate,
       endDate
     );
     this.categories = await this.dbService.getCategories();
     this.calculateStats();
-  }
-
-  onMonthChange(month: string) {
-    this.currentMonth = month;
-    this.loadData();
+    this.createDonutChart();
   }
 
   setType(type: ChartType) {
     this.selectedType = type;
     this.calculateStats();
+
+    // Wait for the DOM update before creating the chart
+    this.cdr.detectChanges();
     this.createDonutChart();
+  }
+
+  onMonthChange(month: string) {
+    this.currentMonth = month;
+    this.loadData();
   }
 
   calculateStats() {
@@ -336,14 +350,20 @@ export class ChartsComponent implements OnInit, AfterViewInit {
       .sort((a, b) => b.amount - a.amount);
   }
 
-  createDonutChart() {
-    const ctx = this.donutChartRef.nativeElement.getContext('2d');
+  private createDonutChart() {
+    if (this.selectedType === 'fuel' || !this.donutChartRef) return;
+  
+    const canvas = this.donutChartRef.nativeElement as HTMLCanvasElement;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+  
     this.chartService.createDonutChart(
       ctx,
       this.categoryStats,
       this.categoryStats.map((stat) => stat.color)
     );
   }
+  
 
   getCategoryIcon(categoryId: number): string {
     return this.categories.find((c) => c.id === categoryId)?.icon || 'help';
