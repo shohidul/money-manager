@@ -120,8 +120,8 @@ import { calculateMileage } from '../../utils/fuel.utils';
     </div>
   `,
 
-styles: [
-  `
+  styles: [
+    `
   .dashboard {
     max-width: 800px;
     margin: 0 auto;
@@ -246,9 +246,8 @@ styles: [
     color: var(--text-secondary);
   }
 `,
-],
+  ],
 })
-
 export class DashboardComponent implements OnInit {
   currentMonth = format(new Date(), 'yyyy-MM');
   transactions: Transaction[] = [];
