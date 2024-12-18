@@ -14,8 +14,17 @@ import { MonthPickerComponent } from '../../components/month-picker/month-picker
 import { FuelChartsComponent } from '../../components/fuel-charts/fuel-charts.component';
 import { startOfMonth, endOfMonth, format } from 'date-fns';
 import { MobileHeaderComponent } from '../../components/mobile-header/mobile-header.component';
-import { Transaction } from '../../models/transaction-types';
 import { ChangeDetectorRef } from '@angular/core';
+import {
+  Transaction,
+  isFuelTransaction,
+  isLendBorrowTransaction,
+  isLend,
+  isBorrow,
+  isAssetTransaction,
+  FuelTransaction,
+} from '../../models/transaction-types';
+import { calculateMileage } from '../../utils/fuel.utils';
 
 type ChartType = 'all' | 'income' | 'expense' | 'fuel';
 
@@ -54,35 +63,42 @@ type ChartType = 'all' | 'income' | 'expense' | 'fuel';
           </div>
         </div>
 
-        <div class="chart-container card">
+        
           @if (selectedType === 'fuel') {
-            <app-fuel-charts [transactions]="transactions" />
-          } @else {
-            <div class="chart-wrapper">
-              <canvas #donutChart></canvas>
+            <div class="card">
+              <app-fuel-charts [transactions]="transactions" />
             </div>
-            <div class="legend">
-            @for (stat of categoryStats; track stat.categoryId) {
-              <div class="legend-item">
-                <div class="legend-color" [style.background-color]="stat.color"></div>
-                <div class="legend-info">
-                  <span class="category-name">
-                    <span class="material-symbols-rounded">{{ getCategoryIcon(stat.categoryId) }}</span>
-                    {{ stat.category }}
-                  </span>
-                  <span class="amount">{{ stat.amount | number:'1.0-0' }}</span>
-                </div>
-                <span class="percentage">{{ stat.percentage }}%</span>
+          } @else {
+            <div class="chart-container card">
+              <div class="chart-wrapper">
+                <canvas #donutChart></canvas>
               </div>
-            }
+              <div class="legend">
+              @for (stat of categoryStats.slice(0, 5); track stat.categoryId) {
+                <div class="legend-item">
+                  <div class="legend-color" [style.background-color]="stat.color"></div>
+                  <div class="legend-info">
+                    <span class="category-name">
+                      <span class="material-symbols-rounded">{{ getCategoryIcon(stat.categoryId) }}</span>
+                      {{ stat.category }}
+                    </span>
+                  </div>
+                  <span class="percentage">{{ stat.percentage | number:'1.1-1' }}%</span>
+                </div>
+              }
+            </div>
           </div>
-        <div class="transactions-by-category">
+        <div class="transactions-by-category card">
+        <span>{{ selectedType | titlecase}} list</span>
           @for (stat of categoryStats; track stat.categoryId) {
-            <div class="category-details card">
+            <div class="category-details">
               <div class="category-header" (click)="toggleCategory(stat.categoryId)">
                 <div class="category-info">
-                  <span class="material-symbols-rounded">{{ getCategoryIcon(stat.categoryId) }}</span>
-                  <span>{{ stat.category }}</span>
+                  <span class="material-symbols-rounded" [class]="stat.type">{{ getCategoryIcon(stat.categoryId) }}</span>
+                  <span>
+                    {{ stat.category }} 
+                    <span class="percentage text-sm ml-4 text-muted">{{ stat.percentage | number:'1.1-1' }}%</span>
+                  </span> 
                 </div>
                 <span class="amount">{{ stat.amount | number:'1.0-0' }}</span>
               </div>
@@ -90,11 +106,42 @@ type ChartType = 'all' | 'income' | 'expense' | 'fuel';
                 <div class="category-transactions">
                   <canvas [id]="'chart-' + stat.categoryId"></canvas>
                   <div class="transaction-list">
-                    @for (tx of getTransactionsByCategory(stat.categoryId); track tx.id) {
+                    @for (tx of getTransactionsByCategory(stat.categoryId); let i = $index; track tx.id) {
                       <div class="transaction-item">
-                        <span>{{ tx.date | date:'mediumDate' }}</span>
-                        <span>{{ tx.memo }}</span>
-                        <span>{{ tx.amount | number:'1.0-0' }}</span>
+                        <span class="material-symbols-rounded" [class]="tx.type">
+                          {{ getCategoryIcon(tx.categoryId) }}
+                        </span>
+                        <div class="transaction-details">
+                          <span class="small-text">{{ tx.date | date: 'short' }}</span>
+                          <span class="memo">
+                            {{ tx.memo ? tx.memo : stat.category }}
+                            <span class="percentage text-sm ml-4 text-muted">{{ (tx.amount / stat.amount) * 100 | number:'1.1-1' }}%</span>
+                          </span>
+                          @if (isAssetTransaction(tx)) {
+                            <span class="small-text">
+                              {{ tx.assetName || 'N/A' }}
+                            </span>
+                          }
+
+                          @if (isLendBorrowTransaction(tx)) {
+                            <span class="small-text">
+                              {{ tx.personName || 'Unnamed' }} | Due Date: {{ tx.dueDate ? (tx.dueDate | date: 'shortDate') : 'N/A' }}
+                            </span>
+                          }
+
+                          @if (isFuelTransaction(tx)) {
+                            <span class="small-text">
+                              {{ tx.fuelType || '' }}
+                              {{ tx.fuelQuantity || 0 }} L | Odo {{ tx.odometerReading || 0 }} km | 
+                              Mileage {{ calculateMileage(tx, fuelTransaction) | number:'1.1-1' || 0 }} km/L
+
+                              {{ assignFuelTransaction(tx) }}
+                            </span>
+                          }
+                        </div>
+                        <span class="amount">
+                          {{ tx.amount | number:'1.0-2' }}
+                        </span>
                       </div>
                     }
                   </div>
@@ -105,7 +152,7 @@ type ChartType = 'all' | 'income' | 'expense' | 'fuel';
         </div>
 
           }
-        </div>
+        
       </div>
     </div>
   `,
@@ -149,16 +196,27 @@ type ChartType = 'all' | 'income' | 'expense' | 'fuel';
     color: white;
   }
 
-  /*.chart-container {
+  .chart-container {
     display: flex;
     gap: 2rem;
-    align-items: flex-start;
-  }*/
+    align-items: center;
+  }
 
   .chart-wrapper {
     flex: 1;
     max-width: 300px;
     height: 300px;
+  }
+
+  @media (max-width: 768px) {
+    .chart-container {
+      flex-direction: column;
+      align-items: normal;
+    }
+
+    .chart-wrapper {
+      max-width: none;
+    }
   }
 
   .legend {
@@ -207,14 +265,15 @@ type ChartType = 'all' | 'income' | 'expense' | 'fuel';
   }
 
   .category-details {
-    margin-top: 1rem;
+    /* margin-top: 1rem; */
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   }
 
   .category-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem;
+    padding: 1rem 0;
     cursor: pointer;
   }
 
@@ -234,21 +293,24 @@ type ChartType = 'all' | 'income' | 'expense' | 'fuel';
   }
 
   .transaction-item {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
+    display: flex;
+    align-items: center;
     gap: 1rem;
-    padding: 0.5rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    padding: 0.1rem 0.5rem 0.8rem 0.5rem;
+    transition: background-color 0.2s;
+    border-bottom: 1px solid #f5f5f5;
+    font-size: 0.875rem;
   }
 
-  @media (max-width: 768px) {
-    .chart-container {
-      flex-direction: column;
-    }
+  .transaction-details {
+    flex: 1;
+  }
 
-    .chart-wrapper {
-      max-width: none;
-    }
+  .transaction-details .small-text {
+    display: block;
+    font-size: 0.65rem;
+    color: #999;
+    margin-top: 0.25rem;
   }
 `,
   ],
@@ -257,6 +319,14 @@ export class ChartsComponent implements OnInit, AfterViewInit {
   @ViewChild('donutChart', { static: false })
   private donutChartRef!: ElementRef;
 
+  isFuelTransaction = isFuelTransaction;
+  isLendBorrowTransaction = isLendBorrowTransaction;
+  isLend = isLend;
+  isBorrow = isBorrow;
+  isAssetTransaction = isAssetTransaction;
+  calculateMileage = calculateMileage;
+
+  fuelTransaction: FuelTransaction | undefined;
   currentMonth = format(new Date(), 'yyyy-MM');
   selectedType: ChartType = 'all';
   chartTypes: ChartType[] = ['all', 'income', 'expense', 'fuel'];
@@ -332,6 +402,7 @@ export class ChartsComponent implements OnInit, AfterViewInit {
         stats.set(tx.categoryId, {
           categoryId: tx.categoryId,
           category: category?.name || 'Unknown',
+          type: category.type,
           amount: 0,
           color: this.chartColors[stats.size % this.chartColors.length],
         });
@@ -345,25 +416,24 @@ export class ChartsComponent implements OnInit, AfterViewInit {
     this.categoryStats = Array.from(stats.values())
       .map((stat) => ({
         ...stat,
-        percentage: Math.round((stat.amount / totalAmount) * 100),
+        percentage: (stat.amount / totalAmount) * 100,
       }))
       .sort((a, b) => b.amount - a.amount);
   }
 
   private createDonutChart() {
     if (this.selectedType === 'fuel' || !this.donutChartRef) return;
-  
+
     const canvas = this.donutChartRef.nativeElement as HTMLCanvasElement;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-  
+
     this.chartService.createDonutChart(
       ctx,
       this.categoryStats,
       this.categoryStats.map((stat) => stat.color)
     );
   }
-  
 
   getCategoryIcon(categoryId: number): string {
     return this.categories.find((c) => c.id === categoryId)?.icon || 'help';
@@ -403,6 +473,10 @@ export class ChartsComponent implements OnInit, AfterViewInit {
       chartData,
       this.categoryStats.find((stat) => stat.categoryId === categoryId)?.color
     );
+  }
+
+  assignFuelTransaction(tx: FuelTransaction): void {
+    this.fuelTransaction = tx;
   }
 
   goBack() {
