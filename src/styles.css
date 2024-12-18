@@ -11,8 +11,12 @@
   --text-muted: rgba(0, 0, 0, 0.4);
 }
 
-.color-primary{
- color: var(--primary-color);
+.color-primary {
+  color: var(--primary-color);
+}
+
+.text-muted{
+  color: var(--text-muted);
 }
 
 * {
@@ -96,6 +100,10 @@ body {
   font-size: 1.125rem;
 }
 
+.text-sm {
+  font-size: 0.75rem;
+}
+
 .font-bold {
   font-weight: 700;
 }
@@ -117,4 +125,8 @@ body {
 .date-icon .bottom {
   font-size: small;
   color: var(--text-muted);
+}
+
+.ml-4 {
+  margin-left: 4px;
 }
