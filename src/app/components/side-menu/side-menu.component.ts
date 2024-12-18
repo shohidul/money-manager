@@ -11,7 +11,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
       <div class="menu-header">
         <!-- Logo with error handler -->
         <img 
-          src="assets/images/logo_foreground.png" 
+          src="assets/images/logo.png" 
           alt="Logo" 
           class="logo"
           (error)="onImageError($event)" 
