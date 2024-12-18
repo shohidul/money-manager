@@ -1,4 +1,8 @@
-import { FuelTransaction, Transaction, isFuelTransaction } from '../models/transaction-types';
+import {
+  FuelTransaction,
+  Transaction,
+  isFuelTransaction,
+} from '../models/transaction-types';
 
 export interface FuelStats {
   mileage: number;
@@ -8,12 +12,17 @@ export interface FuelStats {
   costPerKm: number;
 }
 
-export function calculateMileage(currentTx: FuelTransaction, previousTx?: FuelTransaction): number {
+export function calculateMileage(
+  currentTx: FuelTransaction,
+  previousTx?: FuelTransaction
+): number {
   if (!previousTx) return 0;
-  
+
   const distance = currentTx.odometerReading - previousTx.odometerReading;
-  if (distance <= 0 || currentTx.fuelQuantity <= 0) return 0;
-  
+
+  if (Number.isNaN(distance) || distance <= 0 || currentTx.fuelQuantity <= 0)
+    return 0;
+
   return distance / currentTx.fuelQuantity; // km/L
 }
 
@@ -30,7 +39,7 @@ export function calculateFuelStats(transactions: Transaction[]): FuelStats {
     const current = fuelTransactions[i];
     const previous = fuelTransactions[i - 1];
     const distance = current.odometerReading - previous.odometerReading;
-    
+
     if (distance > 0) {
       totalDistance += distance;
       totalFuel += current.fuelQuantity;
@@ -43,7 +52,7 @@ export function calculateFuelStats(transactions: Transaction[]): FuelStats {
     distance: totalDistance,
     fuelQuantity: totalFuel,
     fuelCost: totalCost,
-    costPerKm: totalDistance > 0 ? totalCost / totalDistance : 0
+    costPerKm: totalDistance > 0 ? totalCost / totalDistance : 0,
   };
 }
 
