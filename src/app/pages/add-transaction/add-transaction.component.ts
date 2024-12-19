@@ -35,7 +35,7 @@ import { TransactionSubType, Transaction } from '../../models/transaction-types'
         @for (category of filteredGroups; track category.name) {
           <button 
             class="category-item"
-            [class.selected]="selectedIcon?.icon === category.icon"
+            [class.selected]="selectedIcon?.icon === category.icon && selectedIcon?.name === category.name"
             (click)="selectCategory(category)"
             #categoryButton
           >
