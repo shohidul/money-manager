@@ -11,7 +11,7 @@ import { RouterModule } from '@angular/router';
       class="mobile-header" 
       [class.show-on-desktop]="showOnDesktop">
       <button *ngIf="showBackButton" class="back-button" (click)="goBack()">
-        <span class="material-icons">arrow_back</span>
+        <span class="material-icons">arrow_back_ios</span>
       </button>
       <button *ngIf="!showBackButton" class="menu-button" (click)="toggleMenu()">
         <span class="material-icons">menu</span>

@@ -17,6 +17,21 @@ export const routes: Routes = [
           import('./pages/add-transaction/add-transaction.component').then(m => m.AddTransactionComponent)
       },
       {
+        path: 'loans',
+        loadComponent: () => 
+          import('./pages/loans/loans.component').then(m => m.LoansComponent)
+      },
+      {
+        path: 'assets',
+        loadComponent: () => 
+          import('./pages/assets/assets.component').then(m => m.AssetsComponent)
+      },
+      {
+        path: 'fuel',
+        loadComponent: () => 
+          import('./pages/fuel/fuel.component').then(m => m.FuelComponent)
+      },
+      {
         path: 'add-category',
         loadComponent: () => 
           import('./pages/add-category/add-category.component').then(m => m.AddCategoryComponent)

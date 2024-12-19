@@ -9,17 +9,8 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   template: `
     <nav class="side-menu" [class.open]="isOpen">
       <div class="menu-header">
-        <!-- Logo with error handler -->
-        <img 
-          src="assets/images/logo.png" 
-          alt="Logo" 
-          class="logo"
-          (error)="onImageError($event)" 
-          *ngIf="!logoFailed" />
-        
-        <!-- Fallback icon if logo fails -->
+        <img src="assets/images/logo.png" alt="Logo" class="logo" (error)="onImageError($event)" *ngIf="!logoFailed" />
         <span *ngIf="logoFailed" class="material-icons">wallet</span>
-
         <h1>Money Manager</h1>
       </div>
       <div class="menu-items">
@@ -30,6 +21,18 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         <a routerLink="/charts" routerLinkActive="active" (click)="close()">
           <span class="material-icons">donut_large</span>
           Charts
+        </a>
+        <a routerLink="/fuel" routerLinkActive="active" (click)="close()">
+          <span class="material-icons">local_gas_station</span>
+          Fuel Logs
+        </a>
+        <a routerLink="/loans" routerLinkActive="active" (click)="close()">
+          <span class="material-icons">account_balance</span>
+          Loan Management
+        </a>
+        <a routerLink="/assets" routerLinkActive="active" (click)="close()">
+          <span class="material-icons">real_estate_agent</span>
+          Asset Management
         </a>
         <a routerLink="/export" routerLinkActive="active" (click)="close()">
           <span class="material-icons">download</span>

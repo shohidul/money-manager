@@ -1,3 +1,4 @@
+import { Router } from '@angular/router';
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -248,6 +249,7 @@ import { calculateMileage } from '../../utils/fuel.utils';
 `,
   ],
 })
+  
 export class DashboardComponent implements OnInit {
   currentMonth = format(new Date(), 'yyyy-MM');
   transactions: Transaction[] = [];
@@ -263,7 +265,7 @@ export class DashboardComponent implements OnInit {
   isBorrow = isBorrow;
   isAssetTransaction = isAssetTransaction;
 
-  constructor(private dbService: DbService, private menuService: MenuService) {}
+  constructor(private router: Router, private dbService: DbService, private menuService: MenuService) {}
 
   async ngOnInit() {
     await this.loadCategories();
@@ -349,7 +351,21 @@ export class DashboardComponent implements OnInit {
   }
 
   editTransaction(transaction: Transaction) {
-    this.selectedTransaction = { ...transaction };
+    if (transaction.subType === 'none') {
+      this.navigateToEdit(transaction);
+    } else {
+      this.selectedTransaction = { ...transaction };
+    }
+  }
+
+  navigateToEdit(transaction: Transaction) {
+    this.router.navigate(['/add-transaction'], {
+      queryParams: {
+        type: transaction.type,
+        subType: transaction.subType,
+        editedTransaction: JSON.stringify(transaction)
+      }
+    });
   }
 
   async onTransactionSave(transaction: Transaction) {

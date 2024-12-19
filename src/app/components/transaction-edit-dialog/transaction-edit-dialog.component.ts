@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { Transaction, isLendBorrowTransaction, isAssetTransaction, isFuelTransaction } from '../../models/transaction-types';
 import { LendBorrowFormComponent } from '../transaction-forms/lend-borrow-form.component';
 import { AssetFormComponent } from '../transaction-forms/asset-form.component';
@@ -19,37 +20,12 @@ import { FuelFormComponent } from '../transaction-forms/fuel-form.component';
   template: `
     <div class="dialog-overlay">
       <div class="dialog-content">
-        <h2>Edit Transaction</h2>
-        
-        <div class="form-group">
-          <label for="memo">Memo</label>
-          <input
-            type="text"
-            id="memo"
-            [(ngModel)]="editedTransaction.memo"
-            class="form-input"
-          >
-        </div>
-
-        <div class="form-group">
-          <label for="amount">Amount</label>
-          <input
-            type="number"
-            id="amount"
-            [(ngModel)]="editedTransaction.amount"
-            class="form-input"
-          >
-        </div>
-
-        <div class="form-group">
-          <label for="date">Date</label>
-          <input
-            type="datetime-local"
-            id="date"
-            [ngModel]="editedTransaction.date | date:'yyyy-MM-ddTHH:mm'"
-            (ngModelChange)="onDateChange($event)"
-            class="form-input"
-          >
+        <div class="dialog-header">
+          <h2>Edit Transaction</h2>
+          <button class="edit-full-button" (click)="onEditFull()">
+            Edit More
+            <span class="material-icons">chevron_right</span>
+          </button>
         </div>
 
         @if (isLendBorrowTransaction(editedTransaction)) {
@@ -83,8 +59,8 @@ import { FuelFormComponent } from '../transaction-forms/fuel-form.component';
       </div>
     </div>
   `,
-  styles: [
-    `
+  styles: [`
+  
     .dialog-overlay {
       position: fixed;
       top: 0;
@@ -100,13 +76,25 @@ import { FuelFormComponent } from '../transaction-forms/fuel-form.component';
 
     .dialog-content {
       background: white;
-      padding: 1.5rem;
-      width: 90%;
-      max-width: 500px;
+      padding: 3.5rem;
+      width: 60%;
+      height: 85%;
       max-height: 90vh;
       overflow-y: auto;
-      border-radius: 8px;
+      display: flex
+  ;
+      flex-direction: column;
+      justify-content: space-between;
     }
+
+    @media (max-width: 768px) {
+      .dialog-content {
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        max-height: 100vh;
+      }
+    }    
 
     .form-group {
       margin-bottom: 1rem;
@@ -161,8 +149,26 @@ import { FuelFormComponent } from '../transaction-forms/fuel-form.component';
       color: white;
       cursor: pointer;
     }
-  `,
-  ],
+
+    .dialog-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .edit-full-button {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 4px;
+      background-color: var(--primary-color);
+      color: white;
+      cursor: pointer;
+    }
+  `]
 })
 export class TransactionEditDialogComponent {
   @Input() transaction!: Transaction;
@@ -175,16 +181,24 @@ export class TransactionEditDialogComponent {
   isAssetTransaction = isAssetTransaction;
   isFuelTransaction = isFuelTransaction;
 
+  constructor(private router: Router) {}
+
   ngOnInit() {
     this.editedTransaction = { ...this.transaction };
   }
 
-  onDateChange(value: string) {
-    this.editedTransaction.date = new Date(value);
-  }
-
   onTransactionChange(transaction: Transaction) {
     this.editedTransaction = { ...transaction };
+  }
+
+  onEditFull() {
+    this.router.navigate(['/add-transaction'], {
+      queryParams: {
+        type: this.transaction.type,
+        subType: this.transaction.subType,
+        editedTransaction: JSON.stringify(this.transaction)
+      }
+    });
   }
 
   onSave() {

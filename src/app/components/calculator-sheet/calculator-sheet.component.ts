@@ -1,12 +1,4 @@
-import {
-  Component,
-  Input,
-  Output,
-  EventEmitter,
-  ChangeDetectionStrategy,
-  OnChanges,
-  SimpleChanges,
-} from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
@@ -15,55 +7,55 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
   selector: 'app-calculator-sheet',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="calculator-sheet" [class.open]="isVisible">
       <div class="sheet-header">
         <div class="category-info">
-          <span class="material-symbols-rounded color-primary">{{ categoryIcon }}</span>
-          <span class="memo">
-            <span class="material-symbols-rounded">edit_note</span>
-            <input 
-              type="text" 
-              [(ngModel)]="memo" 
-              (ngModelChange)="onMemoChange($event)"
-              placeholder="Add memo"
-              class="memo-input"
-            >
-          </span>
+          <span class="material-symbols-rounded">{{ categoryIcon }}</span>
+          <input 
+            type="text" 
+            [(ngModel)]="memo" 
+            (ngModelChange)="onMemoChange($event)"
+            placeholder="Add memo"
+            class="memo-input"
+          >
         </div>
         <div class="amount">{{ displayAmount }}</div>
       </div>
-        @if (showDatePicker) {
-          <div class="date-picker">
-            <input 
-              type="date" 
-              [value]="selectedDate | date:'yyyy-MM-dd'"
-              (change)="onDateChange($event)"
-              [max]="today | date:'yyyy-MM-dd'"
-            >
-          </div>
-        }
-      <div class="sheet-body">
-        <div class="keypad-number">
-          @for (key of numericKeys; track key) {
-            <button (click)="onKeyPress(key)" class="key">{{ key }}</button>
-          }
+
+      @if (showDatePicker) {
+        <div class="date-picker">
+          <input 
+            type="date" 
+            [ngModel]="selectedDate | date:'yyyy-MM-dd'"
+            (ngModelChange)="onDateChange($event)"
+            [max]="today | date:'yyyy-MM-dd'"
+          >
         </div>
-        <div class="keypad-function">
-          <button (click)="onKeyPress('date')" class="key" style="padding: .9rem;">
-            <span [innerHTML]="formattedDateIcon"></span>
-          </button>
-          <button (click)="onKeyPress('+')" class="key operator-key">+</button>
-          <button (click)="onKeyPress('-')" class="key operator-key">−</button>
-          <button (click)="onKeyPress('=')" class="key equals-key">
-            <span class="material-symbols-rounded">{{ isCalculating ? '=' : 'check_circle' }}</span>
-          </button>
+      }
+
+      <div class="keypad">
+        <div class="sheet-body">
+          <div class="keypad-number">
+            @for (key of numericKeys; track key) {
+              <button (click)="onKeyPress(key)" class="key">{{ key }}</button>
+            }
+          </div>
+          <div class="keypad-function">
+            <button (click)="onKeyPress('date')" class="key" style="padding: .9rem;">
+              <span [innerHTML]="formattedDateIcon"></span>
+            </button>
+            <button (click)="onKeyPress('+')" class="key operator-key">+</button>
+            <button (click)="onKeyPress('-')" class="key operator-key">−</button>
+            <button (click)="onKeyPress('=')" class="key equals-key">
+              <span class="material-symbols-rounded">{{ isCalculating ? '=' : 'check_circle' }}</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
   `,
-  styles: [
+    styles: [
     `
     .calculator-sheet {
       position: fixed;
@@ -199,6 +191,8 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 export class CalculatorSheetComponent implements OnChanges {
   @Input() categoryIcon = 'help';
   @Input() initialAmount = '0';
+  @Input() initialMemo = '';
+  @Input() initialDate = new Date();
   @Input() isVisible = false;
 
   @Output() toggle = new EventEmitter<void>();
@@ -221,6 +215,7 @@ export class CalculatorSheetComponent implements OnChanges {
     '0',
     '⌫',
   ];
+  
   memo = '';
   amount = '0';
   operator = '';
@@ -232,11 +227,11 @@ export class CalculatorSheetComponent implements OnChanges {
 
   constructor(private domSanitizer: DomSanitizer) {}
 
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes['isVisible'] && !changes['isVisible'].firstChange) {
-      if (!changes['isVisible'].currentValue) {
-        this.resetCalculator();
-      }
+  ngOnChanges() {
+    if (this.isVisible) {
+      this.amount = this.initialAmount;
+      this.memo = this.initialMemo;
+      this.selectedDate = new Date(this.initialDate);
     }
   }
 
