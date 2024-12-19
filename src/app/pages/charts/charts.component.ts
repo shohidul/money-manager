@@ -18,9 +18,7 @@ import { ChangeDetectorRef } from '@angular/core';
 import {
   Transaction,
   isFuelTransaction,
-  isLendBorrowTransaction,
-  isLend,
-  isBorrow,
+  isLoanTransaction,
   isAssetTransaction,
   FuelTransaction,
 } from '../../models/transaction-types';
@@ -123,7 +121,7 @@ type ChartType = 'all' | 'income' | 'expense' | 'fuel';
                             </span>
                           }
 
-                          @if (isLendBorrowTransaction(tx)) {
+                          @if (isLoanTransaction(tx)) {
                             <span class="small-text">
                               {{ tx.personName || 'Unnamed' }} | Due Date: {{ tx.dueDate ? (tx.dueDate | date: 'shortDate') : 'N/A' }}
                             </span>
@@ -320,9 +318,7 @@ export class ChartsComponent implements OnInit, AfterViewInit {
   private donutChartRef!: ElementRef;
 
   isFuelTransaction = isFuelTransaction;
-  isLendBorrowTransaction = isLendBorrowTransaction;
-  isLend = isLend;
-  isBorrow = isBorrow;
+  isLoanTransaction = isLoanTransaction;
   isAssetTransaction = isAssetTransaction;
   calculateMileage = calculateMileage;
 

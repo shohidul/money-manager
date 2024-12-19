@@ -1,10 +1,10 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { LendBorrowTransaction } from '../../models/transaction-types';
+import { LoanTransaction } from '../../models/transaction-types';
 
 @Component({
-  selector: 'app-lend-borrow-form',
+  selector: 'app-loan-form',
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
@@ -54,9 +54,9 @@ import { LendBorrowTransaction } from '../../models/transaction-types';
     }
   `]
 })
-export class LendBorrowFormComponent {
-  @Input() transaction!: LendBorrowTransaction;
-  @Output() transactionChange = new EventEmitter<LendBorrowTransaction>();
+export class LoanFormComponent {
+  @Input() transaction!: LoanTransaction;
+  @Output() transactionChange = new EventEmitter<LoanTransaction>();
 
   onChange() {
     this.transactionChange.emit(this.transaction);

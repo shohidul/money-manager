@@ -6,9 +6,7 @@ import { DbService } from '../../services/db.service';
 import {
   Transaction,
   isFuelTransaction,
-  isLendBorrowTransaction,
-  isLend,
-  isBorrow,
+  isLoanTransaction,
   isAssetTransaction,
 } from '../../models/transaction-types';
 import { MenuService } from '../../services/menu.service';
@@ -83,7 +81,7 @@ import { calculateMileage } from '../../utils/fuel.utils';
                   </span>
                 }
 
-                @if (isLendBorrowTransaction(tx)) {
+                @if (isLoanTransaction(tx)) {
                   <span class="small-text">
                     {{ tx.personName || 'Unnamed' }} | Due Date: {{ tx.dueDate ? (tx.dueDate | date: 'shortDate') : 'N/A' }}
                   </span>
@@ -260,9 +258,7 @@ export class DashboardComponent implements OnInit {
   balance = 0;
   selectedTransaction: Transaction | null = null;
   isFuelTransaction = isFuelTransaction;
-  isLendBorrowTransaction = isLendBorrowTransaction;
-  isLend = isLend;
-  isBorrow = isBorrow;
+  isLoanTransaction = isLoanTransaction;
   isAssetTransaction = isAssetTransaction;
 
   constructor(private router: Router, private dbService: DbService, private menuService: MenuService) {}

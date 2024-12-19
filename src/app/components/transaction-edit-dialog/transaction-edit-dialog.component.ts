@@ -2,8 +2,8 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Transaction, isLendBorrowTransaction, isAssetTransaction, isFuelTransaction } from '../../models/transaction-types';
-import { LendBorrowFormComponent } from '../transaction-forms/lend-borrow-form.component';
+import { Transaction, isLoanTransaction, isAssetTransaction, isFuelTransaction } from '../../models/transaction-types';
+import { LoanFormComponent } from '../transaction-forms/loan-form.component';
 import { AssetFormComponent } from '../transaction-forms/asset-form.component';
 import { FuelFormComponent } from '../transaction-forms/fuel-form.component';
 
@@ -13,7 +13,7 @@ import { FuelFormComponent } from '../transaction-forms/fuel-form.component';
   imports: [
     CommonModule, 
     FormsModule,
-    LendBorrowFormComponent,
+    LoanFormComponent,
     AssetFormComponent,
     FuelFormComponent
   ],
@@ -28,8 +28,8 @@ import { FuelFormComponent } from '../transaction-forms/fuel-form.component';
           </button>
         </div>
 
-        @if (isLendBorrowTransaction(editedTransaction)) {
-          <app-lend-borrow-form
+        @if (isLoanTransaction(editedTransaction)) {
+          <app-loan-form
             [transaction]="editedTransaction"
             (transactionChange)="onTransactionChange($event)"
           />
@@ -177,7 +177,7 @@ export class TransactionEditDialogComponent {
   @Output() cancel = new EventEmitter<void>();
 
   editedTransaction!: Transaction;
-  isLendBorrowTransaction = isLendBorrowTransaction;
+  isLoanTransaction = isLoanTransaction;
   isAssetTransaction = isAssetTransaction;
   isFuelTransaction = isFuelTransaction;
 
