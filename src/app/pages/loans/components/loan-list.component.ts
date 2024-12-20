@@ -1,41 +1,71 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { LoanGroup } from '../../../models/loan.model';
+import { FilterBarComponent } from '../../../components/filter-bar/filter-bar.component';
+import { LoanListItemComponent } from './loan-list-item.component';
+import { FilterOptions } from '../../../utils/transaction-filters';
 
 @Component({
   selector: 'app-loan-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FilterBarComponent, LoanListItemComponent],
   template: `
-    <div class="loan-management">
-      <div class="loan-section">
-        <div class="loan-given card">
+    <div class="loan-lists">
+      <app-filter-bar
+        [filters]="filters"
+        [showStatus]="true"
+        (filtersChange)="onFiltersChange($event)"
+      />
+
+      <div class="lists-container">
+        <div class="loan-section">
           <h3>Loans Given</h3>
-          <!-- Loan given list will go here -->
+          <div class="loan-items">
+            @for (group of givenLoans; track group.parentId) {
+              <app-loan-list-item [group]="group" />
+            }
+          </div>
         </div>
-        
-        <div class="loan-taken card">
+
+        <div class="loan-section">
           <h3>Loans Taken</h3>
-          <!-- Loan taken list will go here -->
+          <div class="loan-items">
+            @for (group of takenLoans; track group.parentId) {
+              <app-loan-list-item [group]="group" />
+            }
+          </div>
         </div>
       </div>
     </div>
   `,
   styles: [`
-    .loan-management {
-      margin-bottom: 1rem;
-    }
-
-    .loan-section {
+    .lists-container {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 1rem;
+      gap: 2rem;
     }
 
     @media (max-width: 768px) {
-      .loan-section {
+      .lists-container {
         grid-template-columns: 1fr;
       }
     }
+
+    .loan-section h3 {
+      margin-bottom: 1rem;
+      color: var(--text-secondary);
+    }
   `]
 })
-export class LoanListComponent {}
+export class LoanListComponent {
+  @Input() givenLoans: LoanGroup[] = [];
+  @Input() takenLoans: LoanGroup[] = [];
+  
+  filters: FilterOptions = {
+    status: 'all'
+  };
+
+  onFiltersChange(filters: FilterOptions) {
+    // Emit filters to parent component
+  }
+}
