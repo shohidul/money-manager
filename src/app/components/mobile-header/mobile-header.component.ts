@@ -34,9 +34,9 @@ import { RouterModule } from '@angular/router';
       padding: 1rem 1.5rem;
       background-color: var(--surface-color);
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      margin: -1rem -1rem 1rem -1rem;
+      /* margin: -1rem -1rem 1rem -1rem;*/
       position: sticky;
-      top: -16px;
+      top: 0;
       z-index: 100;
     }
 

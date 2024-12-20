@@ -32,9 +32,11 @@ import { CategoryService } from '../../services/category.service';
         <app-security-card />
         
         <app-categories-card
-          [categories]="categories"
+          [categoriesExpnse]="categoriesExpnse"
+          [categoriesIncome]="categoriesIncome"
           (categoryDrop)="onCategoryDrop($event)"
           (deleteCategory)="deleteCategory($event)"
+          (resetOrder)="resetCategoryOrder($event)"
         />
 
         <app-data-management-card
@@ -58,8 +60,10 @@ import { CategoryService } from '../../services/category.service';
   `,
   ],
 })
+
 export class SettingsComponent implements OnInit {
-  categories: any[] = [];
+  categoriesExpnse: any[] = [];
+  categoriesIncome: any[] = [];
 
   constructor(
     private dbService: DbService,
@@ -72,11 +76,19 @@ export class SettingsComponent implements OnInit {
     await this.categoryService.initializeDefaultCategories();
 
     // Load the categories after initialization
-    await this.loadCategories();
+    await this.loadCategoriesExpense();
+    await this.loadCategoriesIncome();
   }
 
-  async loadCategories() {
-    this.categories = await this.categoryService.getAllCategories();
+  async loadCategoriesExpense() {
+    this.categoriesExpnse = await this.categoryService.getCategoriesByType(
+      'expense'
+    );
+  }
+  async loadCategoriesIncome() {
+    this.categoriesIncome = await this.categoryService.getCategoriesByType(
+      'income'
+    );
   }
 
   async deleteCategory(category: any) {
@@ -88,23 +100,48 @@ export class SettingsComponent implements OnInit {
     // Delete the category from the database
     await this.dbService.deleteCategory(category.id);
 
-    // Remove the category from the local list
-    this.categories = this.categories.filter((cat) => cat.id !== category.id);
+    if (category.type === 'expense') {
+      // Remove the category from the local list
+      this.categoriesExpnse = this.categoriesExpnse.filter(
+        (cat) => cat.id !== category.id
+      );
+      // Reorder the remaining categories
+      this.categoriesExpnse.forEach((cat, index) => {
+        cat.order = index + 1;
+      });
+  
+      // Update the order in the database
+      await this.dbService.updateCategoryOrder(this.categoriesExpnse);
 
-    // Reorder the remaining categories
-    this.categories.forEach((cat, index) => {
-      cat.order = index + 1;
-    });
+      // Reload the categories (if needed)
+      await this.loadCategoriesExpense();
 
-    // Update the order in the database
-    await this.dbService.updateCategoryOrder(this.categories);
+    }else if(category.type === 'income') {
+      // Remove the category from the local list
+      this.categoriesIncome = this.categoriesIncome.filter(
+        (cat) => cat.id !== category.id
+      );
+      // Reorder the remaining categories
+      this.categoriesIncome.forEach((cat, index) => {
+        cat.order = index + 1;
+      });
+  
+      // Update the order in the database
+      await this.dbService.updateCategoryOrder(this.categoriesIncome);
 
-    // Reload the categories (if needed)
-    await this.loadCategories();
+      // Reload the categories (if needed)
+      await this.loadCategoriesIncome();
+    }
   }
 
   async onCategoryDrop(event: CdkDragDrop<any[]>) {
-    const categories = [...this.categories];
+    // Get the category type from the modified event
+    const currentType = (event as any).categoryType;
+
+    // Select the appropriate categories based on type
+    const typedCategories = currentType === 'expense' 
+      ? this.categoriesExpnse 
+      : this.categoriesIncome;
 
     // Get the `order` of the dragged item
     const oldOrderNum =
@@ -115,18 +152,15 @@ export class SettingsComponent implements OnInit {
     const newOrderNum = oldOrderNum - difference;
 
     // Use `moveItemInArray` to rearrange the categories array
-    moveItemInArray(categories, oldOrderNum, newOrderNum);
+    moveItemInArray(typedCategories, oldOrderNum, newOrderNum);
 
     // Update the `order` property for all categories
-    categories.forEach((category, index) => {
+    typedCategories.forEach((category, index) => {
       category.order = index + 1;
     });
 
     // Save the updated order to the database
-    await this.dbService.updateCategoryOrder(categories);
-
-    // Reload the categories (if needed)
-    await this.loadCategories();
+    await this.dbService.updateCategoryOrder(typedCategories);
   }
 
   async backupData() {
@@ -165,7 +199,8 @@ export class SettingsComponent implements OnInit {
 
     await this.dbService.clearAllData();
     await this.categoryService.initializeDefaultCategories();
-    await this.loadCategories();
+    await this.loadCategoriesExpense();
+    await this.loadCategoriesIncome();
     alert('All data has been cleared.');
   }
 
@@ -183,7 +218,8 @@ export class SettingsComponent implements OnInit {
         if (data.categories && data.transactions) {
           await this.dbService.clearAllData();
           await this.dbService.restoreData(data);
-          await this.loadCategories();
+          await this.loadCategoriesExpense();
+          await this.loadCategoriesIncome();
           alert('Data has been restored.');
         } else {
           alert('Invalid data format.');
@@ -193,6 +229,18 @@ export class SettingsComponent implements OnInit {
       }
     };
     fileInput.click();
+  }
+
+  async resetCategoryOrder(type: 'expense' | 'income') {
+    // Reset the order for the specified type
+    const updatedCategories = await this.dbService.resetCategoryOrder(type);
+
+    // Update the corresponding category list
+    if (type === 'expense') {
+      this.categoriesExpnse = updatedCategories;
+    } else {
+      this.categoriesIncome = updatedCategories;
+    }
   }
 
   goBack() {

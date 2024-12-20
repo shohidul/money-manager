@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
@@ -55,7 +55,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
       </div>
     </div>
   `,
-    styles: [
+  styles: [
     `
     .calculator-sheet {
       position: relative;
@@ -181,7 +181,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
   `,
   ],
 })
-export class CalculatorSheetComponent implements OnChanges {
+export class CalculatorSheetComponent implements OnInit, OnDestroy, OnChanges {
   @Input() categoryIcon = 'help';
   @Input() initialAmount = '0';
   @Input() initialMemo = '';
@@ -220,11 +220,63 @@ export class CalculatorSheetComponent implements OnChanges {
 
   constructor(private domSanitizer: DomSanitizer) {}
 
-  ngOnChanges() {
+  ngOnInit() {
+    // Add global event listener for keydown
+    window.addEventListener('keydown', this.onGlobalKeyDown.bind(this));
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
     if (this.isVisible) {
       this.amount = this.initialAmount;
       this.memo = this.initialMemo;
       this.selectedDate = new Date(this.initialDate);
+    }
+  }
+
+  ngOnDestroy() {
+    // Remove the event listener to prevent memory leaks
+    window.removeEventListener('keydown', this.onGlobalKeyDown.bind(this));
+  }
+
+  onGlobalKeyDown(event: KeyboardEvent) {
+    // Prevent default if we're handling the key
+    const key = event.key;
+
+    // Backspace key
+    if (key === 'Backspace') {
+      event.preventDefault();
+      
+      // If amount is 0, remove last character from memo
+      if (this.amount === '0') {
+        if (this.memo.length > 0) {
+          this.memo = this.memo.slice(0, -1);
+          this.onMemoChange(this.memo);
+        }
+      } else {
+        // Otherwise, use calculator's backspace
+        this.onKeyPress('⌫');
+      }
+      return;
+    }
+
+    // Numeric and operator keys
+    if (/^[0-9+\-.]$/.test(key)) {
+      event.preventDefault();
+      this.onKeyPress(key);
+      return;
+    }
+
+    // Enter key acts like '='
+    if (key === 'Enter') {
+      event.preventDefault();
+      this.onKeyPress('=');
+      return;
+    }
+
+    // If it's a letter, assume it's for memo
+    if (/^[a-zA-Z\s]$/.test(key)) {
+      // Focus on memo input or update memo
+      this.onMemoChange(this.memo + key);
     }
   }
 
@@ -319,7 +371,7 @@ export class CalculatorSheetComponent implements OnChanges {
         }
     }
 
-    this.amountChange.emit(Number(this.amount.replace(/[^0-9.]/g, '')));
+    // this.amountChange.emit(Number(this.amount.replace(/[^0-9.]/g, '')));
   }
 
   calculateResult() {
@@ -337,6 +389,7 @@ export class CalculatorSheetComponent implements OnChanges {
       this.isCalculating = false;
       this.operator = '';
     } else {
+      this.amountChange.emit(Number(this.amount.replace(/[^0-9.]/g, '')));
       this.save.emit();
     }
   }

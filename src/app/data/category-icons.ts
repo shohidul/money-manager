@@ -276,7 +276,7 @@ export const defaultCategories: DefaultCategories[] = [
   { name: 'Sell Asset', icon: 'apartment', type: 'income', subType: 'asset' },
   
   // Fuel categories
-  { name: 'Car Fuel', icon: 'local_gas_station', type: 'expense', subType: 'fuel' },
+  { name: 'Car Fuel', icon: 'directions_car', type: 'expense', subType: 'fuel' },
   { name: 'Motorcycle Fuel', icon: 'two_wheeler', type: 'expense', subType: 'fuel' },
   { name: 'EV Charging', icon: 'ev_station', type: 'expense', subType: 'fuel' },
 

@@ -1,7 +1,7 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { Category } from '../../../services/db.service';
 
@@ -16,12 +16,6 @@ import { Category } from '../../../services/db.service';
         <div class="category-actions">
           <div class="category-filters">
             <button 
-              [class.active]="categoryFilter === 'all'"
-              (click)="setCategoryFilter('all')"
-            >
-              All
-            </button>
-            <button 
               [class.active]="categoryFilter === 'expense'"
               (click)="setCategoryFilter('expense')"
             >
@@ -33,12 +27,20 @@ import { Category } from '../../../services/db.service';
             >
               Income
             </button>
+            <button 
+              class="reset-order"
+              [class.dirty]="currentOrderDirty"
+              [disabled]="!currentOrderDirty"
+              (click)="resetCategoryOrder()"
+            >
+              Reset Order
+            </button>
           </div>
         </div>
       </div>
 
       <div class="category-list" cdkDropList (cdkDropListDropped)="onDrop($event)">
-        @for (category of sortedCategories; track category.id) {
+        @for (category of getCategories; track category.id) {
           <div class="category-item" cdkDrag>
             <div class="category-item-placeholder" *cdkDragPlaceholder></div>
             <div class="order-number">{{ category.order }}</div>
@@ -61,6 +63,10 @@ import { Category } from '../../../services/db.service';
           </div>
         }
       </div>
+      <a [routerLink]="'/add-category'" [queryParams]="{ type: categoryFilter, referer: currentRoute }" class="add-category-button">
+        <span class="material-icons">add</span>
+        Add New Category
+      </a>
     </div>
   `,
   styles: [
@@ -105,7 +111,7 @@ import { Category } from '../../../services/db.service';
 
     @media (max-width: 769px) {
       .section-header {
-        top: 55px;
+        top: 72px;
       }
     }
 
@@ -215,34 +221,131 @@ import { Category } from '../../../services/db.service';
     .add-category-button:hover {
       background-color: rgba(0, 0, 0, 0.04);
     }
+
+    .reset-order {
+      margin-left: 10px;
+      background-color: #f0f0f0;
+      color: #333;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 5px 10px;
+      font-size: 0.8em;
+    }
+
+    .reset-order:disabled {
+      cursor: not-allowed !important;
+    }
+
+    .reset-order.dirty {
+      background-color: #f44336 !important;
+      color: white !important;
+      border-color: #f44336 !important;
+    }
+
   `,
   ],
 })
-export class CategoriesCardComponent {
-  @Input() categories: Category[] = [];
+export class CategoriesCardComponent implements OnInit {
+  currentRoute: string;
+  @Input() set categoriesExpnse(categories: Category[]) {
+    this._categoriesExpnse = categories;
+    this.checkOrderDirty('expense');
+  }
+  get categoriesExpnse(): Category[] {
+    return this._categoriesExpnse;
+  }
+  private _categoriesExpnse: Category[] = [];
+
+  @Input() set categoriesIncome(categories: Category[]) {
+    this._categoriesIncome = categories;
+    this.checkOrderDirty('income');
+  }
+  get categoriesIncome(): Category[] {
+    return this._categoriesIncome;
+  }
+  private _categoriesIncome: Category[] = [];
+
   @Output() categoryDrop = new EventEmitter<CdkDragDrop<any[]>>();
   @Output() deleteCategory = new EventEmitter<Category>();
+  @Output() resetOrder = new EventEmitter<'expense' | 'income'>();
 
-  categoryFilter: 'all' | 'expense' | 'income' = 'all';
+  categoryFilter: 'expense' | 'income' = 'expense';
 
-  get sortedCategories() {
-    const filtered = this.categories.filter(
-      (category) =>
-        this.categoryFilter === 'all' || category.type === this.categoryFilter
-    );
-
-    return filtered.sort((a, b) => {
-      const orderA = a.order || 0;
-      const orderB = b.order || 0;
-      return orderA - orderB;
-    });
+  constructor(
+    private router: Router,
+    private activatedRoute: ActivatedRoute
+  ) {
+    this.currentRoute = this.router.url.split('?')[0];
   }
 
-  setCategoryFilter(filter: 'all' | 'expense' |'income' ) {
+  isOrderDirty: { expense: boolean, income: boolean } = {
+    expense: false,
+    income: false
+  };
+
+  get getCategories() {
+    return this.categoryFilter === 'expense' ? this.categoriesExpnse : this.categoriesIncome;
+  }
+
+  get currentOrderDirty(): boolean {
+    return this.isOrderDirty[this.categoryFilter];
+  }
+
+  setCategoryFilter(filter: 'expense' | 'income') {
     this.categoryFilter = filter;
   }
 
+  ngOnInit() {
+    this.activatedRoute.queryParams.subscribe((params) => {
+      this.categoryFilter = params['type'] ?? 'expense'; // Default to 'expense' if 'type' is not found
+    });
+
+    // Check order dirty state when component initializes
+    this.checkOrderDirty('expense');
+    this.checkOrderDirty('income');
+  }
+
+  private checkOrderDirty(type: 'expense' | 'income') {
+    const categories = type === 'expense' ? this._categoriesExpnse : this._categoriesIncome;
+    
+    // Check if the current order matches the original order by ID
+    const isDirty = categories.some((category) => {
+      // Assuming the original order is based on the first time the categories were added
+      // This means the order should match the order of IDs
+      const expectedOrder = this.getOriginalOrder(category);
+      const isOrderChanged = category.order !== expectedOrder;
+      
+      return isOrderChanged;
+    });
+
+    this.isOrderDirty[type] = isDirty;
+  }
+
+  private getOriginalOrder(category: Category): number {
+    // This method should return the original order based on the category's ID
+    // Assuming lower IDs should have lower order numbers
+    const categories = category.type === 'expense' 
+      ? this._categoriesExpnse 
+      : this._categoriesIncome;
+    
+    const sortedByID = [...categories].sort((a, b) => (a.id || 0) - (b.id || 0));
+    const originalIndex = sortedByID.findIndex(c => c.id === category.id);
+    
+    return originalIndex + 1;
+  }
+
   onDrop(event: CdkDragDrop<any[]>) {
-    this.categoryDrop.emit(event);
+    const modifiedEvent = {
+      ...event,
+      categoryType: this.categoryFilter
+    };
+    this.categoryDrop.emit(modifiedEvent);
+
+    // Check order dirty state after drop
+    this.checkOrderDirty(this.categoryFilter);
+  }
+
+  resetCategoryOrder() {
+    this.resetOrder.emit(this.categoryFilter);
   }
 }

@@ -138,6 +138,7 @@ import { TransactionSubType, Transaction } from '../../models/transaction-types'
       cursor: pointer;
       text-decoration: none;
       color: inherit;
+      outline: none;
     }
 
     .category-item:hover {
@@ -178,7 +179,7 @@ export class AddTransactionComponent implements OnInit {
     private dbService: DbService,
     private categoryService: CategoryService,
     private router: Router,
-    private route: ActivatedRoute
+    private activatedRoute: ActivatedRoute
   ) {
     this.currentRoute = this.router.url.split('?')[0];
   }
@@ -187,7 +188,11 @@ export class AddTransactionComponent implements OnInit {
     await this.categoryService.initializeDefaultCategories();
     await this.loadCategories();
 
-    const params = this.route.snapshot.queryParams;
+    this.activatedRoute.queryParams.subscribe((params) => {
+      this.selectedType = params['type'] ?? 'expense'; // Default to 'expense' if 'type' is not found
+    });
+
+    const params = this.activatedRoute.snapshot.queryParams;
     if (params['editedTransaction']) {
       const transaction = JSON.parse(params['editedTransaction']);
       await this.setupEditMode(transaction);
@@ -209,15 +214,20 @@ export class AddTransactionComponent implements OnInit {
   }
 
   async loadCategories() {
-    this.categories = await this.categoryService.getAllCategories();
+    // Fetch categories only if not already loaded or if the type has changed
+    if (this.categories.length === 0 || 
+        !this.categories.some(c => c.type === this.selectedType)) {
+      this.categories = await this.categoryService.getAllCategories();
+    }
+  }
+
+  get filteredGroups() {
+    // Memoize filtered categories to prevent unnecessary recalculations
+    return this.categories.filter(c => c.type === this.selectedType);
   }
 
   onTypeChange(type: 'income' | 'expense') {
     this.selectedType = type;
-  }
-
-  get filteredGroups() {
-    return this.categories.filter(c => c.type === this.selectedType);
   }
 
   selectCategory(category: any) {

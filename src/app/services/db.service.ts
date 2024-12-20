@@ -127,7 +127,13 @@ export class DbService {
 
   async addCategory(category: Omit<Category, 'id'>) {
     const categories = await this.getCategories();
-    const maxOrder = Math.max(...categories.map((c) => c.order || 0), 0);
+    
+    // Filter categories by the same type
+    const typeCategories = categories.filter(c => c.type === category.type);
+    
+    // Find the maximum order for the specific type
+    const maxOrder = Math.max(...typeCategories.map((c) => c.order || 0), 0);
+    
     return this.db.add('categories', { ...category, order: maxOrder + 1 });
   }
 
@@ -139,7 +145,14 @@ export class DbService {
 
   async getCategories(): Promise<Category[]> {
     const categories = await this.db.getAll('categories');
-    return categories.sort((a, b) => (a.order || 0) - (b.order || 0));
+    return categories.sort((a, b) => {
+      // First sort by type (expense before income)
+      const typeCompare = a.type.localeCompare(b.type);
+      if (typeCompare !== 0) return typeCompare;
+      
+      // Then sort by order within the type
+      return (a.order || 0) - (b.order || 0);
+    });
   }
 
   async updateCategory(category: Category) {
@@ -148,12 +161,51 @@ export class DbService {
 
   async updateCategoryOrder(categories: Category[]) {
     const tx = this.db.transaction('categories', 'readwrite');
+    
+    // Group categories by type
+    const categoriesByType = categories.reduce((acc, category) => {
+      if (!acc[category.type]) acc[category.type] = [];
+      acc[category.type].push(category);
+      return acc;
+    }, {} as Record<string, Category[]>);
+
+    // Update order for each type separately
+    for (const type in categoriesByType) {
+      const typedCategories = categoriesByType[type];
+      await Promise.all(
+        typedCategories.map((category, index) =>
+          tx.store.put({ ...category, order: index + 1 })
+        )
+      );
+    }
+
+    await tx.done;
+  }
+
+  async resetCategoryOrder(type: 'expense' | 'income') {
+    const categories = await this.getCategories();
+    
+    // Filter categories by the specified type
+    const typedCategories = categories
+      .filter(c => c.type === type)
+      .sort((a, b) => (a.id || 0) - (b.id || 0)); // Sort by ID
+
+    // Update order based on ID sorting
+    const updatedCategories = typedCategories.map((category, index) => ({
+      ...category,
+      order: index + 1
+    }));
+
+    // Update the database
+    const tx = this.db.transaction('categories', 'readwrite');
     await Promise.all(
-      categories.map((category, index) =>
-        tx.store.put({ ...category, order: index + 1 })
+      updatedCategories.map(category => 
+        tx.store.put(category)
       )
     );
     await tx.done;
+
+    return updatedCategories;
   }
 
   async deleteCategory(id: number) {
