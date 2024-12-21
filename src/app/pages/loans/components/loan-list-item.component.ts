@@ -7,7 +7,7 @@ import { LoanGroup } from '../../../models/loan.model';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="loan-item" [class.completed]="group.status.isCompleted">
+    <!-- <div class="loan-item" [class.completed]="group.status.isCompleted">
       <div class="loan-header">
         <div class="person-info">
           <span class="material-icons">person</span>
@@ -35,7 +35,7 @@ import { LoanGroup } from '../../../models/loan.model';
           </div>
         }
       </div>
-    </div>
+    </div> -->
   `,
   styles: [`
     .loan-item {
