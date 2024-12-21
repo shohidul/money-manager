@@ -131,9 +131,7 @@ type ChartType = 'all' | 'income' | 'expense' | 'fuel';
                             <span class="small-text">
                               {{ tx.fuelType || '' }}
                               {{ tx.fuelQuantity || 0 }} L | Odo {{ tx.odometerReading || 0 }} km | 
-                              Mileage {{ calculateMileage(tx, fuelTransaction) | number:'1.1-1' || 0 }} km/L
-
-                              {{ assignFuelTransaction(tx) }}
+                              Mileage {{ getMileage(tx) || 0 | number:'1.1-1' }} km/L
                             </span>
                           }
                         </div>
@@ -322,7 +320,6 @@ export class ChartsComponent implements OnInit, AfterViewInit {
   isAssetTransaction = isAssetTransaction;
   calculateMileage = calculateMileage;
 
-  fuelTransaction: FuelTransaction | undefined;
   currentMonth = format(new Date(), 'yyyy-MM');
   selectedType: ChartType = 'all';
   chartTypes: ChartType[] = ['all', 'income', 'expense', 'fuel'];
@@ -471,11 +468,20 @@ export class ChartsComponent implements OnInit, AfterViewInit {
     );
   }
 
-  assignFuelTransaction(tx: FuelTransaction): void {
-    this.fuelTransaction = tx;
-  }
-
   goBack() {
     this.router.navigate(['/']);
+  }
+
+  getMileage(tx: FuelTransaction): number | undefined {
+    const previousTransaction = this.getPreviousFuelTransaction(tx);
+    if (!previousTransaction) return undefined;
+    return calculateMileage(tx, previousTransaction);
+  }
+
+  getPreviousFuelTransaction(tx: FuelTransaction): FuelTransaction | undefined {
+    const fuelTransactions = this.transactions.filter(isFuelTransaction);
+    const index = fuelTransactions.findIndex((t) => t.id === tx.id);
+    if (index === 0) return undefined;
+    return fuelTransactions[index - 1];
   }
 }

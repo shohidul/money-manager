@@ -91,7 +91,7 @@ import { calculateMileage } from '../../utils/fuel.utils';
                   <span class="small-text">
                     {{ tx.fuelType || '' }}
                     {{ tx.fuelQuantity || 0 }} L | Odo {{ tx.odometerReading || 0 }} km | 
-                    Mileage {{ getMileage(tx) | number:'1.1-1' || 0 }} km/L
+                    Mileage {{ (getMileage(tx) || 0) | number:'1.1-1' }} km/L
                   </span>
                 }
 
