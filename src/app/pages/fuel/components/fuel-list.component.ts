@@ -1,22 +1,148 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { DbService } from '../../../services/db.service';
+import { FilterBarComponent } from '../../../components/filter-bar/filter-bar.component';
+import { isFuelTransaction, FuelTransaction } from '../../../models/transaction-types';
+import { calculateMileage } from '../../../utils/fuel.utils';
+import { FilterOptions } from '../../../utils/transaction-filters';
 
 @Component({
   selector: 'app-fuel-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FilterBarComponent],
   template: `
-    <div class="fuel-logs">
-      <div class="card">
-        <h3>Fuel Entries</h3>
-        <!-- Fuel entries list will go here -->
+    <div class="fuel-list">
+      <app-filter-bar
+        [filters]="filters"
+        (filtersChange)="onFiltersChange($event)"
+      />
+
+      <div class="transactions card">
+        @for (tx of fuelTransactions; track tx.id) {
+          <div class="transaction-item">
+            <span class="material-symbols-rounded">local_gas_station</span>
+            <div class="transaction-details">
+              <span class="date">{{ tx.date | date:'MMM d, y h:mm a' }}</span>
+              <span class="memo">{{ tx.memo }}</span>
+              <div class="fuel-info">
+                <span>{{ tx.fuelQuantity }}L {{ tx.fuelType }}</span>
+                <span>{{ tx.odometerReading }} km</span>
+                <span>{{ getMileage(tx) | number:'1.1-1' }} km/L</span>
+                <span>{{ tx.amount / tx.fuelQuantity | number:'1.2-2' }}/L</span>
+              </div>
+            </div>
+            <span class="amount">{{ tx.amount | currency }}</span>
+          </div>
+        }
+
+        @if (fuelTransactions.length === 0) {
+          <div class="empty-state">
+            <span class="material-symbols-rounded">local_gas_station</span>
+            <p>No fuel entries found</p>
+          </div>
+        }
       </div>
     </div>
   `,
   styles: [`
-    .fuel-logs {
+    .transactions {
+      margin-top: 1rem;
+    }
+
+    .transaction-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .transaction-item:last-child {
+      border-bottom: none;
+    }
+
+    .transaction-details {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .date {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+
+    .memo {
+      font-weight: 500;
+    }
+
+    .fuel-info {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+
+    .amount {
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-secondary);
+    }
+
+    .empty-state .material-symbols-rounded {
+      font-size: 48px;
       margin-bottom: 1rem;
+    }
+
+    .add-button {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.75rem 1.5rem;
+      background: var(--primary-color);
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
     }
   `]
 })
-export class FuelListComponent {}
+export class FuelListComponent implements OnInit {
+  fuelTransactions: FuelTransaction[] = [];
+  filters: FilterOptions = {};
+  previousTransaction?: FuelTransaction;
+
+  constructor(private dbService: DbService) {}
+
+  async ngOnInit() {
+    await this.loadTransactions();
+  }
+
+  async loadTransactions() {
+    const transactions = await this.dbService.getTransactions(
+      this.filters.startDate || new Date(0),
+      this.filters.endDate || new Date()
+    );
+
+    this.fuelTransactions = transactions
+      .filter(isFuelTransaction)
+      .sort((a, b) => b.date.getTime() - a.date.getTime());
+  }
+
+  getMileage(transaction: FuelTransaction): number {
+    const prevTransaction = this.fuelTransactions
+      .find(t => t.date < transaction.date && t.odometerReading < transaction.odometerReading);
+    
+    return calculateMileage(transaction, prevTransaction);
+  }
+
+  async onFiltersChange(filters: FilterOptions) {
+    this.filters = filters;
+    await this.loadTransactions();
+  }
+}

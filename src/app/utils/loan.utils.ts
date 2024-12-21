@@ -1,4 +1,4 @@
-import { LoanTransaction } from '../models/transaction-types';
+import { LoanTransaction } from '../models/loan.model';
 import { LoanGroup, LoanStatus } from '../models/loan.model';
 
 export function calculateLoanStatus(transactions: LoanTransaction[]): LoanStatus {
@@ -27,6 +27,7 @@ export function groupLoanTransactions(transactions: LoanTransaction[]): LoanGrou
     groups.get(parentId)!.push(tx);
   });
 
+  // Create loan groups
   return Array.from(groups.entries()).map(([parentId, txs]) => ({
     parentId,
     personName: txs[0].personName,

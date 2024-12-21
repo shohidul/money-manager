@@ -1,4 +1,15 @@
-export type LoanTransaction = [];
+export interface LoanTransaction {
+  id: number;
+  type: 'income' | 'expense';
+  subType: 'loan';
+  amount: number;
+  categoryId: number;
+  memo: string;
+  date: Date;
+  personName: string;
+  dueDate?: Date;
+  parentId?: number;
+}
 
 export interface LoanStatus {
   totalAmount: number;

@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MobileHeaderComponent } from '../../components/mobile-header/mobile-header.component';
 import { FuelListComponent } from './components/fuel-list.component';
-import { FuelChartsComponent } from './components/fuel-charts.component';
+import { FuelChartsComponent } from '../../components/fuel-charts/fuel-charts.component';
 
 @Component({
   selector: 'app-fuel',
