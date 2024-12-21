@@ -2,32 +2,35 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AssetTransaction } from '../../models/transaction-types';
+import { AssetService } from '../../services/asset.service';
+import { AutocompleteInputComponent } from '../shared/autocomplete-input.component';
 
 @Component({
   selector: 'app-asset-form',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AutocompleteInputComponent],
   template: `
     <div class="form-fields">
       <div class="form-group">
         <label for="assetName">Asset Name</label>
-        <input
-          type="text"
+        <app-autocomplete-input
           id="assetName"
-          [(ngModel)]="transaction.assetName"
-          (ngModelChange)="onChange()"
-          class="form-input"
-          required
-        >
+          type="text"
+          [(value)]="transaction.assetName"
+          (inputChange)="onAssetNameChange($event)"
+          [suggestions]="suggestions"
+          [required]="true"
+          inputClass="form-input"
+        />
       </div>
       
       <div class="form-group">
-        <label for="purchaseDate">Purchase Date</label>
+        <label for="transactionDate">Transaction Date</label>
         <input
           type="date"
-          id="purchaseDate"
-          [ngModel]="transaction.purchaseDate | date:'yyyy-MM-dd'"
-          (ngModelChange)="onPurchaseDateChange($event)"
+          id="transactionDate"
+          [ngModel]="transaction.transactionDate | date:'yyyy-MM-dd'"
+          (ngModelChange)="onTransactionDateChange($event)"
           class="form-input"
           required
         >
@@ -50,20 +53,20 @@ import { AssetTransaction } from '../../models/transaction-types';
     .form-fields {
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      gap: 16px;
     }
 
     .form-group {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 8px;
     }
 
     .form-input {
-      padding: 0.75rem;
-      border: 1px solid rgba(0, 0, 0, 0.12);
+      padding: 8px;
+      border: 1px solid #ddd;
       border-radius: 4px;
-      font-size: 1rem;
+      font-size: 1em;
     }
   `]
 })
@@ -71,12 +74,25 @@ export class AssetFormComponent {
   @Input() transaction!: AssetTransaction;
   @Output() transactionChange = new EventEmitter<AssetTransaction>();
 
-  onChange() {
-    this.transactionChange.emit(this.transaction);
+  suggestions: string[] = [];
+  private lastQuery = '';
+
+  constructor(private assetService: AssetService) {}
+
+  async onAssetNameChange(value: string) {
+    if (value !== this.lastQuery) {
+      this.lastQuery = value;
+      this.suggestions = await this.assetService.getAssetSuggestions(value);
+    }
+    this.onChange();
   }
 
-  onPurchaseDateChange(date: string) {
-    this.transaction.purchaseDate = new Date(date);
+  onTransactionDateChange(dateStr: string) {
+    this.transaction.transactionDate = new Date(dateStr);
     this.onChange();
+  }
+
+  onChange() {
+    this.transactionChange.emit(this.transaction);
   }
 }

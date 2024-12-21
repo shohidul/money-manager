@@ -13,12 +13,13 @@ export interface BaseTransaction {
 
 export interface LoanTransaction extends BaseTransaction {
   personName: string;
+  loanDate: Date;
   dueDate?: Date;
 }
 
 export interface AssetTransaction extends BaseTransaction {
   assetName: string;
-  purchaseDate: Date;
+  transactionDate: Date;  // Date of purchase or sale
   currentValue: number;
 }
 

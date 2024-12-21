@@ -6,6 +6,7 @@ import { Transaction, isLoanTransaction, isAssetTransaction, isFuelTransaction }
 import { LoanFormComponent } from '../transaction-forms/loan-form.component';
 import { AssetFormComponent } from '../transaction-forms/asset-form.component';
 import { FuelFormComponent } from '../transaction-forms/fuel-form.component';
+import { Category } from '../../services/db.service';
 
 @Component({
   selector: 'app-transaction-edit-dialog',
@@ -23,37 +24,98 @@ import { FuelFormComponent } from '../transaction-forms/fuel-form.component';
         <div class="dialog-header">
           <h2>Edit Transaction</h2>
           <button class="edit-full-button" (click)="onEditFull()">
-            Edit More
+            @if (editedTransaction.subType !== 'none') {
+              Edit Full
+            } @else {
+              Edit
+            }
             <span class="material-icons">chevron_right</span>
           </button>
         </div>
 
-        @if (isLoanTransaction(editedTransaction)) {
-          <app-loan-form
-            [transaction]="editedTransaction"
-            (transactionChange)="onTransactionChange($event)"
-          />
-        }
+        <div class="dialog-body">
+          <div class="dialog-content-grid" [class.no-form]="editedTransaction.subType === 'none'">
+            @if (editedTransaction.subType === 'none') {
+              <div class="transaction-summary-column">
+                <div class="summary-item category-item">
+                  <div class="category-content">
+                    <span class="material-symbols-rounded category-icon" [class]="editedTransaction.type">{{ category.icon }}</span>
+                    <div class="category-details">
+                    <span class="label">{{ editedTransaction.type | titlecase }}</span>
+                      <span class="category-name">{{ category.name }}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="summary-item type-item">
+                  <span class="label">
+                    <span class="material-icons">category</span>
+                    Date
+                  </span>
+                  <span class="value">{{ editedTransaction.date | date: 'short' }}</span>
+                </div>
+                <div class="summary-item amount-item">
+                  <span class="label">
+                    <span class="material-icons">attach_money</span>
+                    Amount
+                  </span>
+                  <span class="value">{{ editedTransaction.amount | currency }}</span>
+                </div>
+                <div class="summary-item memo-item">
+                  <span class="label">
+                    <span class="material-icons">notes</span>
+                    Memo
+                  </span>
+                  <span class="value">{{ editedTransaction.memo || 'No memo' }}</span>
+                </div>
+              </div>
+            } @else {
+              <div class="form-container">
+                <div class="summary-item category-item compact">
+                  <div class="category-content">
+                    <span class="material-symbols-rounded category-icon" [class]="editedTransaction.type">{{ category.icon }}</span>
+                    <div class="category-details">
+                      <span class="label">{{ editedTransaction.type | titlecase }} | {{ editedTransaction.subType | titlecase }}</span>
+                      <span class="category-name">{{ category.name }}</span>
+                      <span class="meta-info">{{ editedTransaction.memo || 'No memo' }} | {{ editedTransaction.date | date: 'short'}}</span>
+                    </div>
+                  </div>
+                  <span class="value">{{ editedTransaction.amount | currency }}</span>
+                </div>
 
-        @if (isAssetTransaction(editedTransaction)) {
-          <app-asset-form
-            [transaction]="editedTransaction"
-            (transactionChange)="onTransactionChange($event)"
-          />
-        }
+                <div class="form-content">
+                  @if (isLoanTransaction(editedTransaction)) {
+                    <app-loan-form
+                      [transaction]="editedTransaction"
+                      (transactionChange)="onTransactionChange($event)"
+                    />
+                  }
 
-        @if (isFuelTransaction(editedTransaction)) {
-          <app-fuel-form
-            [transaction]="editedTransaction"
-            (transactionChange)="onTransactionChange($event)"
-          />
-        }
+                  @if (isAssetTransaction(editedTransaction)) {
+                    <app-asset-form
+                      [transaction]="editedTransaction"
+                      (transactionChange)="onTransactionChange($event)"
+                    />
+                  }
+
+                  @if (isFuelTransaction(editedTransaction)) {
+                    <app-fuel-form
+                      [transaction]="editedTransaction"
+                      (transactionChange)="onTransactionChange($event)"
+                    />
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
 
         <div class="dialog-actions">
           <button class="delete-button" (click)="onDelete()">Delete</button>
           <div class="right-actions">
             <button class="cancel-button" (click)="onCancel()">Cancel</button>
-            <button class="save-button" (click)="onSave()">Save</button>
+            @if (editedTransaction.subType !== 'none') {
+              <button class="save-button" (click)="onSave()">Save</button>
+            }
           </div>
         </div>
       </div>
@@ -154,24 +216,188 @@ import { FuelFormComponent } from '../transaction-forms/fuel-form.component';
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 1.5rem;
+    }
+
+    .dialog-header h2 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .dialog-header h2 {
+        font-size: 1.2rem;
+      }
+
+      .dialog-body {
+        padding: 16px 0 !important;
+      }
+
+      .form-content {
+        border-radius: 0;
+      }
+
+      .category-item {
+        border-radius: 0;
+      }
     }
 
     .edit-full-button {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem 1rem;
+      gap: 4px;
+      padding: 8px 16px;
       border: none;
       border-radius: 4px;
-      background-color: var(--primary-color);
+      background: #007bff;
       color: white;
       cursor: pointer;
+    }
+
+    .edit-full-button .material-icons {
+      color: white;
+    }
+
+    .dialog-body {
+      padding: 16px;
+    }
+
+    .dialog-content-grid {
+      display: grid;
+      gap: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .dialog-content-grid.no-form {
+      grid-template-columns: minmax(300px, 600px);
+      justify-content: center;
+    }
+
+    .form-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .form-content {
+      background: #f5f5f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .transaction-summary-column {
+      display: grid;
+      grid-template-rows: auto repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .transaction-form-column {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .summary-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f5f5f5;
+      border-radius: 8px;
+      padding: 16px;
+      transition: background-color 0.3s ease;
+    }
+
+    .label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #666;
+      font-size: 0.9em;
+    }
+
+    .value {
+      font-weight: 500;
+      color: #333;
+      text-align: right;
+    }
+
+    .material-icons {
+      font-size: 20px;
+      color: #888;
+    }
+
+    .category-item {
+      padding: 24px !important;
+    }
+
+    .category-item.compact {
+      padding: 16px !important;
+      margin-bottom: 16px;
+    }
+
+    .category-item.compact .category-icon {
+      font-size: 24px !important;
+      padding: 8px;
+    }
+
+    .category-item.compact .category-details {
+      gap: 2px;
+    }
+
+    .meta-info {
+      font-size: 0.9em;
+      color: #666;
+    }
+
+    .category-content {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .category-icon {
+      font-size: 32px !important;
+      padding: 12px;
+      background: rgba(0, 0, 0, 0.05);
+      border-radius: 50%;
+    }
+
+    .category-details {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .category-name {
+      font-size: 1.2em;
+      font-weight: 600;
+      color: #333;
+    }
+
+    @media (max-width: 768px) {
+      .dialog-content-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      .dialog-content-grid.no-form {
+        grid-template-columns: minmax(280px, 400px);
+      }
+
+      .category-item {
+        padding: 16px !important;
+      }
+
+      .category-icon {
+        font-size: 24px !important;
+        padding: 8px;
+      }
     }
   `]
 })
 export class TransactionEditDialogComponent {
   @Input() transaction!: Transaction;
+  @Input() category!: Category;
   @Output() save = new EventEmitter<Transaction>();
   @Output() delete = new EventEmitter<void>();
   @Output() cancel = new EventEmitter<void>();

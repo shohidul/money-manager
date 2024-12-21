@@ -2,25 +2,40 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LoanTransaction } from '../../models/transaction-types';
+import { PersonService } from '../../services/person.service';
+import { AutocompleteInputComponent } from '../shared/autocomplete-input.component';
 
 @Component({
   selector: 'app-loan-form',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AutocompleteInputComponent],
   template: `
     <div class="form-fields">
       <div class="form-group">
         <label for="personName">Person/Entity Name</label>
-        <input
-          type="text"
+        <app-autocomplete-input
           id="personName"
-          [(ngModel)]="transaction.personName"
-          (ngModelChange)="onChange()"
+          type="text"
+          [(value)]="transaction.personName"
+          (inputChange)="onPersonNameChange($event)"
+          [suggestions]="suggestions"
+          [required]="true"
+          inputClass="form-input"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="loanDate">Loan Date</label>
+        <input
+          type="date"
+          id="loanDate"
+          [ngModel]="transaction.loanDate | date:'yyyy-MM-dd'"
+          (ngModelChange)="onLoanDateChange($event)"
           class="form-input"
           required
         >
       </div>
-      
+
       <div class="form-group">
         <label for="dueDate">Due Date</label>
         <input
@@ -37,20 +52,20 @@ import { LoanTransaction } from '../../models/transaction-types';
     .form-fields {
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      gap: 16px;
     }
 
     .form-group {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 8px;
     }
 
     .form-input {
-      padding: 0.75rem;
-      border: 1px solid rgba(0, 0, 0, 0.12);
+      padding: 8px;
+      border: 1px solid #ddd;
       border-radius: 4px;
-      font-size: 1rem;
+      font-size: 1em;
     }
   `]
 })
@@ -58,12 +73,30 @@ export class LoanFormComponent {
   @Input() transaction!: LoanTransaction;
   @Output() transactionChange = new EventEmitter<LoanTransaction>();
 
-  onChange() {
-    this.transactionChange.emit(this.transaction);
+  suggestions: string[] = [];
+  private lastQuery = '';
+
+  constructor(private personService: PersonService) {}
+
+  async onPersonNameChange(value: string) {
+    if (value !== this.lastQuery) {
+      this.lastQuery = value;
+      this.suggestions = await this.personService.getPersonSuggestions(value);
+    }
+    this.onChange();
   }
 
-  onDueDateChange(date: string) {
-    this.transaction.dueDate = date ? new Date(date) : undefined;
+  onLoanDateChange(dateStr: string) {
+    this.transaction.loanDate = new Date(dateStr);
     this.onChange();
+  }
+
+  onDueDateChange(dateStr: string) {
+    this.transaction.dueDate = dateStr ? new Date(dateStr) : undefined;
+    this.onChange();
+  }
+
+  onChange() {
+    this.transactionChange.emit(this.transaction);
   }
 }

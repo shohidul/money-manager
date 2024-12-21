@@ -2,7 +2,7 @@ import { Router } from '@angular/router';
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { DbService } from '../../services/db.service';
+import { Category, DbService } from '../../services/db.service';
 import {
   Transaction,
   isFuelTransaction,
@@ -111,6 +111,7 @@ import { calculateMileage } from '../../utils/fuel.utils';
       @if (selectedTransaction) {
         <app-transaction-edit-dialog
           [transaction]="selectedTransaction"
+          [category]="selectedTransactionCategory"
           (save)="onTransactionSave($event)"
           (delete)="onTransactionDelete()"
           (cancel)="closeEditDialog()"
@@ -257,6 +258,7 @@ export class DashboardComponent implements OnInit {
   totalExpense = 0;
   balance = 0;
   selectedTransaction: Transaction | null = null;
+  selectedTransactionCategory: any | null = null; 
   isFuelTransaction = isFuelTransaction;
   isLoanTransaction = isLoanTransaction;
   isAssetTransaction = isAssetTransaction;
@@ -341,17 +343,23 @@ export class DashboardComponent implements OnInit {
     return category?.name || 'Unknown';
   }
 
+  getCategory(categoryId: number): Category | null {
+    const category = this.categories.find((c) => c.id === categoryId);
+    return category || null;
+  }
+
   onMonthChange(month: string) {
     this.currentMonth = month;
     this.loadTransactions();
   }
 
   editTransaction(transaction: Transaction) {
-    if (transaction.subType === 'none') {
-      this.navigateToEdit(transaction);
-    } else {
+    // if (transaction.subType === 'none') {
+    //   this.navigateToEdit(transaction);
+    // } else {
       this.selectedTransaction = { ...transaction };
-    }
+      this.selectedTransactionCategory = this.getCategory(transaction.categoryId);
+    // }
   }
 
   navigateToEdit(transaction: Transaction) {
