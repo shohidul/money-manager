@@ -23,6 +23,9 @@ import {
   FuelTransaction,
 } from '../../models/transaction-types';
 import { calculateMileage } from '../../utils/fuel.utils';
+import { TranslatePipe } from '../../components/shared/translate.pipe';
+import { TranslateDatePipe } from "../../components/shared/translate-date.pipe";
+import { TranslateNumberPipe } from "../../components/shared/translate-number.pipe";
 
 type ChartType = 'all' | 'income' | 'expense' | 'fuel';
 
@@ -35,11 +38,14 @@ type ChartType = 'all' | 'income' | 'expense' | 'fuel';
     MobileHeaderComponent,
     MonthPickerComponent,
     FuelChartsComponent,
-  ],
+    TranslatePipe,
+    TranslateDatePipe,
+    TranslateNumberPipe
+],
   template: `
     <div class="charts">
       <app-mobile-header
-        title="Analytics"
+        [title]="'charts.title' | translate"
         [showBackButton]="true"
         (back)="goBack()"
       />
@@ -56,7 +62,7 @@ type ChartType = 'all' | 'income' | 'expense' | 'fuel';
               [class.active]="selectedType === type"
               (click)="setType(type)"
             >
-              {{ type | titlecase }}
+              {{ 'charts.types.' + type | translate }}
             </button>
           </div>
         </div>
@@ -78,27 +84,27 @@ type ChartType = 'all' | 'income' | 'expense' | 'fuel';
                   <div class="legend-info">
                     <span class="category-name">
                       <span class="material-symbols-rounded">{{ getCategoryIcon(stat.categoryId) }}</span>
-                      {{ stat.category }}
+                      {{ stat.category  | translate }}
                     </span>
                   </div>
-                  <span class="percentage">{{ stat.percentage | number:'1.1-1' }}%</span>
+                  <span class="percentage">{{ stat.percentage | translateNumber:'1.1-1' }}%</span>
                 </div>
               }
             </div>
           </div>
         <div class="transactions-by-category card">
-        <span>{{ selectedType | titlecase}} list</span>
+        <span>{{ 'charts.types.' + selectedType | translate }} {{ 'charts.list' | translate }}</span>
           @for (stat of categoryStats; track stat.categoryId) {
             <div class="category-details">
               <div class="category-header" (click)="toggleCategory(stat.categoryId)">
                 <div class="category-info">
                   <span class="material-symbols-rounded" [class]="stat.type">{{ getCategoryIcon(stat.categoryId) }}</span>
                   <span>
-                    {{ stat.category }} 
-                    <span class="percentage text-sm ml-4 text-muted">{{ stat.percentage | number:'1.1-1' }}%</span>
+                    {{ stat.category | translate  }} 
+                    <span class="percentage text-sm ml-4 text-muted">{{ stat.percentage | translateNumber:'1.1-1' }}%</span>
                   </span> 
                 </div>
-                <span class="amount">{{ stat.amount | number:'1.0-0' }}</span>
+                <span class="amount">{{ stat.amount | translateNumber:'1.0-0' }}</span>
               </div>
               @if (expandedCategories.includes(stat.categoryId)) {
                 <div class="category-transactions">
@@ -110,10 +116,10 @@ type ChartType = 'all' | 'income' | 'expense' | 'fuel';
                           {{ getCategoryIcon(tx.categoryId) }}
                         </span>
                         <div class="transaction-details">
-                          <span class="small-text">{{ tx.date | date: 'short' }}</span>
+                          <span class="small-text">{{ tx.date | translateDate: 'short' }}</span>
                           <span class="memo">
-                            {{ tx.memo ? tx.memo : stat.category }}
-                            <span class="percentage text-sm ml-4 text-muted">{{ (tx.amount / stat.amount) * 100 | number:'1.1-1' }}%</span>
+                            {{ tx.memo ? tx.memo : (stat.category | translate) }}
+                            <span class="percentage text-sm ml-4 text-muted">{{ (tx.amount / stat.amount) * 100 | translateNumber:'1.1-1' }}%</span>
                           </span>
                           @if (isAssetTransaction(tx)) {
                             <span class="small-text">
@@ -123,20 +129,20 @@ type ChartType = 'all' | 'income' | 'expense' | 'fuel';
 
                           @if (isLoanTransaction(tx)) {
                             <span class="small-text">
-                              {{ tx.personName || 'Unnamed' }} | Due Date: {{ tx.dueDate ? (tx.dueDate | date: 'shortDate') : 'N/A' }}
+                              {{ tx.personName || 'Unnamed' }} | {{ 'charts.dueDate' | translate }}: {{ tx.dueDate ? (tx.dueDate | date: 'shortDate') : 'N/A' }}
                             </span>
                           }
 
                           @if (isFuelTransaction(tx)) {
                             <span class="small-text">
                               {{ tx.fuelType || '' }}
-                              {{ tx.fuelQuantity || 0 }} L | Odo {{ tx.odometerReading || 0 }} km | 
-                              Mileage {{ getMileage(tx) || 0 | number:'1.1-1' }} km/L
+                              {{ tx.fuelQuantity || 0 }} {{ 'fuel.L' | translate }} | {{ 'fuel.odo' | translate }} {{ tx.odometerReading || 0 }} {{ 'fuel.km' | translate }} | 
+                              {{ 'fuel.mileage' | translate }} {{ getMileage(tx) || 0 | translateNumber:'1.1-1' }} {{ 'fuel.kmPerLiter' | translate }}
                             </span>
                           }
                         </div>
                         <span class="amount">
-                          {{ tx.amount | number:'1.0-2' }}
+                          {{ tx.amount | translateNumber:'1.0-2' }}
                         </span>
                       </div>
                     }

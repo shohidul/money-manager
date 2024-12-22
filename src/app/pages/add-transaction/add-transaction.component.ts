@@ -6,15 +6,16 @@ import { CalculatorSheetComponent } from '../../components/calculator-sheet/calc
 import { MobileHeaderComponent } from '../../components/mobile-header/mobile-header.component';
 import { CategoryService } from '../../services/category.service';
 import { TransactionSubType, Transaction } from '../../models/transaction-types';
+import { TranslatePipe } from '../../components/shared/translate.pipe';
 
 @Component({
   selector: 'app-add-transaction',
   standalone: true,
-  imports: [CommonModule, CalculatorSheetComponent, RouterLink, MobileHeaderComponent],
+  imports: [CommonModule, CalculatorSheetComponent, RouterLink, MobileHeaderComponent, TranslatePipe],
   template: `
     <div class="add-transaction">
       <app-mobile-header
-        [title]="isEditMode ? 'Edit Transaction' : 'Add Transaction'"
+        [title]="isEditMode ? ('transaction.title.edit' | translate) : ('transaction.title.add' | translate)"
         [showBackButton]="true"
         [showOnDesktop]="true" 
         (back)="goBack()"
@@ -27,7 +28,7 @@ import { TransactionSubType, Transaction } from '../../models/transaction-types'
           (click)="onTypeChange(type)"
           class="type-tab"
         >
-          {{ type | titlecase }}
+          {{ 'transaction.types.' + type | translate }}
         </button>
       </div>
 
@@ -40,12 +41,12 @@ import { TransactionSubType, Transaction } from '../../models/transaction-types'
             #categoryButton
           >
             <span class="material-symbols-rounded">{{ category.icon }}</span>
-            <span class="category-name">{{ category.name }}</span>
+            <span class="category-name">{{ category.name | translate }}</span>
           </button>
         }
         <a [routerLink]="'/add-category'" [queryParams]="{ type: selectedType, referer: currentRoute }" class="category-item add-category">
           <span class="material-icons">add</span>
-          <span class="category-name">Add New</span>
+          <span class="category-name">{{ 'common.add' | translate }}</span>
         </a>
       </div>
 
@@ -179,7 +180,7 @@ export class AddTransactionComponent implements OnInit {
     private dbService: DbService,
     private categoryService: CategoryService,
     private router: Router,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
   ) {
     this.currentRoute = this.router.url.split('?')[0];
   }

@@ -7,6 +7,8 @@ import { MobileHeaderComponent } from '../../components/mobile-header/mobile-hea
 import { SecurityCardComponent } from './components/security-card.component';
 import { CategoriesCardComponent } from './components/categories-card.component';
 import { DataManagementCardComponent } from './components/data-management-card.component';
+import { LanguageCardComponent } from './components/language-card.component';
+import { TranslatePipe } from '../../components/shared/translate.pipe';
 import { format } from 'date-fns';
 import { CategoryService } from '../../services/category.service';
 
@@ -19,16 +21,20 @@ import { CategoryService } from '../../services/category.service';
     SecurityCardComponent,
     CategoriesCardComponent,
     DataManagementCardComponent,
+    LanguageCardComponent,
+    TranslatePipe,
   ],
   template: `
     <div class="settings">
       <app-mobile-header
-        title="Settings"
+        [title]="'settings.title' | translate"
         [showBackButton]="true"
         (back)="goBack()"
       />
 
       <div class="content">
+        <app-language-card />
+        
         <app-security-card />
         
         <app-categories-card
@@ -68,7 +74,8 @@ export class SettingsComponent implements OnInit {
   constructor(
     private dbService: DbService,
     private categoryService: CategoryService,
-    private router: Router
+    private router: Router,
+    private translate: TranslatePipe
   ) {}
 
   async ngOnInit() {
@@ -93,7 +100,7 @@ export class SettingsComponent implements OnInit {
 
   async deleteCategory(category: any) {
     const confirm = window.confirm(
-      `Are you sure you want to delete the category "${category.name}"?`
+      this.translate.transform('settings.deleteCategory', [category.name])
     );
     if (!confirm) return;
 
@@ -193,7 +200,7 @@ export class SettingsComponent implements OnInit {
 
   async clearData() {
     const confirm = window.confirm(
-      'Are you sure you want to clear all data? This action cannot be undone.'
+      this.translate.transform('settings.clearData')
     );
     if (!confirm) return;
 
@@ -201,7 +208,7 @@ export class SettingsComponent implements OnInit {
     await this.categoryService.initializeDefaultCategories();
     await this.loadCategoriesExpense();
     await this.loadCategoriesIncome();
-    alert('All data has been cleared.');
+    alert(this.translate.transform('settings.dataCleared'));
   }
 
   async restoreData() {
@@ -220,12 +227,12 @@ export class SettingsComponent implements OnInit {
           await this.dbService.restoreData(data);
           await this.loadCategoriesExpense();
           await this.loadCategoriesIncome();
-          alert('Data has been restored.');
+          alert(this.translate.transform('settings.dataRestored'));
         } else {
-          alert('Invalid data format.');
+          alert(this.translate.transform('settings.invalidDataFormat'));
         }
       } catch (error) {
-        alert('Failed to parse the file.');
+        alert(this.translate.transform('settings.failedToParseFile'));
       }
     };
     fileInput.click();

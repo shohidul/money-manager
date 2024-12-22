@@ -1,0 +1,438 @@
+{
+  "common": {
+    "edit": "সম্পাদনা",
+    "delete": "মুছে ফেলুন",
+    "save": "সংরক্ষণ",
+    "cancel": "বাতিল",
+    "close": "বন্ধ",
+    "amount": "পরিমাণ",
+    "date": "তারিখ",
+    "memo": "মেমো",
+    "category": "বিভাগ",
+    "type": "ধরন",
+    "required": "আবশ্যক",
+    "add": "যোগ করুন",
+    "noMemo": "কোন মেমো নেই"
+  },
+  "menu": {
+    "title": "মানি ম্যানেজার",
+    "transactions": "লেনদেন",
+    "charts": "বিশ্লেষণ",
+    "fuelLogs": "জ্বালানি লগ",
+    "loanManagement": "ঋণ ব্যবস্থাপনা",
+    "assetManagement": "সম্পদ ব্যবস্থাপনা",
+    "export": "সংরক্ষণ",
+    "settings": "সেটিংস",
+    "howToUse": "ব্যবহার পদ্ধতি",
+    "about": "সম্পর্কে"
+  },
+  "categories": {
+    "title": "বিভাগসমূহ",
+    "filters": {
+      "expense": "ব্যয়",
+      "income": "আয়"
+    },
+    "actions": {
+      "resetOrder": "পুনঃক্রম করুন",
+      "addNew": "নতুন ক্যাটাগরি যোগ করুন"
+    },
+    "groups": {
+      "common": "সাধারণ",
+      "finance": "আর্থিক",
+      "food": "খাবার",
+      "transportation": "পরিবহন",
+      "vehicle": "যানবাহন",
+      "shopping": "কেনাকাটা",
+      "entertainment": "বিনোদন",
+      "healthFitness": "স্বাস্থ্য ও ফিটনেস",
+      "family": "পরিবার",
+      "home": "বাসা",
+      "electronics": "ইলেকট্রনিক্স",
+      "billsUtilities": "বিল ও ইউটিলিটি",
+      "housing": "আবাসন",
+      "income": "আয়",
+      "icons": {
+        "common": {
+          "home": "বাসা",
+          "food": "খাবার",
+          "transport": "পরিবহন",
+          "shopping": "কেনাকাটা",
+          "entertainment": "বিনোদন",
+          "health": "স্বাস্থ্য",
+          "education": "শিক্ষা",
+          "work": "কাজ",
+          "utilities": "ইউটিলিটি",
+          "clothing": "পোশাক",
+          "gift": "উপহার",
+          "travel": "ভ্রমণ",
+          "pets": "পোষা প্রাণী",
+          "sports": "খেলাধুলা",
+          "charity": "দান",
+          "hobbies": "শখ",
+          "other": "অন্যান্য"
+        },
+        "finance": {
+          "salary": "বেতন",
+          "investment": "বিনিয়োগ",
+          "savings": "সঞ্চয়",
+          "bills": "বিল",
+          "bank": "ব্যাংক",
+          "creditCard": "ক্রেডিট কার্ড",
+          "insurance": "বীমা",
+          "tax": "কর",
+          "loan": "ঋণ"
+        },
+        "food": {
+          "restaurant": "রেস্টুরেন্ট",
+          "cafe": "ক্যাফে",
+          "grocery": "মুদি",
+          "fastFood": "ফাস্ট ফুড",
+          "bar": "বার",
+          "foodDelivery": "খাবার ডেলিভারি",
+          "dining": "ডাইনিং",
+          "chef": "শেফ"
+        },
+        "transportation": {
+          "bus": "বাস",
+          "train": "ট্রেন",
+          "taxi": "ট্যাক্সি",
+          "flight": "বিমান",
+          "subway": "সাবওয়ে",
+          "bike": "বাইক",
+          "carRental": "গাড়ি ভাড়া",
+          "traffic": "ট্রাফিক",
+          "navigation": "নেভিগেশন"
+        },
+        "vehicle": {
+          "car": "গাড়ি",
+          "motorcycle": "মোটরসাইকেল",
+          "fuel": "জ্বালানি",
+          "maintenance": "মেরামত",
+          "parking": "পার্কিং",
+          "carWash": "গাড়ি ধোয়া",
+          "truck": "ট্রাক",
+          "evCharging": "ইভি চার্জিং",
+          "garage": "গ্যারেজ"
+        },
+        "shopping": {
+          "cart": "কার্ট",
+          "hanger": "হ্যাঙ্গার",
+          "giftCard": "গিফট কার্ড",
+          "onlineShopping": "অনলাইন কেনাকাটা",
+          "jewelry": "গহনা",
+          "beauty": "সৌন্দর্য",
+          "discount": "ছাড়",
+          "wallet": "মানিব্যাগ",
+          "market": "বাজার"
+        },
+        "entertainment": {
+          "movies": "সিনেমা",
+          "games": "গেমস",
+          "music": "সঙ্গীত",
+          "books": "বই",
+          "theater": "থিয়েটার",
+          "sportsEvent": "খেলার ইভেন্ট",
+          "party": "পার্টি",
+          "art": "শিল্প",
+          "dance": "নৃত্য"
+        },
+        "healthFitness": {
+          "medical": "চিকিৎসা",
+          "pharmacy": "ফার্মেসি",
+          "gym": "জিম",
+          "doctor": "ডাক্তার",
+          "dental": "দাঁতের চিকিৎসা",
+          "yoga": "যোগব্যায়াম",
+          "diet": "খাদ্যতালিকা",
+          "mentalHealth": "মানসিক স্বাস্থ্য"
+        },
+        "billsUtilities": {
+          "electricity": "বিদ্যুৎ",
+          "water": "পানি",
+          "internet": "ইন্টারনেট",
+          "phoneBill": "ফোন বিল",
+          "gas": "গ্যাস",
+          "tvCable": "টিভি কেবল",
+          "heating": "হিটিং",
+          "solarPower": "সৌর বিদ্যুৎ",
+          "garbage": "আবর্জনা"
+        },
+        "housing": {
+          "rent": "ভাড়া",
+          "mortgage": "বন্ধকী",
+          "insurance": "বীমা",
+          "propertyTax": "সম্পত্তি কর",
+          "hotel": "হোটেল",
+          "security": "নিরাপত্তা",
+          "key": "চাবি",
+          "apartment": "অ্যাপার্টমেন্ট",
+          "realEstate": "রিয়েল এস্টেট"
+        },
+        "family": {
+          "children": "শিশু",
+          "familyCare": "পারিবারিক যত্ন",
+          "elderCare": "বয়স্ক যত্ন",
+          "petCare": "পোষা প্রাণীর যত্ন",
+          "babyProducts": "শিশু পণ্য",
+          "education": "শিক্ষা",
+          "pregnancy": "গর্ভাবস্থা",
+          "playground": "খেলার মাঠ",
+          "parenting": "অভিভাবকত্ব"
+        },
+        "home": {
+          "furniture": "আসবাবপত্র",
+          "appliances": "যন্ত্রপাতি",
+          "homeRepair": "বাড়ি মেরামত",
+          "cleaning": "পরিষ্কার",
+          "garden": "বাগান",
+          "tools": "যন্ত্রপাতি",
+          "decor": "সাজসজ্জা",
+          "painting": "রং",
+          "lighting": "আলো"
+        },
+        "electronics": {
+          "gadgets": "গ্যাজেট",
+          "phone": "ফোন",
+          "computer": "কম্পিউটার",
+          "electronics": "ইলেকট্রনিক্স",
+          "tv": "টিভি",
+          "camera": "ক্যামেরা",
+          "gamingConsole": "গেমিং কনসোল",
+          "wearables": "পরিধানযোগ্য",
+          "smartHome": "স্মার্ট হোম"
+        },
+        "income": {
+          "salary": "বেতন",
+          "business": "ব্যবসা",
+          "freelance": "ফ্রিল্যান্স",
+          "investment": "বিনিয়োগ",
+          "rental": "ভাড়া",
+          "gift": "উপহার",
+          "interest": "সুদ",
+          "bonus": "বোনাস",
+          "otherIncome": "অন্যান্য আয়",
+          "profit": "লাভ"
+        }
+      }
+    },
+    "add": {
+      "title": "বিভাগ যোগ করুন",
+      "namePlaceholder": "বিভাগের নাম",
+      "selectIcon": "একটি আইকন নির্বাচন করুন",
+      "validation": {
+        "nameRequired": "বিভাগের নাম আবশ্যক",
+        "iconRequired": "একটি আইকন নির্বাচন করুন"
+      }
+    },
+    "defaults": {
+      "expense": {
+        "home": "বাসা",
+        "family": "পরিবার",
+        "food": "খাবার",
+        "grocery": "মুদি",
+        "transportation": "পরিবহন",
+        "shopping": "কেনাকাটা",
+        "entertainment": "বিনোদন",
+        "bills": "বিল",
+        "health": "স্বাস্থ্য",
+        "others": "অন্যান্য",
+        "utilities": "ইউটিলিটি",
+        "clothing": "পোশাক",
+        "snacks": "স্ন্যাকস",
+        "fruits": "ফল",
+        "car": "গাড়ি",
+        "motorcycle": "মোটরসাইকেল",
+        "fuel": "জ্বালানি",
+        "beauty": "সৌন্দর্য",
+        "phoneRecharge": "ফোন রিচার্জ",
+        "internet": "ইন্টারনেট",
+        "fitness": "ফিটনেস",
+        "travel": "ভ্রমণ",
+        "baby": "শিশু",
+        "donation": "দান",
+        "insurance": "বীমা",
+        "tax": "কর",
+        "telephone": "টেলিফোন",
+        "cigarette": "সিগারেট",
+        "sport": "খেলাধুলা",
+        "pet": "পোষা প্রাণী",
+        "electronics": "ইলেকট্রনিক্স",
+        "wine": "মদ",
+        "gift": "উপহার",
+        "social": "সামাজিক",
+        "book": "বই",
+        "office": "অফিস",
+        "furniture": "আসবাবপত্র",
+        "charity": "দান",
+        "hobbies": "শখ"
+      },
+      "loan": {
+        "personalLoanGiven": "ব্যক্তিগত ঋণ দেওয়া",
+        "businessLoanGiven": "ব্যবসায়িক ঋণ দেওয়া",
+        "loanRepaidToMe": "ঋণ ফেরত পাওয়া",
+        "personalLoanTaken": "ব্যক্তিগত ঋণ নেওয়া",
+        "bankLoanTaken": "ব্যাংক ঋণ নেওয়া",
+        "loanPayment": "ঋণ পরিশোধ",
+        "loan": "ঋণ"
+      },
+      "asset": {
+        "purchaseAsset": "সম্পদ ক্রয়",
+        "sellAsset": "সম্পদ বিক্রয়"
+      },
+      "fuel": {
+        "carFuel": "গাড়ির জ্বালানি",
+        "motorcycleFuel": "মোটরসাইকেল জ্বালানি",
+        "evCharging": "ইভি চার্জিং"
+      },
+      "income": {
+        "salary": "বেতন",
+        "business": "ব্যবসা",
+        "investment": "বিনিয়োগ",
+        "otherIncome": "অন্যান্য আয়",
+        "freelance": "ফ্রিল্যান্স",
+        "rental": "ভাড়া",
+        "gift": "উপহার",
+        "interest": "সুদ",
+        "bonus": "বোনাস"
+      }
+    }
+  },
+  "transaction": {
+    "types": {
+      "income": "আয়",
+      "expense": "ব্যয়"
+    },
+    "subTypes": {
+      "none": "সাধারণ",
+      "loan": "ঋণ",
+      "asset": "সম্পদ",
+      "fuel": "জ্বালানি"
+    },
+    "title": {
+      "add": "লেনদেন যোগ করুন",
+      "edit": "লেনদেন সম্পাদনা"
+    },
+    "edit": {
+      "edit": "সম্পাদনা",
+      "editFull": "সম্পূর্ণ সম্পাদনা"
+    }
+  },
+  "asset": {
+    "name": "সম্পদের নাম",
+    "transactionDate": "লেনদেনের তারিখ",
+    "currentValue": "বর্তমান মূল্য"
+  },
+  "loan": {
+    "personName": "ব্যক্তি/প্রতিষ্ঠানের নাম",
+    "loanDate": "ঋণের তারিখ",
+    "dueDate": "শেষ তারিখ"
+  },
+  "fuel": {
+    "odo": "ওডো",
+    "km": "কিমি",
+    "L": "লি",
+    "mileage": "মাইলেজ",
+    "kmPerLiter": "কিমি/লি",
+    "odometerReading": "ওডোমিটার রিডিং",
+    "fuelQuantity": "জ্বালানির পরিমাণ",
+    "fuelType": "জ্বালানির ধরন",
+    "types": {
+      "octen": "অকটেন",
+      "petrol": "পেট্রল",
+      "diesel": "ডিজেল",
+      "electric": "বিদ্যুৎ",
+      "other": "অন্যান্য"
+    }
+  },
+  "charts": {
+    "title": "বিশ্লেষণ",
+    "types": {
+      "all": "সব",
+      "income": "আয়",
+      "expense": "ব্যয়",
+      "fuel": "জ্বালানি"
+    },
+    "list": "তালিকা",
+    "noMemo": "কোন মেমো নেই",
+    "notApplicable": "প্রযোজ্য নয়",
+    "dueDate": "শেষ তারিখ"
+  },
+  "dashboard": {
+    "title": "ড্যাশবোর্ড",
+    "summary": "সারসংক্ষেপ",
+    "recentTransactions": "সাম্প্রতিক লেনদেন",
+    "viewAll": "সব দেখুন",
+    "noTransactions": "কোন লেনদেন পাওয়া যায়নি",
+    "income": "আয়",
+    "expense": "ব্যয়",
+    "balance": "ব্যালেন্স"
+  },
+  "settings": {
+    "title": "সেটিংস",
+    "deleteCategory": "আপনি কি নিশ্চিত যে আপনি ক্যাটাগরি '{0}' মুছে দিতে চান?",
+    "clearData": "আপনি কি নিশ্চিত যে আপনি সমস্ত ডেটা মুছে দিতে চান? এই ক্রিয়াটি পূর্বাবস্থায় ফেরানো যাবে না।",
+    "dataCleared": "সমস্ত ডেটা মুছে দেওয়া হয়েছে।",
+    "dataRestored": "ডেটা পুনঃস্থাপন করা হয়েছে।",
+    "invalidDataFormat": "ডেটা ফরম্যাট সঠিক নয়।",
+    "failedToParseFile": "ফাইল পার্স করতে ব্যর্থ হয়েছে।",
+    "language": "ভাষা",
+    "languages": {
+      "en": "English",
+      "bn": "বাংলা"
+    },
+    "theme": "থিম",
+    "themes": {
+      "light": "লাইট",
+      "dark": "ডার্ক",
+      "system": "সিস্টেম"
+    }
+  },
+  "months": {
+    "january": "জানুয়ারি",
+    "february": "ফেব্রুয়ারি",
+    "march": "মার্চ",
+    "april": "এপ্রিল",
+    "may": "মে",
+    "june": "জুন",
+    "july": "জুলাই",
+    "august": "আগস্ট",
+    "september": "সেপ্টেম্বর",
+    "october": "অক্টোবর",
+    "november": "নভেম্বর",
+    "december": "ডিসেম্বর"
+  },
+  "export": {
+    "title": "রপ্তানি",
+    "transactions": "লেনদেন",
+    "startDate": "শুরুর তারিখ",
+    "endDate": "শেষ তারিখ",
+    "exportFormat": "রপ্তানি ফরম্যাট",
+    "excel": "এক্সেল (XLSX)",
+    "csv": "সিএসভি",
+    "exportData": "তথ্য রপ্তানি করুন",
+    "dateError": "শুরুর তারিখ শেষ তারিখের পরে হতে পারে না"
+  },
+  "dataManagement": {
+    "title": "ডেটা ব্যবস্থাপনা",
+    "buttons": {
+      "backup": "ডেটা ব্যাকআপ",
+      "clear": "সমস্ত ডেটা রিসেট করুন",
+      "restore": "ডেটা পুনঃস্থাপন"
+    }
+  },
+  "security": {
+    "title": "নিরাপত্তা",
+    "pinLock": {
+      "title": "PIN লক",
+      "description": "৪-সংখ্যার PIN দ্বারা আপনার ডেটা সুরক্ষিত করুন"
+    },
+    "autoLock": {
+      "title": "স্বয়ংক্রিয় লক",
+      "description": "পটভূমিতে যাওয়ার সময় অ্যাপ্লিকেশন লক করুন"
+    },
+    "dialogs": {
+      "disablePinConfirm": "আপনি কি নিশ্চিত যে আপনি PIN লক অক্ষম করতে চান? এটি আপনার PIN মুছে দেবে।",
+      "pinSetSuccess": "PIN সফলভাবে সেট করা হয়েছে"
+    }
+  }
+}

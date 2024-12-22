@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TranslatePipe } from '../shared/translate.pipe';
 import { AssetTransaction } from '../../models/transaction-types';
 import { AssetService } from '../../services/asset.service';
 import { AutocompleteInputComponent } from '../shared/autocomplete-input.component';
@@ -8,11 +9,11 @@ import { AutocompleteInputComponent } from '../shared/autocomplete-input.compone
 @Component({
   selector: 'app-asset-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, AutocompleteInputComponent],
+  imports: [CommonModule, FormsModule, AutocompleteInputComponent, TranslatePipe],
   template: `
     <div class="form-fields">
       <div class="form-group">
-        <label for="assetName">Asset Name</label>
+        <label for="assetName">{{ 'asset.name' | translate }}</label>
         <app-autocomplete-input
           id="assetName"
           type="text"
@@ -25,7 +26,7 @@ import { AutocompleteInputComponent } from '../shared/autocomplete-input.compone
       </div>
       
       <div class="form-group">
-        <label for="transactionDate">Transaction Date</label>
+        <label for="transactionDate">{{ 'asset.transactionDate' | translate }}</label>
         <input
           type="date"
           id="transactionDate"
@@ -37,7 +38,7 @@ import { AutocompleteInputComponent } from '../shared/autocomplete-input.compone
       </div>
 
       <div class="form-group">
-        <label for="currentValue">Current Value</label>
+        <label for="currentValue">{{ 'asset.currentValue' | translate }}</label>
         <input
           type="number"
           id="currentValue"

@@ -8,15 +8,17 @@ import { MobileHeaderComponent } from '../../components/mobile-header/mobile-hea
 import { Location } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { TransactionSubType } from '../../models/transaction-types';
+import { TranslatePipe } from '../../components/shared/translate.pipe';
+import { TranslationService } from '../../services/translation.service';
 
 @Component({
   selector: 'app-add-category',
   standalone: true,
-  imports: [CommonModule, FormsModule, MobileHeaderComponent],
+  imports: [CommonModule, FormsModule, MobileHeaderComponent, TranslatePipe],
   template: `
     <div class="add-category">
       <app-mobile-header
-        title="Add Category"
+        [title]="'categories.add.title' | translate"
         [showBackButton]="true"
         [showOnDesktop]="true" 
         (back)="goBack()"
@@ -33,7 +35,7 @@ import { TransactionSubType } from '../../models/transaction-types';
             <input 
               type="text" 
               [(ngModel)]="categoryName"
-              placeholder="Category Name"
+              [placeholder]="'categories.add.namePlaceholder' | translate"
               class="category-name-input"
             >
           </div>
@@ -41,16 +43,16 @@ import { TransactionSubType } from '../../models/transaction-types';
           <div class="category-groups">
             @for (group of categoryGroups; track group.name) {
               <div class="category-group">
-                <h3>{{ group.name }}</h3>
+                <h3>{{ group.name | translate }}</h3>
                 <div class="icon-grid">
                   @for (icon of group.icons; track icon.name) {
                     <button 
                       class="icon-button" 
-                      [class.selected]="selectedIcon?.icon === icon.icon"
+                      [class.selected]="selectedIcon?.icon === icon.icon && selectedIcon?.name === icon.name"
                       (click)="selectIcon(icon)"
                     >
                       <span class="material-symbols-rounded">{{ icon.icon }}</span>
-                      <span class="icon-name">{{ icon.name }}</span>
+                      <span class="icon-name">{{ icon.name | translate }}</span>
                     </button>
                   }
                 </div>
@@ -65,7 +67,7 @@ import { TransactionSubType } from '../../models/transaction-types';
         [disabled]="!isValid"
         (click)="saveCategory()"
       >
-        Save Category
+        {{ 'common.save' | translate }}
       </button>
     </div>
   `,
@@ -196,13 +198,24 @@ export class AddCategoryComponent implements OnInit {
   categoryName = '';
   selectedIcon: CategoryIcon | null = null;
   referer: string = '';
+  private _selectedIconName = '';
+  private initialTranslation = '';
 
   constructor(
     private dbService: DbService,
     private router: Router,
     private location: Location,
-    private route: ActivatedRoute
-  ) {}
+    private route: ActivatedRoute,
+    private translationService: TranslationService
+  ) {
+    this.translationService.currentLang$.subscribe(() => {
+      if (this.selectedIcon && this.categoryName === this.initialTranslation) {
+        const newTranslation = this.translationService.translate(this._selectedIconName);
+        this.categoryName = newTranslation;
+        this.initialTranslation = newTranslation;
+      }
+    });
+  }
 
   ngOnInit(): void {
     const typeFromQuery = this.route.snapshot.queryParamMap.get('type');
@@ -221,10 +234,18 @@ export class AddCategoryComponent implements OnInit {
     return !!this.selectedIcon && !!this.categoryName.trim();
   }
 
+  get translatedIconName(): string {
+    return this._selectedIconName ? this.translationService.translate(this._selectedIconName) : '';
+  }
+
   selectIcon(icon: CategoryIcon) {
     this.selectedIcon = icon;
-    if (!this.categoryName) {
-      this.categoryName = icon.name;
+    this._selectedIconName = icon.name;
+    
+    const translation = this.translationService.translate(icon.name);
+    if (!this.categoryName || this.categoryName === this.initialTranslation) {
+      this.categoryName = translation;
+      this.initialTranslation = translation;
     }
   }
 

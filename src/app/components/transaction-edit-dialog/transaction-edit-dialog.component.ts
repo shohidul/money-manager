@@ -1,128 +1,139 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, Inject, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Transaction, isLoanTransaction, isAssetTransaction, isFuelTransaction } from '../../models/transaction-types';
-import { LoanFormComponent } from '../transaction-forms/loan-form.component';
 import { AssetFormComponent } from '../transaction-forms/asset-form.component';
+import { LoanFormComponent } from '../transaction-forms/loan-form.component';
 import { FuelFormComponent } from '../transaction-forms/fuel-form.component';
 import { Category } from '../../services/db.service';
+import { TranslatePipe } from '../shared/translate.pipe';
+import { TranslateDatePipe } from '../shared/translate-date.pipe';
+import { TranslateNumberPipe } from "../shared/translate-number.pipe";
 
 @Component({
   selector: 'app-transaction-edit-dialog',
   standalone: true,
   imports: [
-    CommonModule, 
+    CommonModule,
     FormsModule,
-    LoanFormComponent,
     AssetFormComponent,
-    FuelFormComponent
-  ],
+    LoanFormComponent,
+    FuelFormComponent,
+    TranslatePipe,
+    TranslateDatePipe,
+    TranslateNumberPipe
+],
   template: `
-    <div class="dialog-overlay">
-      <div class="dialog-content">
-        <div class="dialog-header">
-          <h2>Edit Transaction</h2>
-          <button class="edit-full-button" (click)="onEditFull()">
-            @if (editedTransaction.subType !== 'none') {
-              Edit Full
-            } @else {
-              Edit
-            }
-            <span class="material-icons">chevron_right</span>
-          </button>
-        </div>
-
-        <div class="dialog-body">
-          <div class="dialog-content-grid" [class.no-form]="editedTransaction.subType === 'none'">
-            @if (editedTransaction.subType === 'none') {
-              <div class="transaction-summary-column">
-                <div class="summary-item category-item">
-                  <div class="category-content">
-                    <span class="material-symbols-rounded category-icon" [class]="editedTransaction.type">{{ category.icon }}</span>
-                    <div class="category-details">
-                    <span class="label">{{ editedTransaction.type | titlecase }}</span>
-                      <span class="category-name">{{ category.name }}</span>
-                    </div>
-                  </div>
-                </div>
-                <div class="summary-item type-item">
-                  <span class="label">
-                    <span class="material-icons">category</span>
-                    Date
-                  </span>
-                  <span class="value">{{ editedTransaction.date | date: 'short' }}</span>
-                </div>
-                <div class="summary-item amount-item">
-                  <span class="label">
-                    <span class="material-icons">attach_money</span>
-                    Amount
-                  </span>
-                  <span class="value">{{ editedTransaction.amount | currency }}</span>
-                </div>
-                <div class="summary-item memo-item">
-                  <span class="label">
-                    <span class="material-icons">notes</span>
-                    Memo
-                  </span>
-                  <span class="value">{{ editedTransaction.memo || 'No memo' }}</span>
-                </div>
-              </div>
-            } @else {
-              <div class="form-container">
-                <div class="summary-item category-item compact">
-                  <div class="category-content">
-                    <span class="material-symbols-rounded category-icon" [class]="editedTransaction.type">{{ category.icon }}</span>
-                    <div class="category-details">
-                      <span class="label">{{ editedTransaction.type | titlecase }} | {{ editedTransaction.subType | titlecase }}</span>
-                      <span class="category-name">{{ category.name }}</span>
-                      <span class="meta-info">{{ editedTransaction.memo || 'No memo' }} | {{ editedTransaction.date | date: 'short'}}</span>
-                    </div>
-                  </div>
-                  <span class="value">{{ editedTransaction.amount | currency }}</span>
-                </div>
-
-                <div class="form-content">
-                  @if (isLoanTransaction(editedTransaction)) {
-                    <app-loan-form
-                      [transaction]="editedTransaction"
-                      (transactionChange)="onTransactionChange($event)"
-                    />
-                  }
-
-                  @if (isAssetTransaction(editedTransaction)) {
-                    <app-asset-form
-                      [transaction]="editedTransaction"
-                      (transactionChange)="onTransactionChange($event)"
-                    />
-                  }
-
-                  @if (isFuelTransaction(editedTransaction)) {
-                    <app-fuel-form
-                      [transaction]="editedTransaction"
-                      (transactionChange)="onTransactionChange($event)"
-                    />
-                  }
-                </div>
-              </div>
-            }
+    @if (show) {
+      <div class="dialog-overlay" (click)="onOverlayClick($event)">
+        <div class="dialog-content">
+          <div class="dialog-header">
+            <h2>{{ 'transaction.title.edit' | translate }}</h2>
+            <button class="edit-full-button" (click)="onEditFull()">
+              @if (editedTransaction.subType !== 'none') {
+                {{ 'transaction.edit.editFull' | translate }}
+              } @else {
+                {{ 'transaction.edit.edit' | translate }}
+              }
+              <span class="material-icons">chevron_right</span>
+            </button>
           </div>
-        </div>
 
-        <div class="dialog-actions">
-          <button class="delete-button" (click)="onDelete()">Delete</button>
-          <div class="right-actions">
-            <button class="cancel-button" (click)="onCancel()">Cancel</button>
-            @if (editedTransaction.subType !== 'none') {
-              <button class="save-button" (click)="onSave()">Save</button>
-            }
+          <div class="dialog-body">
+            <div class="dialog-content-grid" [class.no-form]="editedTransaction.subType === 'none'">
+              @if (editedTransaction.subType === 'none') {
+                <div class="transaction-summary-column">
+                  <div class="summary-item category-item">
+                    <div class="category-content">
+                      <span class="material-symbols-rounded category-icon" [class]="editedTransaction.type">{{ category.icon }}</span>
+                      <div class="category-details">
+                        <span class="label">{{ 'transaction.types.' + editedTransaction.type | translate }}</span>
+                        <span class="category-name">{{ category.name | translate }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="summary-item type-item">
+                    <span class="label">
+                      <span class="material-icons">event</span>
+                      {{ 'common.date' | translate }}
+                    </span>
+                    <span class="value">{{ editedTransaction.date | translateDate:'short' }}</span>
+                  </div>
+                  <div class="summary-item amount-item">
+                    <span class="label">
+                      <span class="material-icons">attach_money</span>
+                      {{ 'common.amount' | translate }}
+                    </span>
+                    <span class="value">{{ editedTransaction.amount | translateNumber:'1.0-2' }}</span>
+                  </div>
+                  <div class="summary-item memo-item">
+                    <span class="label">
+                      <span class="material-icons">notes</span>
+                      {{ 'common.memo' | translate }}
+                    </span>
+                    <span class="value">{{ editedTransaction.memo || ('common.noMemo' | translate) }}</span>
+                  </div>
+                </div>
+              } @else {
+                <div class="form-container">
+                  <div class="summary-item category-item compact">
+                    <div class="category-content">
+                      <span class="material-symbols-rounded category-icon" [class]="editedTransaction.type">{{ category.icon }}</span>
+                      <div class="category-details">
+                        <span class="label">{{ 'transaction.types.' + editedTransaction.type | translate }} | {{ 'transaction.subTypes.' + editedTransaction.subType | translate }}</span>
+                        <span class="category-name">{{ category.name | translate }}</span>
+                        <span class="meta-info">{{ editedTransaction.memo || ('common.noMemo' | translate) }} | {{ editedTransaction.date | translateDate:'short'}}</span>
+                      </div>
+                    </div>
+                    <span class="value">{{ editedTransaction.amount | translateNumber:'1.0-2' }}</span>
+                  </div>
+
+                  <div class="form-content">
+                    @if (isLoanTransaction(editedTransaction)) {
+                      <app-loan-form
+                        [transaction]="editedTransaction"
+                        (transactionChange)="onTransactionChange($event)"
+                      />
+                    }
+
+                    @if (isAssetTransaction(editedTransaction)) {
+                      <app-asset-form
+                        [transaction]="editedTransaction"
+                        (transactionChange)="onTransactionChange($event)"
+                      />
+                    }
+
+                    @if (isFuelTransaction(editedTransaction)) {
+                      <app-fuel-form
+                        [transaction]="editedTransaction"
+                        (transactionChange)="onTransactionChange($event)"
+                      />
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="dialog-actions">
+            <button class="delete-button" (click)="onDelete()">
+              {{ 'common.delete' | translate }}
+            </button>
+            <div class="right-actions">
+              <button class="cancel-button" (click)="onCancel()">
+                {{ 'common.cancel' | translate }}
+              </button>
+              <button class="save-button" (click)="onSave()">
+                {{ 'common.save' | translate }}
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    }
   `,
   styles: [`
-  
     .dialog-overlay {
       position: fixed;
       top: 0;
@@ -143,8 +154,7 @@ import { Category } from '../../services/db.service';
       height: 85%;
       max-height: 90vh;
       overflow-y: auto;
-      display: flex
-  ;
+      display: flex;
       flex-direction: column;
       justify-content: space-between;
     }
@@ -395,7 +405,7 @@ import { Category } from '../../services/db.service';
     }
   `]
 })
-export class TransactionEditDialogComponent {
+export class TransactionEditDialogComponent implements OnInit {
   @Input() transaction!: Transaction;
   @Input() category!: Category;
   @Output() save = new EventEmitter<Transaction>();
@@ -406,6 +416,7 @@ export class TransactionEditDialogComponent {
   isLoanTransaction = isLoanTransaction;
   isAssetTransaction = isAssetTransaction;
   isFuelTransaction = isFuelTransaction;
+  show = true;
 
   constructor(private router: Router) {}
 
@@ -429,15 +440,24 @@ export class TransactionEditDialogComponent {
 
   onSave() {
     this.save.emit(this.editedTransaction);
+    this.show = false;
   }
 
   onDelete() {
     if (confirm('Are you sure you want to delete this transaction?')) {
       this.delete.emit();
+      this.show = false;
     }
   }
 
   onCancel() {
     this.cancel.emit();
+    this.show = false;
+  }
+
+  onOverlayClick(event: MouseEvent) {
+    if ((event.target as HTMLElement).classList.contains('dialog-overlay')) {
+      this.onCancel();
+    }
   }
 }

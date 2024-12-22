@@ -1,25 +1,26 @@
 import { Component, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslatePipe } from '../../../components/shared/translate.pipe';
 
 @Component({
   selector: 'app-data-management-card',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   template: `
     <div class="card">
-      <h3>Data Management</h3>
+      <h3>{{ 'dataManagement.title' | translate }}</h3>
       <div class="settings-group data-mgt-group">
         <button class="backup-button" (click)="backup.emit()">
           <span class="material-icons">download</span>
-          Backup Data
+          {{ 'dataManagement.buttons.backup' | translate }}
         </button>
         <button class="clear-button" (click)="clear.emit()">
           <span class="material-icons">delete_forever</span>
-          Reset All Data
+          {{ 'dataManagement.buttons.clear' | translate }}
         </button>
         <button class="restore-button" (click)="restore.emit()">
           <span class="material-icons">restore</span>
-          Restore Data
+          {{ 'dataManagement.buttons.restore' | translate }}
         </button>
       </div>
     </div>

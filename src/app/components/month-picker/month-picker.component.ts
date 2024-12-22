@@ -1,11 +1,15 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { format, addYears, subYears, parse } from 'date-fns';
+import { TranslatePipe } from '../shared/translate.pipe';
+import { TranslationService } from '../../services/translation.service';
+import { TranslateNumberPipe } from "../shared/translate-number.pipe";
+
 
 @Component({
   selector: 'app-month-picker',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe, TranslateNumberPipe],
   template: `
     <div class="month-picker">
       <button class="month-button" (click)="togglePicker()">
@@ -13,30 +17,27 @@ import { format, addYears, subYears, parse } from 'date-fns';
         <span class="material-icons">{{ isOpen ? 'expand_less' : 'expand_more' }}</span>
       </button>
 
-      @if (isOpen) {
-        <div class="picker-dropdown">
-          <div class="year-selector">
-            <button (click)="prevYear()">
-              <span class="material-icons">chevron_left</span>
-            </button>
-            <span>{{ selectedYear }}</span>
-            <button (click)="nextYear()">
-              <span class="material-icons">chevron_right</span>
-            </button>
-          </div>
-          <div class="months-grid">
-            @for (month of months; track month.value) {
-              <button 
-                class="month-item" 
-                [class.selected]="isSelectedMonth(month.value)"
-                (click)="selectMonth(month.value)"
-              >
-                {{ month.label }}
-              </button>
-            }
-          </div>
+      <div *ngIf="isOpen" class="picker-dropdown">
+        <div class="year-selector">
+          <button (click)="prevYear()">
+            <span class="material-icons">chevron_left</span>
+          </button>
+          <span>{{ selectedYear | translateNumber }}</span>
+          <button (click)="nextYear()">
+            <span class="material-icons">chevron_right</span>
+          </button>
         </div>
-      }
+        <div class="months-grid">
+          <button 
+            *ngFor="let month of months" 
+            class="month-item" 
+            [class.selected]="isSelectedMonth(month.value)"
+            (click)="selectMonth(month.value)"
+          >
+            {{ month.label | translate }}
+          </button>
+        </div>
+      </div>
     </div>
   `,
   styles: [
@@ -126,22 +127,27 @@ export class MonthPickerComponent {
   @Input() currentMonth!: string;
   @Output() monthChange = new EventEmitter<string>();
 
+  currentLang: string;
+
+  constructor(private translationService: TranslationService) {
+    this.currentLang = this.translationService.getCurrentLanguage();
+  }
   isOpen = false;
   selectedYear = new Date().getFullYear();
 
   months = [
-    { label: 'Jan', value: '01' },
-    { label: 'Feb', value: '02' },
-    { label: 'Mar', value: '03' },
-    { label: 'Apr', value: '04' },
-    { label: 'May', value: '05' },
-    { label: 'Jun', value: '06' },
-    { label: 'Jul', value: '07' },
-    { label: 'Aug', value: '08' },
-    { label: 'Sep', value: '09' },
-    { label: 'Oct', value: '10' },
-    { label: 'Nov', value: '11' },
-    { label: 'Dec', value: '12' },
+    { label: 'months.january', value: '01' },
+    { label: 'months.february', value: '02' },
+    { label: 'months.march', value: '03' },
+    { label: 'months.april', value: '04' },
+    { label: 'months.may', value: '05' },
+    { label: 'months.june', value: '06' },
+    { label: 'months.july', value: '07' },
+    { label: 'months.august', value: '08' },
+    { label: 'months.september', value: '09' },
+    { label: 'months.october', value: '10' },
+    { label: 'months.november', value: '11' },
+    { label: 'months.december', value: '12' },
   ];
 
   togglePicker() {
@@ -154,7 +160,12 @@ export class MonthPickerComponent {
 
   formatDisplayDate(): string {
     const date = parse(this.currentMonth, 'yyyy-MM', new Date());
-    return format(date, 'MMMM yyyy');
+    
+    // Format the date using Intl.DateTimeFormat
+    return new Intl.DateTimeFormat(this.currentLang, { 
+      month: 'long', 
+      year: 'numeric' 
+    }).format(date);
   }
 
   prevYear() {

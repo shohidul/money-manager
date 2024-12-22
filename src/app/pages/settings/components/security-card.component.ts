@@ -2,19 +2,20 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PinService } from '../../../services/pin.service';
 import { PinDialogComponent } from '../../../components/pin-dialog/pin-dialog.component';
+import { TranslatePipe } from '../../../components/shared/translate.pipe';
 
 @Component({
   selector: 'app-security-card',
   standalone: true,
-  imports: [CommonModule, PinDialogComponent],
+  imports: [CommonModule, PinDialogComponent, TranslatePipe],
   template: `
     <div class="card">
-      <h3>Security</h3>
+      <h3>{{ 'security.title' | translate }}</h3>
       <div class="settings-group">
         <div class="setting-item">
           <div class="setting-info">
-            <span>PIN Lock</span>
-            <small>Protect your data with a 4-digit PIN</small>
+            <span>{{ 'security.pinLock.title' | translate }}</span>
+            <small>{{ 'security.pinLock.description' | translate }}</small>
           </div>
           <div class="switch-button">
             <input 
@@ -29,8 +30,8 @@ import { PinDialogComponent } from '../../../components/pin-dialog/pin-dialog.co
         @if (pinService.hasPin()) {
           <div class="setting-item">
             <div class="setting-info">
-              <span>Auto-lock</span>
-              <small>Lock app when switching to background</small>
+              <span>{{ 'security.autoLock.title' | translate }}</span>
+              <small>{{ 'security.autoLock.description' | translate }}</small>
             </div>
             <div class="switch-button">
               <input 
@@ -103,8 +104,8 @@ import { PinDialogComponent } from '../../../components/pin-dialog/pin-dialog.co
       right: 0;
       bottom: 0;
       background-color: #ccc;
-      transition: .4s;
       border-radius: 34px;
+      transition: .4s;
     }
 
     .switch-button label:before {
@@ -131,40 +132,43 @@ import { PinDialogComponent } from '../../../components/pin-dialog/pin-dialog.co
       position: fixed;
       top: 0;
       left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: rgba(0, 0, 0, 0.5);
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
       display: flex;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       z-index: 1000;
     }
-  `]
+  `],
 })
 export class SecurityCardComponent {
   showPinDialog = false;
 
-  constructor(public pinService: PinService) {}
+
+  constructor(public pinService: PinService, private translate: TranslatePipe) {}
 
   togglePinLock() {
     if (this.pinService.hasPin()) {
-      if (confirm('Are you sure you want to disable PIN lock? This will remove your PIN.')) {
+      // If PIN is already set, show confirmation dialog
+      if (confirm(this.translate.transform('security.dialogs.disablePinConfirm'))) {
         this.pinService.removePin();
       }
     } else {
+      // If no PIN is set, show PIN dialog
       this.showPinDialog = true;
     }
   }
 
   toggleAutoLock() {
-    const newState = !this.pinService.isAutoLockEnabled();
-    this.pinService.setAutoLock(newState);
+    const currentAutoLockStatus = this.pinService.isAutoLockEnabled();
+    this.pinService.setAutoLock(!currentAutoLockStatus);
   }
 
   onPinSet(pin: string) {
     this.pinService.setPin(pin);
     this.closePinDialog();
-    alert('PIN has been set successfully');
+    alert(this.translate.transform('security.dialogs.pinSetSuccess'));
   }
 
   closePinDialog() {

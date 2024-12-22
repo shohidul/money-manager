@@ -1,11 +1,12 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { TranslatePipe } from '../shared/translate.pipe';
 
 @Component({
   selector: 'app-side-menu',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterLink, RouterLinkActive, TranslatePipe],
   template: `
     <nav class="side-menu" [class.open]="isOpen">
       <div class="menu-header">
@@ -16,39 +17,39 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
       <div class="menu-items">
         <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="close()">
           <span class="material-icons">view_stream</span>
-          Transactions
+          {{ 'menu.transactions' | translate }}
         </a>
         <a routerLink="/charts" routerLinkActive="active" (click)="close()">
           <span class="material-icons">donut_large</span>
-          Charts
+          {{ 'menu.charts' | translate }}
         </a>
         <a routerLink="/fuel" routerLinkActive="active" (click)="close()">
           <span class="material-icons">local_gas_station</span>
-          Fuel Logs
+          {{ 'menu.fuelLogs' | translate }}
         </a>
         <a routerLink="/loans" routerLinkActive="active" (click)="close()">
           <span class="material-icons">account_balance</span>
-          Loan Management
+          {{ 'menu.loanManagement' | translate }}
         </a>
         <a routerLink="/assets" routerLinkActive="active" (click)="close()">
           <span class="material-icons">real_estate_agent</span>
-          Asset Management
+          {{ 'menu.assetManagement' | translate }}
         </a>
         <a routerLink="/export" routerLinkActive="active" (click)="close()">
           <span class="material-icons">download</span>
-          Export
+          {{ 'menu.export' | translate }}
         </a>
         <a routerLink="/settings" routerLinkActive="active" (click)="close()">
           <span class="material-icons">settings</span>
-          Settings
+          {{ 'menu.settings' | translate }}
         </a>
         <a routerLink="/tutorial" routerLinkActive="active" (click)="close()">
           <span class="material-icons">help</span>
-          How to Use
+          {{ 'menu.howToUse' | translate }}
         </a>
         <a routerLink="/about" routerLinkActive="active" (click)="close()">
           <span class="material-icons">info</span>
-          About
+          {{ 'menu.about' | translate }}
         </a>
       </div>
     </nav>

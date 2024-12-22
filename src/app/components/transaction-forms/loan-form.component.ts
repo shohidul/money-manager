@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TranslatePipe } from '../shared/translate.pipe';
 import { LoanTransaction } from '../../models/transaction-types';
 import { PersonService } from '../../services/person.service';
 import { AutocompleteInputComponent } from '../shared/autocomplete-input.component';
@@ -8,11 +9,11 @@ import { AutocompleteInputComponent } from '../shared/autocomplete-input.compone
 @Component({
   selector: 'app-loan-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, AutocompleteInputComponent],
+  imports: [CommonModule, FormsModule, AutocompleteInputComponent, TranslatePipe],
   template: `
     <div class="form-fields">
       <div class="form-group">
-        <label for="personName">Person/Entity Name</label>
+        <label for="personName">{{ 'loan.personName' | translate }}</label>
         <app-autocomplete-input
           id="personName"
           type="text"
@@ -25,7 +26,7 @@ import { AutocompleteInputComponent } from '../shared/autocomplete-input.compone
       </div>
 
       <div class="form-group">
-        <label for="loanDate">Loan Date</label>
+        <label for="loanDate">{{ 'loan.loanDate' | translate }}</label>
         <input
           type="date"
           id="loanDate"
@@ -37,7 +38,7 @@ import { AutocompleteInputComponent } from '../shared/autocomplete-input.compone
       </div>
 
       <div class="form-group">
-        <label for="dueDate">Due Date</label>
+        <label for="dueDate">{{ 'loan.dueDate' | translate }}</label>
         <input
           type="date"
           id="dueDate"

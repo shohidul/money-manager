@@ -1,16 +1,17 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TranslatePipe } from '../shared/translate.pipe';
 import { FuelTransaction } from '../../models/transaction-types';
 
 @Component({
   selector: 'app-fuel-form',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe],
   template: `
     <div class="form-fields">
       <div class="form-group">
-        <label for="odometerReading">Odometer Reading</label>
+        <label for="odometerReading">{{ 'fuel.odometerReading' | translate }}</label>
         <input
           type="number"
           id="odometerReading"
@@ -22,7 +23,7 @@ import { FuelTransaction } from '../../models/transaction-types';
       </div>
       
       <div class="form-group">
-        <label for="fuelQuantity">Fuel Quantity</label>
+        <label for="fuelQuantity">{{ 'fuel.fuelQuantity' | translate }}</label>
         <input
           type="number"
           id="fuelQuantity"
@@ -34,7 +35,7 @@ import { FuelTransaction } from '../../models/transaction-types';
       </div>
 
       <div class="form-group">
-        <label for="fuelType">Fuel Type</label>
+        <label for="fuelType">{{ 'fuel.fuelType' | translate }}</label>
         <select
           id="fuelType"
           [(ngModel)]="transaction.fuelType"
@@ -42,11 +43,11 @@ import { FuelTransaction } from '../../models/transaction-types';
           class="form-input"
           required
         >
-          <option value="Octen">Octen</option>
-          <option value="Petrol">Petrol</option>
-          <option value="Diesel">Diesel</option>
-          <option value="Electric">Electric</option>
-          <option value="Other">Other</option>
+          <option value="Octen">{{ 'fuel.types.octen' | translate }}</option>
+          <option value="Petrol">{{ 'fuel.types.petrol' | translate }}</option>
+          <option value="Diesel">{{ 'fuel.types.diesel' | translate }}</option>
+          <option value="Electric">{{ 'fuel.types.electric' | translate }}</option>
+          <option value="Other">{{ 'fuel.types.other' | translate }}</option>
         </select>
       </div>
     </div>

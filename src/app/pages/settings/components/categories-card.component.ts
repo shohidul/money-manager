@@ -4,28 +4,29 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { Category } from '../../../services/db.service';
+import { TranslatePipe } from '../../../components/shared/translate.pipe';
 
 @Component({
   selector: 'app-categories-card',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, DragDropModule],
+  imports: [CommonModule, FormsModule, RouterLink, DragDropModule, TranslatePipe],
   template: `
     <div class="card">
       <div class="section-header">
-        <h3>Categories</h3>
+        <h3>{{ 'categories.title' | translate }}</h3>
         <div class="category-actions">
           <div class="category-filters">
             <button 
               [class.active]="categoryFilter === 'expense'"
               (click)="setCategoryFilter('expense')"
             >
-              Expense
+              {{ 'categories.filters.expense' | translate }}
             </button>
             <button 
               [class.active]="categoryFilter === 'income'"
               (click)="setCategoryFilter('income')"
             >
-              Income
+              {{ 'categories.filters.income' | translate }}
             </button>
             <button 
               class="reset-order"
@@ -33,7 +34,7 @@ import { Category } from '../../../services/db.service';
               [disabled]="!currentOrderDirty"
               (click)="resetCategoryOrder()"
             >
-              Reset Order
+              {{ 'categories.actions.resetOrder' | translate }}
             </button>
           </div>
         </div>
@@ -46,7 +47,7 @@ import { Category } from '../../../services/db.service';
             <div class="order-number">{{ category.order }}</div>
             <div class="category-info">
               <span class="material-symbols-rounded">{{ category.icon }}</span>
-              <span>{{ category.name }}</span>
+              <span>{{ category.name | translate }}</span>
               <span class="category-type">{{ category.type }}</span>
             </div>
             @if (category.isCustom) {
@@ -65,7 +66,7 @@ import { Category } from '../../../services/db.service';
       </div>
       <a [routerLink]="'/add-category'" [queryParams]="{ type: categoryFilter, referer: currentRoute }" class="add-category-button">
         <span class="material-icons">add</span>
-        Add New Category
+        {{ 'categories.actions.addNew' | translate }}
       </a>
     </div>
   `,
@@ -103,7 +104,7 @@ import { Category } from '../../../services/db.service';
       position: sticky;
       top: -16px;
       background: white;
-      padding: 1rem;
+      padding: 1rem 0;
       z-index: 1;
       flex-wrap: wrap;
       gap: 1rem;

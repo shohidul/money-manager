@@ -6,25 +6,28 @@ import { DbService } from '../../services/db.service';
 import { utils, write } from 'xlsx';
 import { format, parse } from 'date-fns';
 import { MobileHeaderComponent } from '../../components/mobile-header/mobile-header.component';
+import { TranslatePipe } from '../../components/shared/translate.pipe';
+import { TranslateDatePipe } from '../../components/shared/translate-date.pipe';
+import { TranslateNumberPipe } from '../../components/shared/translate-number.pipe';
 
 @Component({
   selector: 'app-export',
   standalone: true,
-  imports: [CommonModule, FormsModule, MobileHeaderComponent],
+  imports: [CommonModule, FormsModule, MobileHeaderComponent, TranslatePipe],
   template: `
     <div class="export">
       <app-mobile-header
-        title="Export"
+        title="{{ 'export.title' | translate }}"
         [showBackButton]="true"
         (back)="goBack()"
       />
 
       <div class="content">
         <div class="card">
-          <h3>Transactions</h3>
+          <h3>{{ 'export.transactions' | translate }}</h3>
           <div class="date-range">
             <div class="form-group">
-              <label for="startDate">Start Date</label>
+              <label for="startDate">{{ 'export.startDate' | translate }}</label>
               <input 
                 type="date" 
                 id="startDate"
@@ -33,7 +36,7 @@ import { MobileHeaderComponent } from '../../components/mobile-header/mobile-hea
               >
             </div>
             <div class="form-group">
-              <label for="endDate">End Date</label>
+              <label for="endDate">{{ 'export.endDate' | translate }}</label>
               <input 
                 type="date" 
                 id="endDate"
@@ -44,26 +47,26 @@ import { MobileHeaderComponent } from '../../components/mobile-header/mobile-hea
           </div>
 
           <div class="format-selection">
-            <label>Export Format:</label>
+            <label>{{ 'export.exportFormat' | translate }}:</label>
             <div class="format-buttons">
               <button 
                 [class.active]="format === 'xlsx'"
                 (click)="format = 'xlsx'"
               >
-                Excel (XLSX)
+                {{ 'export.excel' | translate }}
               </button>
               <button 
                 [class.active]="format === 'csv'"
                 (click)="format = 'csv'"
               >
-                CSV
+                {{ 'export.csv' | translate }}
               </button>
             </div>
           </div>
 
           <button class="export-button" (click)="exportData()">
             <span class="material-icons">download</span>
-            Export Data
+            {{ 'export.exportData' | translate }}
           </button>
         </div>
       </div>
@@ -150,7 +153,8 @@ export class ExportComponent {
 
   constructor(
     private dbService: DbService,
-    private router: Router
+    private router: Router,
+    private translate: TranslatePipe
   ) {}
 
   async exportData() {
@@ -158,7 +162,7 @@ export class ExportComponent {
     const end = parse(this.endDate, 'yyyy-MM-dd', new Date());
 
     if (start > end) {
-      alert('Start date cannot be after end date');
+      alert(this.translate.transform('export.dateError'));
       return;
     }
 

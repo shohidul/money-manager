@@ -14,6 +14,9 @@ import { MonthPickerComponent } from '../../components/month-picker/month-picker
 import { TransactionEditDialogComponent } from '../../components/transaction-edit-dialog/transaction-edit-dialog.component';
 import { startOfMonth, endOfMonth, format } from 'date-fns';
 import { calculateMileage } from '../../utils/fuel.utils';
+import { TranslatePipe } from '../../components/shared/translate.pipe';
+import { TranslateDatePipe } from '../../components/shared/translate-date.pipe';
+import { TranslateNumberPipe } from '../../components/shared/translate-number.pipe';
 
 @Component({
   selector: 'app-dashboard',
@@ -23,6 +26,9 @@ import { calculateMileage } from '../../utils/fuel.utils';
     RouterLink,
     MonthPickerComponent,
     TransactionEditDialogComponent,
+    TranslatePipe,
+    TranslateDatePipe,
+    TranslateNumberPipe
   ],
   template: `
     <div class="dashboard">
@@ -41,17 +47,17 @@ import { calculateMileage } from '../../utils/fuel.utils';
 
       <div class="overview card">
         <div class="stat-item">
-          <span class="label">Income</span>
-          <span class="amount">{{ totalIncome | number:'1.0-2' }}</span>
+          <span class="label">{{ 'dashboard.income' | translate }}</span>
+          <span class="amount">{{ totalIncome | translateNumber:'1.0-2' }}</span>
         </div>
         <div class="stat-item">
-          <span class="label">Expense</span>
-          <span class="amount">{{ totalExpense | number:'1.0-2' }}</span>
+          <span class="label">{{ 'dashboard.expense' | translate }}</span>
+          <span class="amount">{{ totalExpense | translateNumber:'1.0-2' }}</span>
         </div>
         <div class="stat-item">
-          <span class="label">Balance</span>
+          <span class="label">{{ 'dashboard.balance' | translate }}</span>
           <span class="amount">
-            {{ balance | number:'1.0-2' }}
+            {{ balance | translateNumber:'1.0-2' }}
           </span>
         </div>
       </div>
@@ -59,10 +65,10 @@ import { calculateMileage } from '../../utils/fuel.utils';
         <div class="transaction-list">
           <div *ngFor="let group of transactionGroups" class="transaction-group card">
             <div class="date-header">
-              <span>{{ group.date | date: 'MM/dd E' }}</span>
+              <span>{{ group.date | translateDate: 'MM/dd E' }}</span>
               <span class="total">
-                <span *ngIf="group.totalIncome > 0">Income: {{ group.totalIncome | number:'1.0-2' }}</span>
-                <span *ngIf="group.totalExpense > 0">&nbsp;&nbsp;&nbsp;Expense: {{ group.totalExpense | number:'1.0-2' }}</span>
+                <span *ngIf="group.totalIncome > 0">{{ 'dashboard.income' | translate }}: {{ group.totalIncome | translateNumber:'1.0-2' }}</span>
+                <span *ngIf="group.totalExpense > 0">&nbsp;&nbsp;&nbsp;{{ 'dashboard.expense' | translate }}: {{ group.totalExpense | translateNumber:'1.0-2' }}</span>
               </span>
             </div>
             <div *ngFor="let tx of group.transactions" 
@@ -72,8 +78,8 @@ import { calculateMileage } from '../../utils/fuel.utils';
                 {{ getCategoryIcon(tx.categoryId) }}
               </span>
               <div class="transaction-details">
-                <span class="small-text">{{ tx.date | date: 'shortTime' }}</span>
-                <span class="memo">{{ tx.memo ? tx.memo : getCategoryName(tx.categoryId) }}</span>
+                <span class="small-text">{{ tx.date | translateDate: 'shortTime' }}</span>
+                <span class="memo">{{ tx.memo ? tx.memo : getCategoryName(tx.categoryId) | translate }}</span>
 
                 @if (isAssetTransaction(tx)) {
                   <span class="small-text">
@@ -83,21 +89,22 @@ import { calculateMileage } from '../../utils/fuel.utils';
 
                 @if (isLoanTransaction(tx)) {
                   <span class="small-text">
-                    {{ tx.personName || 'Unnamed' }} | Due Date: {{ tx.dueDate ? (tx.dueDate | date: 'shortDate') : 'N/A' }}
+                    {{ tx.personName || 'Unnamed' }} | {{ 'loan.dueDate' | translate }}: {{ tx.dueDate ? (tx.dueDate | translateDate: 'shortDate') : 'N/A' }}
                   </span>
                 }
 
                 @if (isFuelTransaction(tx)) {
                   <span class="small-text">
                     {{ tx.fuelType || '' }}
-                    {{ tx.fuelQuantity || 0 }} L | Odo {{ tx.odometerReading || 0 }} km | 
-                    Mileage {{ (getMileage(tx) || 0) | number:'1.1-1' }} km/L
+                    {{ tx.fuelQuantity || 0 }} {{ 'fuel.L' | translate }} | 
+                    {{ 'fuel.odo' | translate }} {{ tx.odometerReading || 0 }} {{ 'fuel.km' | translate }} | 
+                    {{ 'fuel.mileage' | translate }} {{ (getMileage(tx) || 0) | translateNumber:'1.1-1' }} {{ 'fuel.kmPerLiter' | translate }}
                   </span>
                 }
 
               </div>
               <span class="amount">
-                {{ tx.type === 'income' ? '' : '-' }}{{ tx.amount | number:'1.0-2' }}
+                {{ tx.type === 'income' ? '' : '-' }}{{ tx.amount | translateNumber:'1.0-2' }}
               </span>
             </div>
           </div>
