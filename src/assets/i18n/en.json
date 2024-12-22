@@ -28,6 +28,14 @@
   },
   "categories": {
     "title": "Categories",
+    "filters": {
+      "expense": "Expense",
+      "income": "Income"
+    },
+    "actions": {
+      "resetOrder": "Reset Order",
+      "addNew": "Add New Category"
+    },
     "groups": {
       "common": "Common",
       "finance": "Finance",
@@ -287,14 +295,6 @@
         "interest": "Interest",
         "bonus": "Bonus"
       }
-    },
-    "filters": {
-      "expense": "Expense",
-      "income": "Income"
-    },
-    "actions": {
-      "resetOrder": "Reset Order",
-      "addNew": "Add New Category"
     }
   },
   "transaction": {
@@ -369,6 +369,14 @@
   },
   "settings": {
     "title": "Settings",
+    "deleteCategory": "Are you sure you want to delete the category '{0}'?",
+    "clearData": "Are you sure you want to clear all data? This action cannot be undone.",
+    "dataCleared": "All data has been cleared successfully.",
+    "confirmRestore": "Are you sure you want to restore this backup? This will replace all existing data.",
+    "dataRestored": "Data restored successfully.",
+    "invalidDataFormat": "Invalid backup file format.",
+    "failedToParseFile": "Failed to parse the backup file.",
+    "failedToClearData": "Failed to clear data. Please try again.",
     "language": "Language",
     "languages": {
       "en": "English",
@@ -379,13 +387,7 @@
       "light": "Light",
       "dark": "Dark",
       "system": "System"
-    },
-    "deleteCategory": "Are you sure you want to delete the category '{0}'?",
-    "clearData": "Are you sure you want to clear all data? This action cannot be undone.",
-    "dataCleared": "All data has been cleared.",
-    "dataRestored": "Data has been restored.",
-    "invalidDataFormat": "Invalid data format.",
-    "failedToParseFile": "Failed to parse the file."
+    }
   },
   "months": {
     "january": "Jan",

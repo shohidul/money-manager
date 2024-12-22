@@ -30,77 +30,22 @@ export interface Category {
 export class DbService {
   private db!: IDBPDatabase<MoneyManagerDB>;
   private readonly DB_NAME = 'money-manager-db';
-  private readonly VERSION = 4; // Increased version for schema update
+  private readonly VERSION = 1;
 
   async initializeDB() {
     this.db = await openDB<MoneyManagerDB>(this.DB_NAME, this.VERSION, {
-      upgrade(db, oldVersion, newVersion) {
-        if (oldVersion < 1) {
-          const txStore = db.createObjectStore('transactions', {
-            keyPath: 'id',
-            autoIncrement: true,
-          });
-          txStore.createIndex('by-date', 'date');
+      upgrade(db) {
+        const txStore = db.createObjectStore('transactions', {
+          keyPath: 'id',
+          autoIncrement: true,
+        });
+        txStore.createIndex('by-date', 'date');
 
-          const categoryStore = db.createObjectStore('categories', {
-            keyPath: 'id',
-            autoIncrement: true,
-          });
-        }
-
-        if (oldVersion < 2) {
-          const categoryStore = db
-            .transaction('categories', 'readwrite')
-            .objectStore('categories');
-          categoryStore
-            .openCursor()
-            .then(function addOrder(cursor): Promise<void> | undefined {
-              if (!cursor) return;
-              const category = cursor.value;
-              category.order = cursor.key;
-              categoryStore.put(category);
-              return cursor.continue().then(addOrder);
-            });
-        }
-
-        if (oldVersion < 3) {
-          const txStore = db.transaction('transactions', 'readwrite').objectStore('transactions');
-          txStore.openCursor().then(function updateTypes(cursor): Promise<void> | undefined {
-            if (!cursor) return;
-            const tx = cursor.value;
-            if (!tx.type) {
-              tx.type = 'expense';
-            }
-            txStore.put(tx);
-            return cursor.continue().then(updateTypes);
-          });
-        }
-
-        if (oldVersion < 4) {
-          // Add subType to existing transactions and categories
-          const txStore = db.transaction('transactions', 'readwrite').objectStore('transactions');
-          txStore.openCursor().then(function addSubType(cursor): Promise<void> | undefined {
-            if (!cursor) return;
-            const tx = cursor.value;
-            if (!tx.subType) {
-              tx.subType = 'none';
-            }
-            txStore.put(tx);
-            return cursor.continue().then(addSubType);
-          });
-
-          const categoryStore = db.transaction('categories', 'readwrite').objectStore('categories');
-          categoryStore.openCursor().then(function addSubType(cursor): Promise<void> | undefined {
-            if (!cursor) return;
-            const category = cursor.value;
-            if (!category.subType) {
-              category.subType = 'none';
-            }
-            categoryStore.put(category);
-            return cursor.continue().then(addSubType);
-          });
-        }
-      },
+        db.createObjectStore('categories', {
+          keyPath: 'id',
+          autoIncrement: true,
+        });
+      }
     });
   }
 
@@ -234,13 +179,15 @@ export class DbService {
         await tx.objectStore('categories').put(category);
       }
 
-      for (const txn of transactions) {
-        const newTransaction = {
-          ...txn,
-          date: new Date(txn.date),
+      for (const transaction of transactions) {
+        // Ensure date is a Date object and properly indexed
+        const restoredTransaction = {
+          ...transaction,
+          date: transaction.date instanceof Date 
+            ? transaction.date 
+            : new Date(transaction.date)
         };
-        delete newTransaction.id;
-        await tx.objectStore('transactions').add(newTransaction);
+        await tx.objectStore('transactions').put(restoredTransaction);
       }
 
       await tx.done;

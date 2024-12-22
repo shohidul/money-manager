@@ -199,16 +199,28 @@ export class SettingsComponent implements OnInit {
   }
 
   async clearData() {
-    const confirm = window.confirm(
+    const shouldClear = window.confirm(
       this.translate.transform('settings.clearData')
     );
-    if (!confirm) return;
+    if (!shouldClear) return;
 
-    await this.dbService.clearAllData();
-    await this.categoryService.initializeDefaultCategories();
-    await this.loadCategoriesExpense();
-    await this.loadCategoriesIncome();
-    alert(this.translate.transform('settings.dataCleared'));
+    try {
+      // Clear all existing data
+      await this.dbService.clearAllData();
+
+      // Reinitialize default categories
+      await this.categoryService.initializeDefaultCategories();
+
+      // Reload categories
+      await this.loadCategoriesExpense();
+      await this.loadCategoriesIncome();
+
+      // Notify user
+      alert(this.translate.transform('settings.dataCleared'));
+    } catch (error) {
+      console.error('Failed to clear data:', error);
+      alert(this.translate.transform('settings.failedToClearData'));
+    }
   }
 
   async restoreData() {
@@ -219,23 +231,48 @@ export class SettingsComponent implements OnInit {
       const file = event.target.files[0];
       if (!file) return;
 
-      const text = await file.text();
       try {
+        const text = await file.text();
         const data = JSON.parse(text);
-        if (data.categories && data.transactions) {
-          await this.dbService.clearAllData();
-          await this.dbService.restoreData(data);
-          await this.loadCategoriesExpense();
-          await this.loadCategoriesIncome();
-          alert(this.translate.transform('settings.dataRestored'));
-        } else {
+
+        // Validate data structure
+        if (!this.isValidBackupData(data)) {
           alert(this.translate.transform('settings.invalidDataFormat'));
+          return;
         }
+
+        // Confirm restore action
+        const confirmRestore = confirm(this.translate.transform('settings.confirmRestore'));
+        if (!confirmRestore) return;
+
+        // Clear existing data and restore
+        await this.dbService.clearAllData();
+        await this.dbService.restoreData(data);
+
+        // Clear categories cache
+        this.categoryService.clearCategoriesCache();
+
+        // Reload categories
+        await this.loadCategoriesExpense();
+        await this.loadCategoriesIncome();
+
+        alert(this.translate.transform('settings.dataRestored'));
       } catch (error) {
+        console.error('Restore failed:', error);
         alert(this.translate.transform('settings.failedToParseFile'));
       }
     };
     fileInput.click();
+  }
+
+  private isValidBackupData(data: any): boolean {
+    return (
+      data &&
+      Array.isArray(data.categories) &&
+      Array.isArray(data.transactions) &&
+      data.categories.length > 0 &&
+      data.transactions.length >= 0
+    )
   }
 
   async resetCategoryOrder(type: 'expense' | 'income') {

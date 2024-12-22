@@ -11,28 +11,28 @@ export class CategoryService {
   async initializeDefaultCategories() {
     const existingCategories = await this.dbService.getCategories();
 
-    for (const category of defaultCategories) {
+    const defaultCategoriesWithDetails = defaultCategories.map((category, index) => ({
+      id: index + 1, // Start IDs from 1
+      name: category.name,
+      icon: category.icon,
+      type: category.type,
+      subType: category.subType,
+      isCustom: false,
+      order: index + 1
+    }));
+
+    for (const category of defaultCategoriesWithDetails) {
       const exists = existingCategories.some(
-        c =>
-          c.icon === category.icon &&
-          c.type === category.type &&
-          c.subType === category.subType &&
-          c.isCustom === false
+        c => c.id === category.id
       );
 
       if (!exists) {
-        await this.dbService.addCategory({
-          name: category.name,
-          icon: category.icon,
-          type: category.type,
-          subType: category.subType,
-          isCustom: false
-        });
+        await this.dbService.addCategory(category);
       }
     }
 
     // Clear cache to force reload
-    this.categoriesCache = null;
+    this.clearCategoriesCache();
   }
 
   async getAllCategories() {
@@ -49,19 +49,24 @@ export class CategoryService {
 
   async addCategory(category: Omit<Category, 'id'>) {
     // Clear cache to force reload
-    this.categoriesCache = null;
+    this.clearCategoriesCache();
     return this.dbService.addCategory(category);
   }
 
   async updateCategory(category: Category) {
     // Clear cache to force reload
-    this.categoriesCache = null;
+    this.clearCategoriesCache();
     return this.dbService.updateCategory(category);
   }
 
   async deleteCategory(id: number) {
     // Clear cache to force reload
-    this.categoriesCache = null;
+    this.clearCategoriesCache();
     return this.dbService.deleteCategory(id);
+  }
+
+  // Add a method to explicitly clear the cache
+  clearCategoriesCache() {
+    this.categoriesCache = null;
   }
 }
