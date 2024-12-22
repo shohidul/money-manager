@@ -116,6 +116,26 @@ export class LanguageCardComponent {
   }
 
   setLanguage(lang: Language) {
+    // If trying to uncheck the current language
+    if (lang === this.currentLang) {
+      // If only two languages, switch to the other
+      if (this.languages.length === 2) {
+        const otherLang = this.languages.find(l => l !== lang);
+        if (otherLang) {
+          this.translationService.setLanguage(otherLang);
+        }
+        return;
+      }
+      
+      // If more than two languages, revert to default (first language)
+      if (this.languages.length > 2) {
+        const defaultLang = this.languages[0];
+        this.translationService.setLanguage(defaultLang);
+        return;
+      }
+    }
+
+    // Normal language selection
     if (lang !== this.currentLang) {
       this.translationService.setLanguage(lang);
     }
