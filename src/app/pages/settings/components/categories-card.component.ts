@@ -48,7 +48,7 @@ import { TranslatePipe } from '../../../components/shared/translate.pipe';
             <div class="category-info">
               <span class="material-symbols-rounded">{{ category.icon }}</span>
               <span>{{ category.name | translate }}</span>
-              <span class="category-type">{{ category.type }}</span>
+              <span class="category-type">{{ 'transaction.types.' + category.type | translate }}</span>
             </div>
             @if (category.isCustom) {
               <button 
@@ -178,7 +178,7 @@ import { TranslatePipe } from '../../../components/shared/translate.pipe';
 
     .category-type {
       font-size: 0.875rem;
-      color: var(--text-secondary);
+      color: var(--text-muted);
       text-transform: capitalize;
     }
 
