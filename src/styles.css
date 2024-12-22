@@ -33,6 +33,10 @@ body {
   line-height: 1.5;
 }
 
+button {
+  line-height: inherit;
+}
+
 .card {
   background-color: var(--surface-color);
   /*border-radius: 8px;*/
