@@ -1,24 +1,41 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DbService } from '../../../services/db.service';
+import { LoanService } from '../../../services/loan.service';
 import { ChartService } from '../../../services/chart.service';
-import { Transaction, isLoanTransaction } from '../../../models/transaction-types';
-import { groupLoanTransactions } from '../../../utils/loan.utils';
+import { TranslatePipe } from '../../../components/shared/translate.pipe';
 
 @Component({
   selector: 'app-loan-charts',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   template: `
     <div class="loan-analytics">
       <div class="chart-container card">
-        <h3>Loan Overview</h3>
+        <h3>{{ 'loan.charts.overview' | translate }}</h3>
         <canvas #overviewChart></canvas>
       </div>
 
       <div class="chart-container card">
-        <h3>Monthly Loan Activity</h3>
+        <h3>{{ 'loan.charts.monthlyActivity' | translate }}</h3>
         <canvas #activityChart></canvas>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card card">
+          <h4>{{ 'loan.stats.totalGiven' | translate }}</h4>
+          <div class="stat-value">{{ totalGiven | number:'1.0-2' }}</div>
+          <div class="stat-detail">
+            {{ 'loan.stats.activeLoans' | translate }}: {{ activeGivenLoans }}
+          </div>
+        </div>
+
+        <div class="stat-card card">
+          <h4>{{ 'loan.stats.totalTaken' | translate }}</h4>
+          <div class="stat-value">{{ totalTaken | number:'1.0-2' }}</div>
+          <div class="stat-detail">
+            {{ 'loan.stats.activeLoans' | translate }}: {{ activeTakenLoans }}
+          </div>
+        </div>
       </div>
     </div>
   `,
@@ -36,11 +53,37 @@ import { groupLoanTransactions } from '../../../utils/loan.utils';
       width: 100% !important;
       height: 300px !important;
     }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .stat-card {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 500;
+      margin: 0.5rem 0;
+    }
+
+    .stat-detail {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
   `]
 })
 export class LoanChartsComponent implements OnInit {
+  totalGiven = 0;
+  totalTaken = 0;
+  activeGivenLoans = 0;
+  activeTakenLoans = 0;
+
   constructor(
-    private dbService: DbService,
+    private loanService: LoanService,
     private chartService: ChartService
   ) {}
 
@@ -48,46 +91,49 @@ export class LoanChartsComponent implements OnInit {
     await this.loadCharts();
   }
 
-  async loadCharts() {
-    const transactions = await this.dbService.getTransactions(
-      new Date(0),
-      new Date()
-    );
+  private async loadCharts() {
+    const [givenLoans, takenLoans] = await Promise.all([
+      this.loanService.getLoansGiven(),
+      this.loanService.getLoansTaken()
+    ]);
 
-    const loanTransactions = transactions.filter(isLoanTransaction);
-    // const groups = groupLoanTransactions(loanTransactions);
-
-    // this.createOverviewChart(groups);
-    this.createActivityChart(loanTransactions);
+    this.updateStats(givenLoans, takenLoans);
+    this.createOverviewChart(givenLoans, takenLoans);
+    this.createActivityChart(givenLoans, takenLoans);
   }
 
-  private createOverviewChart(groups: any[]) {
+  private updateStats(givenLoans: any[], takenLoans: any[]) {
+    this.totalGiven = givenLoans.reduce((sum, loan) => sum + loan.status.totalAmount, 0);
+    this.totalTaken = takenLoans.reduce((sum, loan) => sum + loan.status.totalAmount, 0);
+    this.activeGivenLoans = givenLoans.filter(loan => !loan.status.isCompleted).length;
+    this.activeTakenLoans = takenLoans.filter(loan => !loan.status.isCompleted).length;
+  }
+
+  private createOverviewChart(givenLoans: any[], takenLoans: any[]) {
     const overviewCanvas = document.querySelector('#overviewChart') as HTMLCanvasElement;
     if (!overviewCanvas) return;
 
-    const givenTotal = groups
-      .filter(g => g.transactions[0].type === 'expense')
-      .reduce((sum, g) => sum + g.status.totalAmount, 0);
-
-    const takenTotal = groups
-      .filter(g => g.transactions[0].type === 'income')
-      .reduce((sum, g) => sum + g.status.totalAmount, 0);
+    const activeGiven = givenLoans.reduce((sum, loan) => 
+      sum + (loan.status.isCompleted ? 0 : loan.status.remainingAmount), 0);
+    const activeTaken = takenLoans.reduce((sum, loan) => 
+      sum + (loan.status.isCompleted ? 0 : loan.status.remainingAmount), 0);
 
     this.chartService.createDonutChart(
       overviewCanvas.getContext('2d')!,
       [
-        { category: 'Given', amount: givenTotal },
-        { category: 'Taken', amount: takenTotal }
+        { category: 'Active Given', amount: activeGiven },
+        { category: 'Active Taken', amount: activeTaken }
       ],
       ['#4caf50', '#f44336']
     );
   }
 
-  private createActivityChart(transactions: Transaction[]) {
+  private createActivityChart(givenLoans: any[], takenLoans: any[]) {
     const activityCanvas = document.querySelector('#activityChart') as HTMLCanvasElement;
     if (!activityCanvas) return;
 
-    const monthlyData = this.getMonthlyData(transactions);
+    // Create monthly activity data
+    const monthlyData = this.getMonthlyActivity([...givenLoans, ...takenLoans]);
 
     this.chartService.createLineChart(
       activityCanvas,
@@ -99,12 +145,14 @@ export class LoanChartsComponent implements OnInit {
     );
   }
 
-  private getMonthlyData(transactions: Transaction[]) {
+  private getMonthlyActivity(loans: any[]) {
     const monthlyMap = new Map<string, number>();
 
-    transactions.forEach(tx => {
-      const month = tx.date.toISOString().slice(0, 7);
-      monthlyMap.set(month, (monthlyMap.get(month) || 0) + tx.amount);
+    loans.forEach(loan => {
+      loan.transactions.forEach((tx: any) => {
+        const month = tx.date.toISOString().slice(0, 7);
+        monthlyMap.set(month, (monthlyMap.get(month) || 0) + tx.amount);
+      });
     });
 
     return Array.from(monthlyMap.entries())
