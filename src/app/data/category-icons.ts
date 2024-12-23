@@ -2,7 +2,7 @@ export interface DefaultCategories {
   name: string;
   icon: string;
   type: 'expense' | 'income' ;
-  subType: 'none' | 'loan' | 'asset' | 'fuel';
+  subType: 'none' | 'loan' | 'repaid' | 'asset' | 'fuel';
 }
 
 export interface CategoryGroup {
@@ -238,8 +238,11 @@ export const defaultCategories: DefaultCategories[] = [
   { name: 'categories.defaults.expense.snacks', icon: 'icecream', type: 'expense', subType: 'none' },
   { name: 'categories.defaults.expense.fruits', icon: 'nutrition', type: 'expense', subType: 'none' },
   { name: 'categories.defaults.expense.car', icon: 'directions_car', type: 'expense', subType: 'none' },
+  { name: 'categories.defaults.fuel.carFuel', icon: 'directions_car', type: 'expense', subType: 'fuel' },
   { name: 'categories.defaults.expense.motorcycle', icon: 'two_wheeler', type: 'expense', subType: 'none' },
+  { name: 'categories.defaults.fuel.motorcycleFuel', icon: 'two_wheeler', type: 'expense', subType: 'fuel' },
   { name: 'categories.defaults.expense.fuel', icon: 'local_gas_station', type: 'expense', subType: 'none' },
+  { name: 'categories.defaults.fuel.evCharging', icon: 'ev_station', type: 'expense', subType: 'fuel' },
   { name: 'categories.defaults.expense.beauty', icon: 'health_and_beauty', type: 'expense', subType: 'none' },
   { name: 'categories.defaults.expense.phoneRecharge', icon: 'phone_iphone', type: 'expense', subType: 'none' },
   { name: 'categories.defaults.expense.internet', icon: 'wifi', type: 'expense', subType: 'none' },
@@ -263,30 +266,23 @@ export const defaultCategories: DefaultCategories[] = [
   { name: 'categories.defaults.expense.charity', icon: 'volunteer_activism', type: 'expense', subType: 'none' },
   { name: 'categories.defaults.expense.hobbies', icon: 'palette', type: 'expense', subType: 'none' },
   
-  // Lending/borrowing categories
   { name: 'categories.defaults.loan.personalLoanGiven', icon: 'person', type: 'expense', subType: 'loan' },
+  { name: 'categories.defaults.loan.loanPayment', icon: 'person_outline', type: 'expense', subType: 'repaid' },
   { name: 'categories.defaults.loan.businessLoanGiven', icon: 'business', type: 'expense', subType: 'loan' },
-  { name: 'categories.defaults.loan.loanRepaidToMe', icon: 'account_balance', type: 'income', subType: 'loan' },
-  { name: 'categories.defaults.loan.personalLoanTaken', icon: 'person', type: 'income', subType: 'loan' },
-  { name: 'categories.defaults.loan.bankLoanTaken', icon: 'account_balance', type: 'income', subType: 'loan' },
-  { name: 'categories.defaults.loan.loanPayment', icon: 'person_outline', type: 'expense', subType: 'loan' },
   { name: 'categories.defaults.loan.loan', icon: 'account_balance_wallet', type: 'expense', subType: 'loan' },
-
-  // Asset categories
-  { name: 'categories.defaults.asset.purchaseAsset', icon: 'apartment', type: 'expense', subType: 'asset' },
-  { name: 'categories.defaults.asset.sellAsset', icon: 'apartment', type: 'income', subType: 'asset' },
   
-  // Fuel categories
-  { name: 'categories.defaults.fuel.carFuel', icon: 'directions_car', type: 'expense', subType: 'fuel' },
-  { name: 'categories.defaults.fuel.motorcycleFuel', icon: 'two_wheeler', type: 'expense', subType: 'fuel' },
-  { name: 'categories.defaults.fuel.evCharging', icon: 'ev_station', type: 'expense', subType: 'fuel' },
-
+  { name: 'categories.defaults.asset.purchaseAsset', icon: 'apartment', type: 'expense', subType: 'asset' },
+  
   // Income categories
   { name: 'categories.defaults.income.salary', icon: 'payments', type: 'income', subType: 'none' },
   { name: 'categories.defaults.income.business', icon: 'store', type: 'income', subType: 'none' },
   { name: 'categories.defaults.income.investment', icon: 'trending_up', type: 'income', subType: 'none' },
   { name: 'categories.defaults.income.otherIncome', icon: 'account_balance_wallet', type: 'income', subType: 'none' },
   { name: 'categories.defaults.income.freelance', icon: 'computer', type: 'income', subType: 'none' },
+  { name: 'categories.defaults.loan.loanRepaidToMe', icon: 'person_outline', type: 'income', subType: 'repaid' },
+  { name: 'categories.defaults.loan.personalLoanTaken', icon: 'person', type: 'income', subType: 'loan' },
+  { name: 'categories.defaults.loan.bankLoanTaken', icon: 'account_balance', type: 'income', subType: 'loan' },
+  { name: 'categories.defaults.asset.sellAsset', icon: 'apartment', type: 'income', subType: 'asset' },
   { name: 'categories.defaults.income.rental', icon: 'apartment', type: 'income', subType: 'none' },
   { name: 'categories.defaults.income.gift', icon: 'redeem', type: 'income', subType: 'none' },
   { name: 'categories.defaults.income.interest', icon: 'savings', type: 'income', subType: 'none' },

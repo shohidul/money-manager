@@ -14,6 +14,7 @@ import { FormsModule } from '@angular/forms';
         [(ngModel)]="value"
         (ngModelChange)="onInputChange($event)"
         (focus)="showSuggestions = true"
+        (input)="onInput($event)"
         [class]="inputClass"
         [placeholder]="placeholder"
         [required]="required"
@@ -111,6 +112,21 @@ export class AutocompleteInputComponent {
     this.value = value;
     this.valueChange.emit(value);
     this.inputChange.emit(value);
+  }
+
+  onInput(event: Event) {
+    const target = event.target as HTMLInputElement;
+    this.value = target.value;
+    this.valueChange.emit(target.value);
+    this.inputChange.emit(target.value);
+  }
+
+  @HostListener('keydown', ['$event'])
+  onKeyDown(event: KeyboardEvent) {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      this.showSuggestions = false;
+    }
   }
 
   selectSuggestion(suggestion: string) {

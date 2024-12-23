@@ -7,27 +7,21 @@ import { LoanStatus } from '../../../models/loan.model';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="loan-summary card">
-      <div class="summary-item">
+    <div class="loan-summary">
+      <div class="summary-item card">
         <span class="label">Total Given</span>
-        <span class="amount">{{ totalGiven | currency }}</span>
+        <span class="amount">{{ totalGiven }}</span>
       </div>
-      <div class="summary-item">
+      <div class="summary-item card">
         <span class="label">Total Taken</span>
-        <span class="amount">{{ totalTaken | currency }}</span>
-      </div>
-      <div class="summary-item">
-        <span class="label">Net Balance</span>
-        <span class="amount" [class.positive]="netBalance >= 0" [class.negative]="netBalance < 0">
-          {{ netBalance | currency }}
-        </span>
+        <span class="amount">{{ totalTaken }}</span>
       </div>
     </div>
   `,
   styles: [`
     .loan-summary {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 1rem;
       text-align: center;
     }
@@ -55,8 +49,4 @@ import { LoanStatus } from '../../../models/loan.model';
 export class LoanSummaryComponent {
   @Input() totalGiven = 0;
   @Input() totalTaken = 0;
-
-  get netBalance(): number {
-    return this.totalGiven - this.totalTaken;
-  }
 }

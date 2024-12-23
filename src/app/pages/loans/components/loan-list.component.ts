@@ -1,14 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DbService } from '../../../services/db.service';
 import { FilterBarComponent } from '../../../components/filter-bar/filter-bar.component';
 import { LoanSummaryComponent } from './loan-summary.component';
 import { LoanItemComponent } from './loan-item.component';
-import { Transaction, isLoanTransaction } from '../../../models/transaction-types';
-import { LoanTransaction } from '../../../models/loan.model';
+import { LoanService } from '../../../services/loan.service';
+import { LoanTransaction, LoanGroup, LoanStatus } from '../../../models/loan.model';
+import { differenceInDays } from 'date-fns';
+import { format } from 'date-fns';
+import { TranslatePipe } from '../../../components/shared/translate.pipe';
+import { TranslateDatePipe } from '../../../components/shared/translate-date.pipe';
+import { TranslateNumberPipe } from '../../../components/shared/translate-number.pipe';
 import { FilterOptions } from '../../../utils/transaction-filters';
-import { LoanGroup } from '../../../models/loan.model';
-import { groupLoanTransactions } from '../../../utils/loan.utils';
 
 @Component({
   selector: 'app-loan-list',
@@ -17,7 +19,10 @@ import { groupLoanTransactions } from '../../../utils/loan.utils';
     CommonModule,
     FilterBarComponent,
     LoanSummaryComponent,
-    LoanItemComponent
+    LoanItemComponent,
+    TranslatePipe,
+    TranslateDatePipe,
+    TranslateNumberPipe
   ],
   template: `
     <div class="loan-list">
@@ -25,6 +30,7 @@ import { groupLoanTransactions } from '../../../utils/loan.utils';
         [filters]="filters"
         [showStatus]="true"
         (filtersChange)="onFiltersChange($event)"
+        (monthChange)="onMonthChange($event)"
       />
 
       <app-loan-summary
@@ -34,25 +40,25 @@ import { groupLoanTransactions } from '../../../utils/loan.utils';
 
       <div class="loan-groups">
         <div class="loan-section">
-          <h3>Loans Given</h3>
+          <h3>{{ 'loan.loansGiven' | translate }}</h3>
           <div class="loan-items">
             @for (group of givenLoans; track group.parentId) {
               <app-loan-item [group]="group" />
             }
             @if (givenLoans.length === 0) {
-              <div class="empty-state">No loans given</div>
+              <div class="empty-state">{{ 'loan.noLoansGiven' | translate }}</div>
             }
           </div>
         </div>
 
         <div class="loan-section">
-          <h3>Loans Taken</h3>
+          <h3>{{ 'loan.loansTaken' | translate }}</h3>
           <div class="loan-items">
             @for (group of takenLoans; track group.parentId) {
               <app-loan-item [group]="group" />
             }
             @if (takenLoans.length === 0) {
-              <div class="empty-state">No loans taken</div>
+              <div class="empty-state">{{ 'loan.noLoansTaken' | translate }}</div>
             }
           </div>
         </div>
@@ -60,69 +66,153 @@ import { groupLoanTransactions } from '../../../utils/loan.utils';
     </div>
   `,
   styles: [`
-    .loan-groups {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+    .loan-list {
+      display: flex;
+      flex-direction: column;
       gap: 1rem;
-      margin-top: 1rem;
+      padding: 1rem;
     }
 
-    @media (max-width: 768px) {
-      .loan-groups {
-        grid-template-columns: 1fr;
-      }
+    .loan-groups {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+
+    .loan-section {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      background: var(--surface-color);
+      padding: 1rem;
+      border-radius: 8px;
     }
 
     .loan-section h3 {
-      margin-bottom: 1rem;
-      color: var(--text-secondary);
+      margin: 0;
+      color: var(--text-primary);
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    .loan-items {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
     }
 
     .empty-state {
       text-align: center;
-      padding: 2rem;
       color: var(--text-secondary);
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      padding: 1rem;
+      background: var(--surface-variant);
+      border-radius: 4px;
     }
   `]
 })
 export class LoanListComponent implements OnInit {
-  filters: FilterOptions = { status: 'all' };
-  loanTransactions: LoanTransaction[] = [];
+  filters: FilterOptions = {};
   givenLoans: LoanGroup[] = [];
   takenLoans: LoanGroup[] = [];
-  totalGiven = 0;
-  totalTaken = 0;
+  totalGiven: number = 0;
+  totalTaken: number = 0;
 
-  constructor(private dbService: DbService) {}
+  constructor(private loanService: LoanService) {}
 
   async ngOnInit() {
-    await this.loadTransactions();
+    // Initialize with all loans
+    await this.loadLoans();
   }
 
-  async loadTransactions() {
-    const transactions = await this.dbService.getTransactions(
-      this.filters.startDate || new Date(0),
-      this.filters.endDate || new Date()
-    );
+  async loadLoans() {
+    try {
+      const [givenLoans, takenLoans] = await Promise.all([
+        this.loanService.getLoansGiven(this.filters.month),
+        this.loanService.getLoansTaken(this.filters.month)
+      ]);
 
-    // this.loanTransactions = transactions
-    //   .filter(isLoanTransaction)
-    //   .sort((a, b) => b.date.getTime() - a.date.getTime());
+      // Assign grouped loans directly since they're already grouped by the service
+      this.givenLoans = givenLoans;
+      this.takenLoans = takenLoans;
 
-    const groups = groupLoanTransactions(this.loanTransactions);
+      // Filter loans based on status
+      const filterByStatus = (loans: LoanGroup[]) => {
+        if (!this.filters.status || this.filters.status === 'all') return loans;
+        
+        return loans.filter(loan => {
+          switch (this.filters.status) {
+            case 'pending': 
+              return loan.status.remainingAmount === loan.status.totalAmount;
+            case 'partial': 
+              return loan.status.remainingAmount > 0 && 
+                     loan.status.remainingAmount < loan.status.totalAmount;
+            case 'completed': 
+              return loan.status.remainingAmount <= 0;
+            default: 
+              return true;
+          }
+        });
+      };
+
+      this.givenLoans = filterByStatus(this.givenLoans);
+      this.takenLoans = filterByStatus(this.takenLoans);
+
+      // Calculate totals
+      this.totalGiven = this.givenLoans.reduce((sum, group) => sum + group.status.totalAmount, 0);
+      this.totalTaken = this.takenLoans.reduce((sum, group) => sum + group.status.totalAmount, 0);
+    } catch (error) {
+      console.error('Error loading loans:', error);
+    }
+  }
+
+  calculateLoanStatus(transactions: LoanTransaction[]): LoanStatus {
+    // If no transactions, return default status
+    if (transactions.length === 0) {
+      return {
+        totalAmount: 0,
+        paidAmount: 0,
+        remainingAmount: 0,
+        isCompleted: true,
+        dueDate: undefined,
+        isOverdue: false,
+        daysUntilDue: undefined
+      };
+    }
+
+    // Get the parent transaction (first transaction in the group)
+    const parentTransaction = transactions[0];
     
-    this.givenLoans = groups.filter(g => g.transactions[0].type === 'expense');
-    this.takenLoans = groups.filter(g => g.transactions[0].type === 'income');
+    // Calculate total amount from the parent transaction
+    const totalAmount = parentTransaction.amount;
 
-    this.totalGiven = this.givenLoans.reduce((sum, g) => sum + g.status.totalAmount, 0);
-    this.totalTaken = this.takenLoans.reduce((sum, g) => sum + g.status.totalAmount, 0);
+    // Calculate paid amount by finding child transactions with this parent's ID
+    const paidAmount = transactions
+      .filter(tx => tx.parentId === parentTransaction.id)
+      .reduce((sum, tx) => sum + tx.amount, 0);
+    
+    const remainingAmount = totalAmount - paidAmount;
+    const isCompleted = remainingAmount <= 0;
+
+    return {
+      totalAmount,
+      paidAmount,
+      remainingAmount,
+      isCompleted,
+      dueDate: parentTransaction.dueDate,
+      isOverdue: parentTransaction.dueDate ? new Date() > parentTransaction.dueDate : false,
+      daysUntilDue: parentTransaction.dueDate 
+        ? differenceInDays(parentTransaction.dueDate, new Date()) 
+        : undefined
+    };
   }
 
-  async onFiltersChange(filters: FilterOptions) {
+  onFiltersChange(filters: FilterOptions) {
     this.filters = filters;
-    await this.loadTransactions();
+    this.loadLoans();
+  }
+
+  onMonthChange(month: string) {
+    this.filters.month = month;
+    this.loadLoans();
   }
 }

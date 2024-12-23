@@ -1,5 +1,5 @@
 export type TransactionType = 'income' | 'expense';
-export type TransactionSubType = 'none' | 'loan' | 'asset' | 'fuel';
+export type TransactionSubType = 'none' | 'loan' | 'repaid' | 'asset' | 'fuel';
 
 export interface BaseTransaction {
   id?: number;
@@ -11,10 +11,13 @@ export interface BaseTransaction {
   date: Date;
 }
 
-export interface LoanTransaction extends BaseTransaction {
+export interface LoanTransactionBase extends BaseTransaction {
+  subType: 'loan';
   personName: string;
   loanDate: Date;
   dueDate?: Date;
+  parentId?: number;
+  status?: 'pending' | 'partial' | 'completed';
 }
 
 export interface AssetTransaction extends BaseTransaction {
@@ -29,10 +32,14 @@ export interface FuelTransaction extends BaseTransaction {
   fuelType: 'octen' | 'petrol' | 'diesel' | 'electric' | 'other';
 }
 
-export type Transaction = BaseTransaction | LoanTransaction | AssetTransaction | FuelTransaction;
+export type Transaction = BaseTransaction | LoanTransactionBase | AssetTransaction | FuelTransaction;
 
-export function isLoanTransaction(tx: Transaction): tx is LoanTransaction {
+export function isLoanTransaction(tx: Transaction): tx is LoanTransactionBase {
   return tx.subType === 'loan';
+}
+
+export function isRepaidTransaction(tx: Transaction): tx is LoanTransactionBase {
+  return tx.subType === 'repaid';
 }
 
 export function isAssetTransaction(tx: Transaction): tx is AssetTransaction {
@@ -49,8 +56,9 @@ export const transactionTypeLabels: Record<TransactionType, string> = {
 };
 
 export const transactionSubTypeLabels: Record<TransactionSubType, string> = {
-  none: 'Regular',
+  none: 'None',
   loan: 'Loan',
+  repaid: 'Repaid',
   asset: 'Asset',
   fuel: 'Fuel'
 };

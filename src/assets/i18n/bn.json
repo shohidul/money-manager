@@ -305,6 +305,7 @@
     "subTypes": {
       "none": "সাধারণ",
       "loan": "ঋণ",
+      "repaid": "ফেরত",
       "asset": "সম্পদ",
       "fuel": "জ্বালানি"
     },
@@ -323,9 +324,33 @@
     "currentValue": "বর্তমান মূল্য"
   },
   "loan": {
-    "personName": "ব্যক্তি/প্রতিষ্ঠানের নাম",
+    "parentLoan": "মূল ঋণ",
+    "noParentLoan": "কোন মূল ঋণ নেই",
+    "lentTo": "ঋণ নিয়েছে",
+    "borrowedFrom": "ঋণ দিয়েছে",
+    "charts": {
+      "overview": "ঋণ সংক্ষিপ্ত বিবরণ",
+      "monthlyActivity": "মাসিক ঋণ কার্যক্রম"
+    },
+    "stats": {
+      "totalGiven": "মোট ঋণ দেওয়া",
+      "totalTaken": "মোট ঋণ নেওয়া", 
+      "activeLoans": "সক্রিয় ঋণ"
+    },
+    "status": {
+      "dueSoon": "শীঘ্রই প্রদানযোগ্য"
+    },
+    "loansGiven": "ঋণ দেওয়া",
+    "loansTaken": "ঋণ নেওয়া",
+    "noLoansGiven": "এখনও কোনো ঋণ দেওয়া হয়নি",
+    "noLoansTaken": "এখনও কোনো ঋণ নেওয়া হয়নি",
+    "personName": "ব্যক্তি/সংস্থার নাম",
     "loanDate": "ঋণের তারিখ",
-    "dueDate": "শেষ তারিখ"
+    "dueDate": "প্রদানের তারিখ",
+    "remaining": "অবশিষ্ট",
+    "pending": "অবশিষ্ট",
+    "partial": "অংশিক",
+    "completed": "সম্পন্ন"
   },
   "fuel": {
     "odo": "ওডো",

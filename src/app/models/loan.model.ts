@@ -1,25 +1,19 @@
-export interface LoanTransaction {
-  id: number;
-  type: 'income' | 'expense';
-  subType: 'loan';
-  amount: number;
-  categoryId: number;
-  memo: string;
-  date: Date;
-  personName: string;
-  dueDate?: Date;
-  parentId?: number;
-}
+import { LoanTransactionBase } from './transaction-types';
+
+export type LoanTransaction = LoanTransactionBase;
 
 export interface LoanStatus {
   totalAmount: number;
   paidAmount: number;
   remainingAmount: number;
   isCompleted: boolean;
+  dueDate?: Date;
+  isOverdue?: boolean;
+  daysUntilDue?: number;
 }
 
 export interface LoanGroup {
-  parentId: number;
+  parentId?: number;
   personName: string;
   transactions: LoanTransaction[];
   status: LoanStatus;

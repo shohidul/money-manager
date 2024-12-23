@@ -205,8 +205,8 @@ export class SettingsComponent implements OnInit {
     if (!shouldClear) return;
 
     try {
-      // Clear all existing data
-      await this.dbService.clearAllData();
+      // Delete the entire database
+      await this.dbService.deleteDatabase();
 
       // Reinitialize default categories
       await this.categoryService.initializeDefaultCategories();

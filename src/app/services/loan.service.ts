@@ -1,63 +1,92 @@
 import { Injectable } from '@angular/core';
 import { DbService } from './db.service';
-import { LoanTransaction, LoanGroup } from '../models/loan.model';
+import { LoanTransaction, LoanGroup, LoanStatus } from '../models/loan.model';
+import { Transaction, isLoanTransaction, TransactionType } from '../models/transaction-types';
+import { differenceInDays, startOfMonth, endOfMonth, format } from 'date-fns';
+import { groupLoanTransactions } from '../utils/loan.utils';
 
 @Injectable({
   providedIn: 'root'
 })
 export class LoanService {
+  currentMonth = format(new Date(), 'yyyy-MM');
+
   constructor(private dbService: DbService) {}
 
-  async getLoanTransactions(startDate: Date, endDate: Date): Promise<LoanTransaction[]> {
-    const transactions = await this.dbService.getTransactions(startDate, endDate);
-    return transactions.filter(tx => tx.subType === 'loan') as LoanTransaction[];
+  async getLoanTransactions(month?: string): Promise<LoanTransaction[]> {
+    try {
+      let startDate: Date;
+      let endDate: Date;
+
+      if (month) {
+        const date = new Date(month);
+        startDate = startOfMonth(date);
+        endDate = endOfMonth(date);
+      } else {
+        // If no month specified, get all transactions
+        startDate = new Date(0);
+        endDate = new Date();
+      }
+
+      const transactions = await this.dbService.getTransactions(startDate, endDate);
+      
+      // Filter using the type guard and ensure all required fields are present
+      const loanTransactions = transactions
+        .filter(isLoanTransaction)
+        .filter(tx => tx.id && tx.personName);
+      
+      return loanTransactions;
+    } catch (error) {
+      console.error('Error fetching loan transactions:', error);
+      throw error;
+    }
   }
 
-  async getLoansGiven(): Promise<LoanGroup[]> {
-    const transactions = await this.getLoanTransactions(new Date(0), new Date());
-    return this.groupLoans(transactions.filter(tx => tx.type === 'expense'));
-  }
-
-  async getLoansTaken(): Promise<LoanGroup[]> {
-    const transactions = await this.getLoanTransactions(new Date(0), new Date());
-    return this.groupLoans(transactions.filter(tx => tx.type === 'income'));
-  }
-
-  private groupLoans(transactions: LoanTransaction[]): LoanGroup[] {
-    // Group parent loans (transactions without parentId)
-    const parentLoans = transactions.filter(tx => !tx.parentId);
-    
-    return parentLoans.map(parentLoan => {
-      const relatedPayments = transactions.filter(tx => 
-        tx.parentId === parentLoan.id
+  async getLoansGiven(month?: string): Promise<LoanGroup[]> {
+    try {
+      const transactions = await this.getLoanTransactions(month);
+      const givenLoans = groupLoanTransactions(
+        transactions.filter(tx => tx.type === 'expense')
       );
-
-      const totalPaid = relatedPayments.reduce((sum, tx) => sum + tx.amount, 0);
-      const remainingAmount = parentLoan.amount - totalPaid;
-
-      return {
-        parentId: parentLoan.id,
-        personName: parentLoan.personName,
-        transactions: [parentLoan, ...relatedPayments],
-        status: {
-          totalAmount: parentLoan.amount,
-          paidAmount: totalPaid,
-          remainingAmount,
-          isCompleted: remainingAmount <= 0
-        }
-      };
-    });
+      
+      return givenLoans;
+    } catch (error) {
+      console.error('Error fetching loans given:', error);
+      throw error;
+    }
   }
 
-  isDueSoon(dueDate?: Date): boolean {
-    if (!dueDate) return false;
-    const today = new Date();
-    const daysUntilDue = Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-    return daysUntilDue <= 7 && daysUntilDue > 0;
+  async getLoansTaken(month?: string): Promise<LoanGroup[]> {
+    try {
+      const transactions = await this.getLoanTransactions(month);
+      const takenLoans = groupLoanTransactions(
+        transactions.filter(tx => tx.type === 'income')
+      );
+      
+      return takenLoans;
+    } catch (error) {
+      console.error('Error fetching loans taken:', error);
+      throw error;
+    }
   }
 
-  isOverdue(dueDate?: Date): boolean {
-    if (!dueDate) return false;
-    return dueDate < new Date();
+  async getParentLoans(type: TransactionType): Promise<LoanTransaction[]> {
+    try {
+      // Get all loan transactions that can be potential parents
+      const transactions = await this.getLoanTransactions();
+      
+      // Filter based on transaction type:
+      // - If current transaction is income (repayment), show expense (given loans) as parents
+      // - If current transaction is expense (giving loan), show income (taken loans) as parents
+      return transactions.filter(tx => 
+        // Only show transactions without a parent (they are parent transactions)
+        !tx.parentId && 
+        // Show opposite type transactions as potential parents
+        tx.type !== type
+      );
+    } catch (error) {
+      console.error('Error fetching parent loans:', error);
+      throw error;
+    }
   }
 }

@@ -305,6 +305,7 @@
     "subTypes": {
       "none": "Regular",
       "loan": "Loan",
+      "repaid": "Repaid",
       "asset": "Asset",
       "fuel": "Fuel"
     },
@@ -323,9 +324,33 @@
     "currentValue": "Current Value"
   },
   "loan": {
-    "personName": "Person/Entity Name",
+    "parentLoan": "Parent Loan",
+    "noParentLoan": "No Parent Loan",
+    "lentTo": "Lent to",
+    "borrowedFrom": "Borrowed from",
+    "charts": {
+      "overview": "Loan Overview",
+      "monthlyActivity": "Monthly Loan Activity"
+    },
+    "stats": {
+      "totalGiven": "Total Loans Given",
+      "totalTaken": "Total Loans Taken", 
+      "activeLoans": "Active Loans"
+    },
+    "status": {
+      "dueSoon": "Due Soon"
+    },
+    "loansGiven": "Loans Given",
+    "loansTaken": "Loans Taken",
+    "noLoansGiven": "No loans given yet",
+    "noLoansTaken": "No loans taken yet",
+    "personName": "Person Name",
     "loanDate": "Loan Date",
-    "dueDate": "Due Date"
+    "dueDate": "Due Date",
+    "remaining": "Remaining",
+    "pending": "Pending",
+    "partial": "Partial",
+    "completed": "Completed"
   },
   "fuel": {
     "odo": "Odo",

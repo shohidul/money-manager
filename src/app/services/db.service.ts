@@ -196,4 +196,17 @@ export class DbService {
       throw error;
     }
   }
+
+  async deleteDatabase() {
+    // Close the current database connection
+    if (this.db) {
+      this.db.close();
+    }
+
+    // Delete the database
+    await indexedDB.deleteDatabase(this.DB_NAME);
+
+    // Reinitialize the database
+    await this.initializeDB();
+  }
 }

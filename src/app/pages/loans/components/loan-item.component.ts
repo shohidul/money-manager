@@ -16,57 +16,59 @@ interface DueStatus {
   standalone: true,
   imports: [CommonModule, TranslatePipe, TranslateDatePipe, TranslateNumberPipe],
   template: `
-    <div class="loan-item card" [class.completed]="group.status.isCompleted">
-      <div class="loan-header">
-        <div class="person-info">
-          <span class="material-symbols-rounded">person</span>
-          <div class="person-details">
-            <span class="person-name">{{ group.personName }}</span>
-            @if (dueStatus) {
-              <span class="due-tag" [class]="dueStatus.class">
-                {{ dueStatus.text | translate }}
-              </span>
-            }
-          </div>
-        </div>
-        <div class="loan-amount">
-          <div class="total">{{ group.status.totalAmount | translateNumber:'1.0-2' }}</div>
-          @if (!group.status.isCompleted) {
-            <div class="remaining">
-              {{ 'loan.remaining' | translate }}: {{ group.status.remainingAmount | translateNumber:'1.0-2' }}
-            </div>
-          } @else {
-            <div class="completed-tag">{{ 'loan.completed' | translate }}</div>
-          }
-        </div>
-      </div>
-
-      <div class="progress-bar">
-        <div 
-          class="progress" 
-          [style.width.%]="progressPercentage"
-        ></div>
-      </div>
-
-      <div class="transactions">
-        @for (tx of group.transactions; track tx.id) {
-          <div class="transaction">
-            <div class="tx-info">
-              <span class="date">{{ tx.date | translateDate:'short' }}</span>
-              <span class="memo">{{ tx.memo }}</span>
-              @if (tx.dueDate) {
-                <span class="due-date">
-                  {{ 'loan.dueDate' | translate }}: {{ tx.dueDate | translateDate:'shortDate' }}
+    @if (group) {
+      <div class="loan-item card" [class.completed]="group.status.isCompleted">
+        <div class="loan-header">
+          <div class="person-info">
+            <span class="material-symbols-rounded">person</span>
+            <div class="person-details">
+              <span class="person-name">{{ group.personName }}</span>
+              @if (dueStatus) {
+                <span class="due-tag" [class]="dueStatus.class">
+                  {{ dueStatus.text | translate }}
                 </span>
               }
             </div>
-            <span class="amount" [class.payment]="tx.parentId">
-              {{ tx.parentId ? '+' : '' }}{{ tx.amount | translateNumber:'1.0-2' }}
-            </span>
           </div>
-        }
+          <div class="loan-amount">
+            <div class="total">{{ group.status.totalAmount | translateNumber:'1.0-2' }}</div>
+            @if (!group.status.isCompleted) {
+              <div class="remaining">
+                {{ 'loan.remaining' | translate }}: {{ group.status.remainingAmount | translateNumber:'1.0-2' }}
+              </div>
+            } @else {
+              <div class="completed-tag">{{ 'loan.completed' | translate }}</div>
+            }
+          </div>
+        </div>
+
+        <div class="progress-bar">
+          <div 
+            class="progress" 
+            [style.width.%]="progressPercentage"
+          ></div>
+        </div>
+
+        <div class="transactions">
+          @for (tx of group.transactions; track tx.id) {
+            <div class="transaction">
+              <div class="tx-info">
+                <span class="date">{{ tx.date | translateDate:'short' }}</span>
+                <span class="memo">{{ tx.memo }}</span>
+                @if (tx.dueDate) {
+                  <span class="due-date">
+                    {{ 'loan.dueDate' | translate }}: {{ tx.dueDate | translateDate:'shortDate' }}
+                  </span>
+                }
+              </div>
+              <span class="amount" [class.payment]="tx.parentId">
+                {{ tx.parentId ? '+' : '' }}{{ tx.amount | translateNumber:'1.0-2' }}
+              </span>
+            </div>
+          }
+        </div>
       </div>
-    </div>
+    }
   `,
   styles: [`
     .loan-item {
@@ -199,14 +201,17 @@ export class LoanItemComponent {
   constructor(private loanService: LoanService) {}
 
   get dueStatus(): DueStatus | null {
-    const dueDate = this.group.transactions[0]?.dueDate;
-    if (!dueDate) return null;
-
-    if (this.loanService.isOverdue(dueDate)) {
-      return { class: 'overdue', text: 'loan.status.overdue' };
+    if (!this.group?.transactions[0]?.dueDate) {
+      return null;
     }
-    
-    if (this.loanService.isDueSoon(dueDate)) {
+
+    const dueDate = new Date(this.group.transactions[0].dueDate);
+    const now = new Date();
+    const daysUntilDue = Math.floor((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (daysUntilDue < 0 && !this.group.status.isCompleted) {
+      return { class: 'overdue', text: 'loan.status.overdue' };
+    } else if (daysUntilDue <= 7 && !this.group.status.isCompleted) {
       return { class: 'due-soon', text: 'loan.status.dueSoon' };
     }
 
@@ -214,6 +219,8 @@ export class LoanItemComponent {
   }
 
   get progressPercentage(): number {
-    return (this.group.status.paidAmount / this.group.status.totalAmount) * 100;
+    if (!this.group) return 0;
+    const { totalAmount, paidAmount } = this.group.status;
+    return (paidAmount / totalAmount) * 100;
   }
 }

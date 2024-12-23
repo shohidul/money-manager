@@ -7,6 +7,7 @@ import {
   Transaction,
   isFuelTransaction,
   isLoanTransaction,
+  isRepaidTransaction,
   isAssetTransaction,
 } from '../../models/transaction-types';
 import { MenuService } from '../../services/menu.service';
@@ -17,6 +18,8 @@ import { calculateMileage } from '../../utils/fuel.utils';
 import { TranslatePipe } from '../../components/shared/translate.pipe';
 import { TranslateDatePipe } from '../../components/shared/translate-date.pipe';
 import { TranslateNumberPipe } from '../../components/shared/translate-number.pipe';
+import { LoanService } from '../../services/loan.service';
+import { LoanTransaction } from '../../models/loan.model';
 
 @Component({
   selector: 'app-dashboard',
@@ -89,7 +92,25 @@ import { TranslateNumberPipe } from '../../components/shared/translate-number.pi
 
                 @if (isLoanTransaction(tx)) {
                   <span class="small-text">
-                    {{ tx.personName || 'Unnamed' }} | {{ 'loan.dueDate' | translate }}: {{ tx.dueDate ? (tx.dueDate | translateDate: 'shortDate') : 'N/A' }}
+                    {{ tx.personName || 'Unnamed' }} | 
+                    {{ 'loan.dueDate' | translate }}: {{ tx.dueDate ? (tx.dueDate | translateDate: 'shortDate') : 'N/A' }} |
+                    {{ 'loan.'+(tx.status || 'pending')  | translate  }} 
+                  </span>
+                }
+
+                @if (isRepaidTransaction(tx)) {
+                  <span class="small-text">
+                    <ng-container *ngIf="getParentLoan(tx.parentId) as parentLoan">
+                      {{ (tx.type === 'income' ? 'loan.lentTo' : 'loan.borrowedFrom') | translate }} {{ parentLoan?.personName ?? 'Unnamed' }} | 
+                      {{ parentLoan?.amount ?? 0 | translateNumber }} | 
+                      {{ 'loan.dueDate' | translate }}: 
+                      {{
+                        parentLoan.dueDate 
+                          ? (parentLoan.dueDate | translateDate: 'shortDate') 
+                          : 'N/A'
+                      }} |
+                      {{ 'loan.'+(parentLoan.status || 'pending') | translate }}
+                    </ng-container>
                   </span>
                 }
 
@@ -268,13 +289,33 @@ export class DashboardComponent implements OnInit {
   selectedTransactionCategory: any | null = null; 
   isFuelTransaction = isFuelTransaction;
   isLoanTransaction = isLoanTransaction;
+  isRepaidTransaction = isRepaidTransaction;
   isAssetTransaction = isAssetTransaction;
+  parentLoanTransactions: LoanTransaction[] = [];
 
-  constructor(private router: Router, private dbService: DbService, private menuService: MenuService) {}
+  constructor(private router: Router, private dbService: DbService, private menuService: MenuService, private loanService: LoanService) {}
 
   async ngOnInit() {
     await this.loadCategories();
     await this.loadTransactions();
+
+    this.parentLoanTransactions = await this.loanService.getLoanTransactions();
+  }
+
+   getParentLoan(id: number | undefined): LoanTransaction | null {
+    try {
+      const transactions = this.parentLoanTransactions;
+      const parentLoan = transactions.find(tx => tx.id === id);
+      
+      if (!parentLoan) {
+        return null;
+      }
+      
+      return parentLoan;
+    } catch (error) {
+      console.error('Error fetching parent loan:', error);
+      throw error;
+    }
   }
 
   async loadCategories() {

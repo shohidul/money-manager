@@ -2,7 +2,7 @@ import { Component, Inject, Input, Output, EventEmitter, OnInit } from '@angular
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Transaction, isLoanTransaction, isAssetTransaction, isFuelTransaction } from '../../models/transaction-types';
+import { Transaction, isLoanTransaction, isRepaidTransaction, isAssetTransaction, isFuelTransaction } from '../../models/transaction-types';
 import { AssetFormComponent } from '../transaction-forms/asset-form.component';
 import { LoanFormComponent } from '../transaction-forms/loan-form.component';
 import { FuelFormComponent } from '../transaction-forms/fuel-form.component';
@@ -90,7 +90,7 @@ import { TranslateNumberPipe } from "../shared/translate-number.pipe";
                   </div>
 
                   <div class="form-content">
-                    @if (isLoanTransaction(editedTransaction)) {
+                    @if (isLoanTransaction(editedTransaction) || isRepaidTransaction(editedTransaction)) {
                       <app-loan-form
                         [transaction]="editedTransaction"
                         (transactionChange)="onTransactionChange($event)"
@@ -414,6 +414,7 @@ export class TransactionEditDialogComponent implements OnInit {
 
   editedTransaction!: Transaction;
   isLoanTransaction = isLoanTransaction;
+  isRepaidTransaction = isRepaidTransaction;
   isAssetTransaction = isAssetTransaction;
   isFuelTransaction = isFuelTransaction;
   show = true;

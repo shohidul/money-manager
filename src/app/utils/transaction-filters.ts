@@ -1,9 +1,12 @@
+import { startOfMonth, endOfMonth } from 'date-fns';
+
 export interface FilterOptions {
   startDate?: Date;
   endDate?: Date;
+  month?: string;
   type?: string;
   subType?: string;
-  status?: 'active' | 'completed' | 'all';
+  status?: 'pending' | 'partial' | 'completed' | 'all';
 }
 
 export function filterTransactions<T extends { date: Date; type: string; subType: string }>(
@@ -11,12 +14,29 @@ export function filterTransactions<T extends { date: Date; type: string; subType
   options: FilterOptions
 ): T[] {
   return transactions.filter(tx => {
-    const dateMatch = (!options.startDate || tx.date >= options.startDate) &&
-                     (!options.endDate || tx.date <= options.endDate);
+    // Month-based filtering
+    if (options.month) {
+      const monthDate = new Date(options.month);
+      const startDate = startOfMonth(monthDate);
+      const endDate = endOfMonth(monthDate);
+      
+      if (tx.date < startDate || tx.date > endDate) {
+        return false;
+      }
+    } else {
+      // Existing date range filtering
+      const dateMatch = (!options.startDate || tx.date >= options.startDate) &&
+                       (!options.endDate || tx.date <= options.endDate);
+      
+      if (!dateMatch) {
+        return false;
+      }
+    }
+
     const typeMatch = !options.type || tx.type === options.type;
     const subTypeMatch = !options.subType || tx.subType === options.subType;
     
-    return dateMatch && typeMatch && subTypeMatch;
+    return typeMatch && subTypeMatch;
   });
 }
 

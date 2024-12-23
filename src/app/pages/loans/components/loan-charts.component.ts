@@ -3,27 +3,22 @@ import { CommonModule } from '@angular/common';
 import { LoanService } from '../../../services/loan.service';
 import { ChartService } from '../../../services/chart.service';
 import { TranslatePipe } from '../../../components/shared/translate.pipe';
+import { TranslateNumberPipe } from '../../../components/shared/translate-number.pipe';
 
 @Component({
   selector: 'app-loan-charts',
   standalone: true,
-  imports: [CommonModule, TranslatePipe],
+  imports: [
+    CommonModule, 
+    TranslatePipe, 
+    TranslateNumberPipe
+  ],
   template: `
     <div class="loan-analytics">
-      <div class="chart-container card">
-        <h3>{{ 'loan.charts.overview' | translate }}</h3>
-        <canvas #overviewChart></canvas>
-      </div>
-
-      <div class="chart-container card">
-        <h3>{{ 'loan.charts.monthlyActivity' | translate }}</h3>
-        <canvas #activityChart></canvas>
-      </div>
-
       <div class="stats-grid">
         <div class="stat-card card">
           <h4>{{ 'loan.stats.totalGiven' | translate }}</h4>
-          <div class="stat-value">{{ totalGiven | number:'1.0-2' }}</div>
+          <div class="stat-value">{{ totalGiven | translateNumber:'1.0-2' }}</div>
           <div class="stat-detail">
             {{ 'loan.stats.activeLoans' | translate }}: {{ activeGivenLoans }}
           </div>
@@ -31,11 +26,20 @@ import { TranslatePipe } from '../../../components/shared/translate.pipe';
 
         <div class="stat-card card">
           <h4>{{ 'loan.stats.totalTaken' | translate }}</h4>
-          <div class="stat-value">{{ totalTaken | number:'1.0-2' }}</div>
+          <div class="stat-value">{{ totalTaken | translateNumber:'1.0-2' }}</div>
           <div class="stat-detail">
             {{ 'loan.stats.activeLoans' | translate }}: {{ activeTakenLoans }}
           </div>
         </div>
+      </div>
+      <div class="chart-container card">
+        <h3>{{ 'loan.charts.overview' | translate }}</h3>
+        <canvas id="overviewChart"></canvas>
+      </div>
+
+      <div class="chart-container card">
+        <h3>{{ 'loan.charts.monthlyActivity' | translate }}</h3>
+        <canvas id="activityChart"></canvas>
       </div>
     </div>
   `,
