@@ -32,7 +32,7 @@ import { LoanChartsComponent } from './components/loan-charts.component';
   `,
   styles: [`
     .loans {
-      max-width: 800px;
+      max-width: 1000px;
       margin: 0 auto;
     }
 

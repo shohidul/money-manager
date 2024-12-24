@@ -26,10 +26,10 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
       @if (showDatePicker) {
         <div class="date-picker">
           <input 
-            type="date" 
-            [ngModel]="selectedDate | date:'yyyy-MM-dd'"
+            type="datetime-local" 
+            [ngModel]="selectedDate | date:'yyyy-MM-ddTHH:mm:ss'"
             (ngModelChange)="onDateChange($event)"
-            [max]="today | date:'yyyy-MM-dd'"
+            [max]="today | date:'yyyy-MM-ddTHH:mm:ss'"
           >
         </div>
       }
@@ -394,9 +394,13 @@ export class CalculatorSheetComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
-  onDateChange(event: Event) {
-    const input = event.target as HTMLInputElement;
-    this.selectedDate = new Date(input.value);
+  onDateChange(event: string | Date) {
+
+    const dateValue = typeof event === 'string' 
+      ? new Date(event) 
+      : event;
+    
+    this.selectedDate = dateValue;
     this.dateChange.emit(this.selectedDate);
     this.showDatePicker = false;
   }

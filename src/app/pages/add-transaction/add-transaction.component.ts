@@ -253,6 +253,7 @@ export class AddTransactionComponent implements OnInit {
 
     const category = await this.ensureCategory();
     const transaction = {
+      ...(this.editingTransaction || {}),
       ...(this.editingTransaction ? { id: this.editingTransaction.id } : {}),
       type: this.selectedType,
       subType: this.selectedSubType,

@@ -8,8 +8,15 @@ import { TranslationService } from '../../services/translation.service';
 export class TranslateDatePipe implements PipeTransform {
   constructor(private translationService: TranslationService) {}
 
-  transform(value: Date, format: string = 'short'): string {
+  transform(value: Date | string | number, format: string = 'short'): string {
     if (!value) return '';
+
+    // Ensure value is a Date object
+    const dateValue = value instanceof Date 
+      ? value 
+      : new Date(value);
+
+    if (isNaN(dateValue.getTime())) return '';
 
     const currentLang = this.translationService.getCurrentLanguage();
     
@@ -23,14 +30,14 @@ export class TranslateDatePipe implements PipeTransform {
             hour: 'numeric',
             minute: '2-digit',
             hour12: true
-          }).format(value);
+          }).format(dateValue);
         case 'MM/dd E':
           // Custom formatting to match exact requirements
           const parts = new Intl.DateTimeFormat(currentLang, {
             month: '2-digit',
             day: '2-digit',
             weekday: 'short'
-          }).formatToParts(value);
+          }).formatToParts(dateValue);
 
           const month = parts.find(p => p.type === 'month')?.value || '';
           const day = parts.find(p => p.type === 'day')?.value || '';
@@ -43,13 +50,13 @@ export class TranslateDatePipe implements PipeTransform {
             hour: 'numeric',
             minute: '2-digit',
             hour12: true
-          }).format(value);
+          }).format(dateValue);
         default:
-          return value.toLocaleDateString(currentLang);
+          return new Intl.DateTimeFormat(currentLang).format(dateValue);
       }
     } catch (error) {
       console.error('Date formatting error:', error);
-      return value.toLocaleString();
+      return dateValue.toLocaleString();
     }
   }
 }

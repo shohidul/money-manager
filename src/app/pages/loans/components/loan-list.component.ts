@@ -130,7 +130,8 @@ export class LoanListComponent implements OnInit {
         this.loanService.getLoansGiven(this.filters.month),
         this.loanService.getLoansTaken(this.filters.month)
       ]);
-
+      console.log( 'givenLoans');
+console.log( givenLoans);
       // Assign grouped loans directly since they're already grouped by the service
       this.givenLoans = givenLoans;
       this.takenLoans = takenLoans;

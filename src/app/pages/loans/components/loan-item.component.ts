@@ -51,10 +51,15 @@ interface DueStatus {
 
         <div class="transactions">
           @for (tx of group.transactions; track tx.id) {
-            <div class="transaction">
+            <div class="transaction" [class.repayment]="tx.parentId">
               <div class="tx-info">
-                <span class="date">{{ tx.date | translateDate:'short' }}</span>
-                <span class="memo">{{ tx.memo }}</span>
+                <div class="tx-header">
+                  @if (tx.parentId) {
+                    <span class="material-symbols-rounded repayment-icon">payments</span>
+                  }
+                  <span class="date">{{ tx.date | translateDate:'short' }}</span>
+                  <span class="memo">{{ tx.memo }}</span>
+                </div>
                 @if (tx.dueDate) {
                   <span class="due-date">
                     {{ 'loan.dueDate' | translate }}: {{ tx.dueDate | translateDate:'shortDate' }}
@@ -100,19 +105,19 @@ interface DueStatus {
 
     .due-tag {
       font-size: 0.75rem;
-      padding: 0.25rem 0.5rem;
-      border-radius: 12px;
-      display: inline-block;
-    }
-
-    .due-tag.due-soon {
-      background: #fff3cd;
-      color: #856404;
+      padding: 0.125rem 0.5rem;
+      border-radius: 1rem;
+      background-color: var(--color-gray-100);
     }
 
     .due-tag.overdue {
-      background: #f8d7da;
-      color: #721c24;
+      color: var(--color-error);
+      background-color: var(--color-error-bg);
+    }
+
+    .due-tag.due-soon {
+      color: var(--color-warning);
+      background-color: var(--color-warning-bg);
     }
 
     .loan-amount {
@@ -120,36 +125,32 @@ interface DueStatus {
     }
 
     .total {
+      font-size: 1.25rem;
       font-weight: 500;
-      color: var(--text-primary);
     }
 
     .remaining {
       font-size: 0.875rem;
-      color: #f44336;
+      color: var(--color-gray-600);
     }
 
     .completed-tag {
       font-size: 0.875rem;
-      color: #4caf50;
+      color: var(--color-success);
     }
 
     .progress-bar {
       height: 4px;
-      background: rgba(0, 0, 0, 0.08);
+      background-color: var(--color-gray-100);
       border-radius: 2px;
-      overflow: hidden;
       margin-bottom: 1rem;
     }
 
     .progress {
       height: 100%;
-      background: var(--primary-color);
+      background-color: var(--color-primary);
+      border-radius: 2px;
       transition: width 0.3s ease;
-    }
-
-    .completed .progress {
-      background: #4caf50;
     }
 
     .transactions {
@@ -161,9 +162,13 @@ interface DueStatus {
     .transaction {
       display: flex;
       justify-content: space-between;
+      align-items: flex-start;
       padding: 0.5rem;
-      border-radius: 4px;
-      background: rgba(0, 0, 0, 0.02);
+      border-radius: 0.5rem;
+    }
+
+    .transaction.repayment {
+      background-color: var(--color-success-bg);
     }
 
     .tx-info {
@@ -172,18 +177,29 @@ interface DueStatus {
       gap: 0.25rem;
     }
 
+    .tx-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .repayment-icon {
+      font-size: 1rem;
+      color: var(--color-success);
+    }
+
     .date {
-      font-size: 0.75rem;
-      color: var(--text-secondary);
+      font-size: 0.875rem;
+      color: var(--color-gray-600);
     }
 
     .memo {
-      color: var(--text-primary);
+      font-size: 0.875rem;
     }
 
     .due-date {
       font-size: 0.75rem;
-      color: var(--text-secondary);
+      color: var(--color-gray-600);
     }
 
     .amount {
@@ -191,7 +207,11 @@ interface DueStatus {
     }
 
     .amount.payment {
-      color: #4caf50;
+      color: var(--color-success);
+    }
+
+    .completed {
+      opacity: 0.7;
     }
   `]
 })
