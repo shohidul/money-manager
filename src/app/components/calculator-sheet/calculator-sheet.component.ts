@@ -395,7 +395,6 @@ export class CalculatorSheetComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   onDateChange(event: string | Date) {
-
     const dateValue = typeof event === 'string' 
       ? new Date(event) 
       : event;

@@ -33,7 +33,12 @@ import { MonthPickerComponent } from "../month-picker/month-picker.component";
       display: flex;
       gap: 1rem;
       margin-bottom: 1rem;
-      flex-wrap: wrap;
+    }
+
+    @media (max-width: 768px) {
+      .filter-bar {
+        gap: 0.6rem;
+      }
     }
 
     .month-picker input,

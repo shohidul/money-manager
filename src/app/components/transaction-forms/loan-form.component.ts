@@ -138,7 +138,7 @@ export class LoanFormComponent implements OnInit {
     );
     
     // Then load parent loans
-    this.parentLoans = await this.loanService.getParentLoans(this.transaction.type);
+    this.parentLoans = await this.loanService.getParentLoansByType(this.transaction.type === 'income' ? 'expense' : 'income');
   }
 
   async onPersonNameChange(value: string) {

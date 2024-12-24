@@ -95,12 +95,6 @@ import { TranslatePipe } from '../../components/shared/translate.pipe';
       gap: 1rem;
     }
 
-    @media (max-width: 768px) {
-      .type-tabs {
-        padding: 0 1rem 1rem 1rem;
-      }
-    }
-
     .type-tab {
       flex: 1;
       padding: 0.75rem;

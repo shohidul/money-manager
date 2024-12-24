@@ -32,9 +32,6 @@ export class LoanService {
       // Filter for both loan and repaid transactions
       const loanTransactions = transactions
       .filter(isRepaidTransaction);
-      console.log('getRepaidTransactions');
-      console.log(transactions);
-      console.log(loanTransactions);
       return loanTransactions;
     } catch (error) {
       console.error('Error fetching loan transactions:', error);
@@ -42,11 +39,11 @@ export class LoanService {
     }
   }
 
-  async getChildrenLoans(type: TransactionType): Promise<LoanTransaction[]> {
+  async getChildrenLoansByType(type: TransactionType): Promise<LoanTransaction[]> {
     try {
       // Get all loan transactions that can be potential parents
       const transactions = await this.getRepaidTransactions();
-      
+
       // Filter based on transaction type:
       // - If current transaction is income (repayment), show expense (given loans) as parents
       // - If current transaction is expense (giving loan), show income (taken loans) as parents
@@ -54,7 +51,7 @@ export class LoanService {
         // Only show transactions without a parent (they are parent transactions)
         // !tx.parentId && 
         // Show opposite type transactions as potential parents
-        tx.type !== type
+        tx.type === type
       );
     } catch (error) {
       console.error('Error fetching parent loans:', error);
@@ -65,13 +62,11 @@ export class LoanService {
   async getLoansGiven(month?: string): Promise<LoanGroup[]> {
     try {
       // Get parent loans (expense type)
-      const parentLoans = await this.getParentLoans('income');
-      console.log('parentLoans');
-      console.log(parentLoans);
+      const parentLoans = await this.getParentLoansByType('expense');
+
       // Get children loans (income type repayments)
-      const childrenLoans = await this.getChildrenLoans('expense');
-      console.log('childrenLoans');
-      console.log(childrenLoans);
+      const childrenLoans = await this.getChildrenLoansByType('income');
+
       // Combine parent and children loans, ensuring they are LoanTransaction[]
       const transactions: LoanTransaction[] = [...parentLoans, ...childrenLoans];
       
@@ -92,10 +87,10 @@ export class LoanService {
   async getLoansTaken(month?: string): Promise<LoanGroup[]> {
     try {
       // Get parent loans (income type)
-      const parentLoans = await this.getParentLoans('expense');
+      const parentLoans = await this.getParentLoansByType('income');
       
       // Get children loans (expense type repayments)
-      const childrenLoans = await this.getChildrenLoans('income');
+      const childrenLoans = await this.getChildrenLoansByType('expense');
       
       // Combine parent and children loans, ensuring they are LoanTransaction[]
       const transactions: LoanTransaction[] = [...parentLoans, ...childrenLoans];
@@ -114,7 +109,7 @@ export class LoanService {
     }
   }
 
-  async getParentLoans(type: TransactionType): Promise<LoanTransaction[]> {
+  async getParentLoansByType(type: TransactionType): Promise<LoanTransaction[]> {
     try {
       // Get all loan transactions that can be potential parents
       const transactions = await this.getLoanTransactions();
@@ -126,7 +121,7 @@ export class LoanService {
         // Only show transactions without a parent (they are parent transactions)
         // !tx.parentId && 
         // Show opposite type transactions as potential parents
-        tx.type !== type
+        tx.type === type
       );
     } catch (error) {
       console.error('Error fetching parent loans:', error);
