@@ -14,6 +14,10 @@
     "add": "Add",
     "noMemo": "No memo"
   },
+  "calculator": {
+    "add_memo": "Add memo",
+    "today": "Today"
+  },
   "menu": {
     "title": "Money Manager",
     "transactions": "Transactions",

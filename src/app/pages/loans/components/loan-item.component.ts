@@ -62,7 +62,7 @@ interface DueStatus {
                 </div>
                 @if (tx.dueDate) {
                   <span class="due-date">
-                    {{ 'loan.dueDate' | translate }}: {{ tx.dueDate | translateDate:'shortDate' }}
+                    {{ 'loan.dueDate' | translate }}: {{ tx.dueDate | translateDate }}
                   </span>
                 }
               </div>

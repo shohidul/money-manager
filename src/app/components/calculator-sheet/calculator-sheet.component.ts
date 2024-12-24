@@ -2,11 +2,15 @@ import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, OnChanges, S
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { TranslationService } from '../../services/translation.service';
+import { TranslatePipe } from '../shared/translate.pipe';
+import { TranslateDatePipe } from '../shared/translate-date.pipe';
+import { TranslateNumberPipe } from '../shared/translate-number.pipe';
 
 @Component({
   selector: 'app-calculator-sheet',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe, TranslateNumberPipe],
   template: `
     <div class="calculator-sheet" [class.open]="isVisible">
       <div class="sheet-header">
@@ -16,11 +20,11 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
             type="text" 
             [(ngModel)]="memo" 
             (ngModelChange)="onMemoChange($event)"
-            placeholder="Add memo"
+            [placeholder]="'calculator.add_memo' | translate"
             class="memo-input"
           >
         </div>
-        <div class="amount">{{ displayAmount }}</div>
+        <div class="amount">{{ displayAmount | translateNumber }}</div>
       </div>
 
       @if (showDatePicker) {
@@ -38,7 +42,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
         <div class="sheet-body">
           <div class="keypad-number">
             @for (key of numericKeys; track key) {
-              <button (click)="onKeyPress(key)" class="key">{{ key }}</button>
+              <button (click)="onKeyPress(key)" class="key">{{ key | translateNumber }}</button>
             }
           </div>
           <div class="keypad-function">
@@ -218,7 +222,10 @@ export class CalculatorSheetComponent implements OnInit, OnDestroy, OnChanges {
   selectedDate = new Date();
   today = new Date();
 
-  constructor(private domSanitizer: DomSanitizer) {}
+  constructor(
+    private domSanitizer: DomSanitizer,
+    private translationService: TranslationService
+  ) {}
 
   ngOnInit() {
     // Add global event listener for keydown
@@ -297,13 +304,21 @@ export class CalculatorSheetComponent implements OnInit, OnDestroy, OnChanges {
   get formattedDateIcon(): SafeHtml {
     const isToday =
       this.selectedDate.toDateString() === this.today.toDateString();
-    const month = this.selectedDate.getMonth() + 1;
-    const day = this.selectedDate.getDate();
-    const year = this.selectedDate.getFullYear();
+    
+    const todayText = this.translationService.translate('calculator.today');
+    
+    // Use TranslateDatePipe to get localized date string
+    const translatedDateString = new TranslateDatePipe(this.translationService).transform(this.selectedDate);
+
+    // Parse the translated date string to extract localized month, day, year
+    const dateParts = translatedDateString.split('/');
+    const translatedDay = dateParts[0];
+    const translatedMonth = dateParts[1];
+    const translatedYear = dateParts[2] || this.selectedDate.getFullYear().toString();
 
     const html = isToday
-      ? `<div class="date-icon"><div class="top">Today</div><div class="bottom">${month}/${day}</div></div>`
-      : `<div class="date-icon"><div class="top">${month}/${day}</div><div class="bottom">${year}</div></div>`;
+      ? `<div class="date-icon"><div class="top">${todayText}</div><div class="bottom">${translatedMonth}/${translatedDay}</div></div>`
+      : `<div class="date-icon"><div class="top">${translatedMonth}/${translatedDay}</div><div class="bottom">${translatedYear}</div></div>`;
 
     return this.domSanitizer.bypassSecurityTrustHtml(html);
   }

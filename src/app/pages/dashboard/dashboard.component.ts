@@ -93,7 +93,7 @@ import { LoanTransaction } from '../../models/loan.model';
                 @if (isLoanTransaction(tx)) {
                   <span class="small-text">
                     {{ tx.personName || 'Unnamed' }} | 
-                    {{ 'loan.dueDate' | translate }}: {{ tx.dueDate ? (tx.dueDate | translateDate: 'shortDate') : 'N/A' }} |
+                    {{ 'loan.dueDate' | translate }}: {{ tx.dueDate ? (tx.dueDate | translateDate) : 'N/A' }} |
                     {{ 'loan.'+(tx.status || 'pending')  | translate  }} 
                   </span>
                 }
@@ -106,7 +106,7 @@ import { LoanTransaction } from '../../models/loan.model';
                       {{ 'loan.dueDate' | translate }}: 
                       {{
                         parentLoan.dueDate 
-                          ? (parentLoan.dueDate | translateDate: 'shortDate') 
+                          ? (parentLoan.dueDate | translateDate) 
                           : 'N/A'
                       }} |
                       {{ 'loan.'+(parentLoan.status || 'pending') | translate }}

@@ -8,7 +8,7 @@ import { TranslationService } from '../../services/translation.service';
 export class TranslateDatePipe implements PipeTransform {
   constructor(private translationService: TranslationService) {}
 
-  transform(value: Date | string | number, format: string = 'short'): string {
+  transform(value: Date | string | number, format: string = ''): string {
     if (!value) return '';
 
     // Ensure value is a Date object
@@ -18,21 +18,24 @@ export class TranslateDatePipe implements PipeTransform {
 
     if (isNaN(dateValue.getTime())) return '';
 
-    const currentLang = this.translationService.getCurrentLanguage();
-    
+    let currentLang = this.translationService.getCurrentLanguage();
+    currentLang = currentLang === 'en' ? 'en-GB' : 'bn-BD';
+
     try {
+      let formattedDate: string;
+
       switch (format) {
         case 'short':
-          return new Intl.DateTimeFormat(currentLang, {
+          formattedDate = new Intl.DateTimeFormat(currentLang, {
             month: 'numeric',
             day: 'numeric',
-            year: '2-digit',
+            year: 'numeric',
             hour: 'numeric',
             minute: '2-digit',
             hour12: true
           }).format(dateValue);
+          break;
         case 'MM/dd E':
-          // Custom formatting to match exact requirements
           const parts = new Intl.DateTimeFormat(currentLang, {
             month: '2-digit',
             day: '2-digit',
@@ -43,17 +46,21 @@ export class TranslateDatePipe implements PipeTransform {
           const day = parts.find(p => p.type === 'day')?.value || '';
           const weekday = parts.find(p => p.type === 'weekday')?.value || '';
 
-          // Ensure two-digit month and day
-          return `${month}/${day} ${weekday}`;
+          formattedDate = `${month}/${day} ${weekday}`;
+          break;
         case 'shortTime':
-          return new Intl.DateTimeFormat(currentLang, {
+          formattedDate = new Intl.DateTimeFormat(currentLang, {
             hour: 'numeric',
             minute: '2-digit',
             hour12: true
           }).format(dateValue);
+          break;
         default:
-          return new Intl.DateTimeFormat(currentLang).format(dateValue);
+          formattedDate = new Intl.DateTimeFormat(currentLang).format(dateValue);
       }
+
+      // Ensure AM/PM is uppercase
+      return formattedDate.replace(/\b(am|pm)\b/g, match => match.toUpperCase());
     } catch (error) {
       console.error('Date formatting error:', error);
       return dateValue.toLocaleString();

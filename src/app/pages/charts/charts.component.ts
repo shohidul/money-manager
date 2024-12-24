@@ -129,7 +129,7 @@ type ChartType = 'all' | 'income' | 'expense' | 'fuel';
 
                           @if (isLoanTransaction(tx)) {
                             <span class="small-text">
-                              {{ tx.personName || 'Unnamed' }} | {{ 'charts.dueDate' | translate }}: {{ tx.dueDate ? (tx.dueDate | date: 'shortDate') : 'N/A' }}
+                              {{ tx.personName || 'Unnamed' }} | {{ 'charts.dueDate' | translate }}: {{ tx.dueDate ? (tx.dueDate | translateDate) : 'N/A' }}
                             </span>
                           }
 

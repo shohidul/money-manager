@@ -14,6 +14,10 @@
     "add": "যোগ করুন",
     "noMemo": "কোন মেমো নেই"
   },
+  "calculator": {
+    "add_memo": "মেমো যোগ করুন",
+    "today": "আজ"
+  },
   "menu": {
     "title": "মানি ম্যানেজার",
     "transactions": "লেনদেন",
