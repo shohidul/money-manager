@@ -8,9 +8,11 @@ import { SecurityCardComponent } from './components/security-card.component';
 import { CategoriesCardComponent } from './components/categories-card.component';
 import { DataManagementCardComponent } from './components/data-management-card.component';
 import { LanguageCardComponent } from './components/language-card.component';
+import { AppModeCardComponent } from './components/app-mode-card.component';
 import { TranslatePipe } from '../../components/shared/translate.pipe';
 import { format } from 'date-fns';
 import { CategoryService } from '../../services/category.service';
+import { FeatureFlagService } from '../../services/feature-flag.service';
 
 @Component({
   selector: 'app-settings',
@@ -22,6 +24,7 @@ import { CategoryService } from '../../services/category.service';
     CategoriesCardComponent,
     DataManagementCardComponent,
     LanguageCardComponent,
+    AppModeCardComponent,
     TranslatePipe,
   ],
   template: `
@@ -33,10 +36,9 @@ import { CategoryService } from '../../services/category.service';
       />
 
       <div class="content">
+        <app-mode-card />
         <app-language-card />
-        
         <app-security-card />
-        
         <app-categories-card
           [categoriesExpnse]="categoriesExpnse"
           [categoriesIncome]="categoriesIncome"
@@ -44,7 +46,6 @@ import { CategoryService } from '../../services/category.service';
           (deleteCategory)="deleteCategory($event)"
           (resetOrder)="resetCategoryOrder($event)"
         />
-
         <app-data-management-card
           (backup)="backupData()"
           (clear)="clearData()"
@@ -59,7 +60,6 @@ import { CategoryService } from '../../services/category.service';
       max-width: 800px;
       margin: 0 auto;
     }
-
     .content {
       padding: 1rem;
     }
@@ -70,12 +70,14 @@ import { CategoryService } from '../../services/category.service';
 export class SettingsComponent implements OnInit {
   categoriesExpnse: any[] = [];
   categoriesIncome: any[] = [];
+  isAdvancedMode = false;
 
   constructor(
+    private router: Router,
     private dbService: DbService,
     private categoryService: CategoryService,
-    private router: Router,
-    private translate: TranslatePipe
+    private translate: TranslatePipe,
+    private featureFlagService: FeatureFlagService
   ) {}
 
   async ngOnInit() {
@@ -85,6 +87,10 @@ export class SettingsComponent implements OnInit {
     // Load the categories after initialization
     await this.loadCategoriesExpense();
     await this.loadCategoriesIncome();
+
+    this.featureFlagService.getAppMode().subscribe(
+      isAdvanced => this.isAdvancedMode = isAdvanced
+    );
   }
 
   async loadCategoriesExpense() {
@@ -285,6 +291,10 @@ export class SettingsComponent implements OnInit {
     } else {
       this.categoriesIncome = updatedCategories;
     }
+  }
+
+  toggleAppMode(event: any) {
+    this.featureFlagService.setAppMode(event.target.checked);
   }
 
   goBack() {

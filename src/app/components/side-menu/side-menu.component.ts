@@ -2,6 +2,7 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { TranslatePipe } from '../shared/translate.pipe';
+import { FeatureFlagService } from '../../services/feature-flag.service';
 
 @Component({
   selector: 'app-side-menu',
@@ -19,43 +20,52 @@ import { TranslatePipe } from '../shared/translate.pipe';
           <span class="material-icons">view_stream</span>
           {{ 'menu.transactions' | translate }}
         </a>
+
         <a routerLink="/charts" routerLinkActive="active" (click)="close()">
           <span class="material-icons">donut_large</span>
           {{ 'menu.charts' | translate }}
         </a>
-        <a routerLink="/fuel" routerLinkActive="active" (click)="close()">
+
+        <a *ngIf="isFeatureEnabled('fuel')" routerLink="/fuel" routerLinkActive="active" (click)="close()">
           <span class="material-icons">local_gas_station</span>
           {{ 'menu.fuelLogs' | translate }}
+          <span class="beta-badge" *ngIf="isFeatureBeta('fuel')">BETA</span>
         </a>
-        <a routerLink="/loans" routerLinkActive="active" (click)="close()">
+
+        <a *ngIf="isFeatureEnabled('loans')" routerLink="/loans" routerLinkActive="active" (click)="close()">
           <span class="material-icons">account_balance</span>
           {{ 'menu.loanManagement' | translate }}
+          <span class="beta-badge" *ngIf="isFeatureBeta('loans')">BETA</span>
         </a>
-        <a routerLink="/assets" routerLinkActive="active" (click)="close()">
+
+        <a *ngIf="isFeatureEnabled('assets')" routerLink="/assets" routerLinkActive="active" (click)="close()">
           <span class="material-icons">real_estate_agent</span>
           {{ 'menu.assetManagement' | translate }}
+          <span class="beta-badge" *ngIf="isFeatureBeta('assets')">BETA</span>
         </a>
+
         <a routerLink="/export" routerLinkActive="active" (click)="close()">
           <span class="material-icons">download</span>
           {{ 'menu.export' | translate }}
         </a>
+
         <a routerLink="/settings" routerLinkActive="active" (click)="close()">
           <span class="material-icons">settings</span>
           {{ 'menu.settings' | translate }}
         </a>
+
         <a routerLink="/tutorial" routerLinkActive="active" (click)="close()">
           <span class="material-icons">help</span>
           {{ 'menu.howToUse' | translate }}
         </a>
+
         <a routerLink="/about" routerLinkActive="active" (click)="close()">
           <span class="material-icons">info</span>
           {{ 'menu.about' | translate }}
         </a>
       </div>
     </nav>
-    @if (isOpen) {
-      <div class="menu-overlay" (click)="close()"></div>
-    }
+    <div class="menu-overlay" *ngIf="isOpen" (click)="close()"></div>
   `,
   styles: [`
     :host {
@@ -110,7 +120,7 @@ import { TranslatePipe } from '../shared/translate.pipe';
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      padding: 0.75rem 2rem;
+      padding: 0.75rem 2.3rem;
       text-decoration: none;
       color: var(--text-primary);
       transition: background-color 0.2s;
@@ -123,6 +133,17 @@ import { TranslatePipe } from '../shared/translate.pipe';
     .menu-items a.active {
       background-color: var(--primary-color);
       color: white;
+    }
+
+    .beta-badge {
+      font-size: 0.6rem;
+      color: var(--primary-color);
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: 5px;
+      font-weight: bold;
+      position: absolute;
+      right: 15px;
     }
 
     @media (max-width: 768px) {
@@ -141,17 +162,24 @@ import { TranslatePipe } from '../shared/translate.pipe';
 export class SideMenuComponent {
   @Input() isOpen = false;
   @Output() menuClosed = new EventEmitter<void>();
-
   logoFailed = false;
+
+  constructor(private featureFlagService: FeatureFlagService) {}
+
+  isFeatureEnabled(featureId: string): boolean {
+    return this.featureFlagService.isFeatureEnabled(featureId);
+  }
+
+  isFeatureBeta(featureId: string): boolean {
+    return this.featureFlagService.isFeatureBeta(featureId);
+  }
 
   close() {
     this.menuClosed.emit();
   }
 
-  // This function is triggered if the logo image fails to load
   onImageError(event: Event) {
     this.logoFailed = true;
-    // Optionally, you can also prevent default image error handling behavior
     event.preventDefault();
   }
 }

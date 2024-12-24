@@ -398,6 +398,11 @@
   },
   "settings": {
     "title": "Settings",
+    "advancedMode": {
+      "title": "Advanced Mode",
+      "label": "Enable Advanced Features",
+      "description": "Unlock premium features like Loans, Assets, and Fuel tracking"
+    },
     "deleteCategory": "Are you sure you want to delete the category '{0}'?",
     "clearData": "Are you sure you want to clear all data? This action cannot be undone.",
     "dataCleared": "All data has been cleared successfully.",
