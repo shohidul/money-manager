@@ -416,11 +416,26 @@
       "en": "English",
       "bn": "বাংলা"
     },
-    "theme": "থিম",
-    "themes": {
-      "light": "লাইট",
+    "theme": {
+      "title": "থিম",
+      "mode": "থিম মোড",
+      "system": "সিস্টেম",
+      "systemDescription": "সিস্টেম আবহ অনুসরণ করুন",
+      "light": "হালকা",
+      "lightDescription": "উজ্জ্বল এবং পরিষ্কার ইন্টারফেস",
       "dark": "ডার্ক",
-      "system": "সিস্টেম"
+      "darkDescription": "কম আলোয় চোখের জন্য সহজ",
+      "primaryColor": "প্রাথমিক রঙ",
+      "colors": {
+        "Blue": "নীল",
+        "Purple": "বেগুনি", 
+        "Green": "সবুজ",
+        "Orange": "কমলা",
+        "Red": "লাল",
+        "Teal": "সবুজ-নীল",
+        "Pink": "গোলাপি",
+        "Indigo": "নীল-বেগুনি"
+      }
     }
   },
   "months": {

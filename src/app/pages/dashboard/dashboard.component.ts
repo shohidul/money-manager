@@ -218,7 +218,7 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
   }
 
   .overview .amount {
-    color: #333333;
+    color: var(--text-primary);
   }
 
   .transaction-list {
@@ -236,7 +236,7 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
     padding: 1rem 1rem 0.5rem 1rem;
     color: var(--text-secondary);
     font-size: 0.875rem;
-    border-bottom: 1px solid #f5f5f5;
+    border-bottom: 1px solid var(--background-color);
   }
 
   .transaction-item {
@@ -246,7 +246,7 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
     padding: 0.1rem 1rem 0.8rem 1rem;
     cursor: pointer;
     transition: background-color 0.2s;
-    border-bottom: 1px solid #f5f5f5;
+    border-bottom: 1px solid var(--background-color);
     font-size: 0.875rem;
   }
 

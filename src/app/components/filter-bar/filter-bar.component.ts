@@ -44,7 +44,7 @@ import { MonthPickerComponent } from "../month-picker/month-picker.component";
     .month-picker input,
     .status-filter select {
       padding: 0.7rem;
-      border: 1px solid rgba(0, 0, 0, 0.12);
+      border: 1px solid var(--border-color);
       border-radius: 4px;
     }
   `]

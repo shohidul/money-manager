@@ -5,6 +5,7 @@ import { DbService } from './services/db.service';
 import { MenuService } from './services/menu.service';
 import { SideMenuComponent } from './components/side-menu/side-menu.component';
 import { Subscription } from 'rxjs';
+import { ThemeService } from './services/theme.service';
 
 @Component({
   selector: 'app-root',
@@ -50,7 +51,7 @@ export class AppComponent implements OnInit, OnDestroy {
   isSideMenuOpen = false;
   private menuSubscription: Subscription;
 
-  constructor(private dbService: DbService, private menuService: MenuService) {
+  constructor(private dbService: DbService, private menuService: MenuService, private themeService: ThemeService) {
     this.menuSubscription = this.menuService.menuState$.subscribe(
       (state) => (this.isSideMenuOpen = state)
     );
@@ -58,6 +59,16 @@ export class AppComponent implements OnInit, OnDestroy {
 
   async ngOnInit() {
     await this.dbService.initializeDB();
+    const savedMode = localStorage.getItem('themeMode') as 'system' | 'light' | 'dark';
+    const savedColor = localStorage.getItem('themeColor');
+
+    if (savedMode) {
+      this.themeService.setThemeMode(savedMode);
+    }
+
+    if (savedColor) {
+      this.themeService.setThemeColor(savedColor);
+    }
   }
 
   ngOnDestroy() {

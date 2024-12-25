@@ -149,7 +149,7 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
     }
 
     .dialog-content {
-      background: white;
+      background-color: var(--surface-color);
       padding: 3.5rem;
       width: 60%;
       height: 85%;
@@ -182,7 +182,7 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
     .form-input {
       width: 100%;
       padding: 0.75rem;
-      border: 1px solid rgba(0, 0, 0, 0.12);
+      border: 1px solid var(--border-color);
       border-radius: 4px;
     }
 

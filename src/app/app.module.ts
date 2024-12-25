@@ -3,14 +3,19 @@ import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
 import { TranslatePipe } from './components/shared/translate.pipe';
 import { TranslateDatePipe } from './components/shared/translate-date.pipe';
+import { ThemeService } from './services/theme.service';
 
 @NgModule({
   imports: [
     BrowserModule,
     HttpClientModule,
-    TranslatePipe, // Importing TranslatePipe as a standalone pipe
-    TranslateDatePipe // Importing TranslateDatePipe as a standalone pipe
+    TranslatePipe,
+    TranslateDatePipe
   ],
-  providers: [TranslatePipe, TranslateDatePipe]
+  providers: [
+    TranslatePipe, 
+    TranslateDatePipe,
+    ThemeService
+  ]
 })
 export class AppModule { }

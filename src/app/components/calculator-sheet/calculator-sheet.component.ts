@@ -78,7 +78,7 @@ import { TranslateNumberPipe } from '../shared/translate-number.pipe';
 
     .sheet-header {
       padding: .75rem 1rem 0 1rem;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      border-bottom: 1px solid var(--border-color-light);
       display: flex;
     }
 
@@ -141,7 +141,7 @@ import { TranslateNumberPipe } from '../shared/translate-number.pipe';
     .key {
       padding: 1.25rem;
       border: none;
-      background: white;
+      background-color: var(--surface-color);
       font-size: 1.25rem;
       cursor: pointer;
       display: flex;
@@ -165,13 +165,13 @@ import { TranslateNumberPipe } from '../shared/translate-number.pipe';
 
     .date-picker {
       padding: 1rem;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      border-bottom: 1px solid var(--border-color-light);
     }
 
     .date-picker input {
       width: 100%;
       padding: 0.75rem;
-      border: 1px solid rgba(0, 0, 0, 0.12);
+      border: 1px solid var(--border-color);
       border-radius: 8px;
     }
 

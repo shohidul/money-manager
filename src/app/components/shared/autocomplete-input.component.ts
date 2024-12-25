@@ -53,7 +53,7 @@ import { FormsModule } from '@angular/forms';
       top: 100%;
       left: 0;
       right: 0;
-      background: white;
+      background-color: var(--surface-color);
       border: 1px solid #ddd;
       border-radius: 4px;
       margin-top: 4px;

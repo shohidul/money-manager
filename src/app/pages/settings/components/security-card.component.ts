@@ -67,7 +67,7 @@ import { TranslatePipe } from '../../../components/shared/translate.pipe';
       justify-content: space-between;
       align-items: center;
       padding: 1rem 0;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      border-bottom: 1px solid var(--border-color)-light;
     }
 
     .setting-item:last-child {

@@ -67,7 +67,7 @@ import { FuelTransaction } from '../../models/transaction-types';
 
     .form-input {
       padding: 0.75rem;
-      border: 1px solid rgba(0, 0, 0, 0.12);
+      border: 1px solid var(--border-color);
       border-radius: 4px;
       font-size: 1rem;
     }

@@ -81,7 +81,7 @@ import { TranslatePipe } from '../../components/shared/translate.pipe';
       background: var(--background-color);
       padding: 1rem;
       z-index: 10;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      border-bottom: 1px solid var(--border-color-light);
     }
 
     .categories-header h3 {
@@ -151,7 +151,7 @@ import { TranslatePipe } from '../../components/shared/translate.pipe';
     }
 
     .add-category {
-      border: 1px dashed rgba(0, 0, 0, 0.2);
+      border: 1px dashed var(--dashed-border);
     }
   `,
   ],

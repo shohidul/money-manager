@@ -172,7 +172,7 @@ type ChartType = 'all' | 'income' | 'expense';
   .filter-buttons {
     display: flex;
     gap: 0.5rem;
-    background: white;
+    background-color: var(--surface-color);
     padding: 0.5rem;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -263,7 +263,7 @@ type ChartType = 'all' | 'income' | 'expense';
 
   .category-details {
     /* margin-top: 1rem; */
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid var(--border-color);
   }
 
   .category-header {
@@ -282,7 +282,7 @@ type ChartType = 'all' | 'income' | 'expense';
 
   .category-transactions {
     padding: 1rem;
-    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    border-top: 1px solid var(--border-color-light);
   }
 
   .transaction-list {

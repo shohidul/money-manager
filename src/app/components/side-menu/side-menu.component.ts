@@ -96,7 +96,7 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
       align-items: center;
       gap: 0.5rem;
       padding: 2rem 2rem 1.75rem 2rem;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+      border-bottom: 1px solid var(--border-color);
       margin-bottom: 1rem;
       color: var(--text-primary);
     }

@@ -100,7 +100,7 @@ import { MobileHeaderComponent } from '../../components/mobile-header/mobile-hea
 
     .features li {
       padding: 0.75rem 0;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      border-bottom: 1px solid var(--border-color-light);
       display: flex;
       align-items: center;
       gap: 0.5rem;

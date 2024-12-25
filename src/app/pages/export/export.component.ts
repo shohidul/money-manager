@@ -97,7 +97,7 @@ import { TranslateNumberPipe } from '../../components/shared/translate-number.pi
 
     .form-group input {
       padding: 0.75rem;
-      border: 1px solid rgba(0, 0, 0, 0.12);
+      border: 1px solid var(--border-color);
       border-radius: 8px;
     }
 
@@ -114,7 +114,7 @@ import { TranslateNumberPipe } from '../../components/shared/translate-number.pi
     .format-buttons button {
       flex: 1;
       padding: 0.75rem;
-      border: 1px solid rgba(0, 0, 0, 0.12);
+      border: 1px solid var(--border-color);
       border-radius: 8px;
       background: none;
       cursor: pointer;

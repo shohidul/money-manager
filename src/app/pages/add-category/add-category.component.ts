@@ -98,7 +98,7 @@ import { TranslationService } from '../../services/translation.service';
       display: flex;
       align-items: center;
       gap: 1rem;
-      background: white;
+      background-color: var(--surface-color);
       padding: 1rem;
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);

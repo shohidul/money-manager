@@ -9,6 +9,7 @@ import { CategoriesCardComponent } from './components/categories-card.component'
 import { DataManagementCardComponent } from './components/data-management-card.component';
 import { LanguageCardComponent } from './components/language-card.component';
 import { AppModeCardComponent } from './components/app-mode-card.component';
+import { ThemeCardComponent } from './components/theme-card.component';
 import { TranslatePipe } from '../../components/shared/translate.pipe';
 import { format } from 'date-fns';
 import { CategoryService } from '../../services/category.service';
@@ -25,6 +26,7 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
     DataManagementCardComponent,
     LanguageCardComponent,
     AppModeCardComponent,
+    ThemeCardComponent,
     TranslatePipe,
   ],
   template: `
@@ -38,6 +40,7 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
       <div class="content">
         <app-mode-card />
         <app-language-card />
+        <app-theme-card />
         <app-security-card />
         <app-categories-card
           [categoriesExpnse]="categoriesExpnse"

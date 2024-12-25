@@ -416,11 +416,26 @@
       "en": "English",
       "bn": "বাংলা"
     },
-    "theme": "Theme",
-    "themes": {
+    "theme": {
+      "title": "Theme",
+      "mode": "Theme Mode",
+      "system": "System",
+      "systemDescription": "Follow system appearance",
       "light": "Light",
+      "lightDescription": "Bright and clean interface",
       "dark": "Dark",
-      "system": "System"
+      "darkDescription": "Easier on the eyes in low light",
+      "primaryColor": "Primary Color",
+      "colors": {
+        "Blue": "Blue",
+        "Purple": "Purple", 
+        "Green": "Green",
+        "Orange": "Orange",
+        "Red": "Red",
+        "Teal": "Teal",
+        "Pink": "Pink",
+        "Indigo": "Indigo"
+      }
     }
   },
   "months": {

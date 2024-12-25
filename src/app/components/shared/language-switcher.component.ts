@@ -31,17 +31,17 @@ import { TranslatePipe } from './translate.pipe';
       padding: 8px 16px;
       border: 1px solid #ddd;
       border-radius: 4px;
-      background: white;
+      background-color: var(--surface-color);
       cursor: pointer;
       transition: all 0.2s;
     }
 
     .lang-btn:hover {
-      background: #f5f5f5;
+      background-color: #f5f5f5;
     }
 
     .lang-btn.active {
-      background: #e0e0e0;
+      background-color: #e0e0e0;
       border-color: #bbb;
     }
 
