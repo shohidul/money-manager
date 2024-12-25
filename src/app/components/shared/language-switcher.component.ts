@@ -37,7 +37,7 @@ import { TranslatePipe } from './translate.pipe';
     }
 
     .lang-btn:hover {
-      background-color: #f5f5f5;
+      background-color: var(--background-color);
     }
 
     .lang-btn.active {

@@ -180,7 +180,7 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
   }
 
   .menu-button:hover, .sync-button:hover {
-    background-color: rgba(0, 0, 0, 0.04);
+    background-color: var(--background-color-hover);
   }
 
   @media (min-width: 769px) {
@@ -251,7 +251,7 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
   }
 
   .transaction-item:hover {
-    background-color: rgba(0, 0, 0, 0.04);
+    background-color: var(--background-color-hover);
   }
 
   .transaction-details {

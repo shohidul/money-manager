@@ -141,7 +141,7 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
+      background: var(--background-overlay);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -210,7 +210,7 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
       padding: 0.75rem 1rem;
       border: none;
       border-radius: 4px;
-      background: rgba(0, 0, 0, 0.04);
+      background: var(--background-color-hover);
       cursor: pointer;
     }
 
@@ -291,7 +291,7 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
     }
 
     .form-content {
-      background: #f5f5f5;
+      background: var(--background-color);
       border-radius: 8px;
       padding: 16px;
     }
@@ -311,7 +311,7 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: #f5f5f5;
+      background: var(--background-color);
       border-radius: 8px;
       padding: 16px;
       transition: background-color 0.3s ease;
@@ -327,7 +327,7 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
 
     .value {
       font-weight: 500;
-      color: #333;
+      color: var(--text-primary);;
       text-align: right;
     }
 
@@ -369,7 +369,7 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
     .category-icon {
       font-size: 32px !important;
       padding: 12px;
-      background: rgba(0, 0, 0, 0.05);
+      background: var(--background-color-hover);
       border-radius: 50%;
     }
 
@@ -382,7 +382,7 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
     .category-name {
       font-size: 1.2em;
       font-weight: 600;
-      color: #333;
+      color: var(--text-primary);
     }
 
     @media (max-width: 768px) {

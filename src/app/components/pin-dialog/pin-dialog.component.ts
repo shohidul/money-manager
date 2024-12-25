@@ -48,7 +48,7 @@ import { CommonModule } from '@angular/common';
       text-align: center;
       background-color: var(--surface-color);
       border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 6px var(--box-shadow-color-light);
       position: relative;
     }
 
@@ -79,7 +79,7 @@ import { CommonModule } from '@angular/common';
     }
 
     .close-button:hover {
-      background-color: rgba(0, 0, 0, 0.04);
+      background-color: var(--background-color-hover);
     }
 
     .pin-display {
@@ -120,7 +120,7 @@ import { CommonModule } from '@angular/common';
     }
 
     .pin-button:hover {
-      background-color: rgba(0, 0, 0, 0.04);
+      background-color: var(--background-color-hover);
     }
 
     .pin-button.function {

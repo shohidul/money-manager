@@ -100,7 +100,7 @@ import { TranslatePipe } from '../../components/shared/translate.pipe';
       padding: 0.75rem;
       border: none;
       border-radius: 8px;
-      background-color: rgba(0, 0, 0, 0.04);
+      background-color: var(--background-color-hover);
       cursor: pointer;
     }
 
@@ -137,7 +137,7 @@ import { TranslatePipe } from '../../components/shared/translate.pipe';
     }
 
     .category-item:hover {
-      background-color: rgba(0, 0, 0, 0.04);
+      background-color: var(--background-color-hover);
     }
 
     .category-item.selected {

@@ -91,14 +91,14 @@ import { CommonModule } from '@angular/common';
       height: 30px;
       border: 2px solid transparent;
       border-radius: 25px;
-      background: rgba(0, 0, 0, 0.04);
+      background: var(--background-color-hover);
       cursor: pointer;
       color: var(--text-primary);
       transition: all 0.2s;
     }
 
     .mode-buttons button:hover {
-      background: rgba(0, 0, 0, 0.08);
+      background: var(--background-color);
     }
 
     .mode-buttons button.active {

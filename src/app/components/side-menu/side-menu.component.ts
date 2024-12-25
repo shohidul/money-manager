@@ -87,7 +87,7 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
+      background: var(--background-overlay);
       z-index: 999;
     }
 
@@ -127,7 +127,7 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
     }
 
     .menu-items a:hover {
-      background-color: rgba(0, 0, 0, 0.04);
+      background-color: var(--background-color-hover);
     }
 
     .menu-items a.active {

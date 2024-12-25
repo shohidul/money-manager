@@ -33,7 +33,7 @@ import { RouterModule } from '@angular/router';
       gap: 1rem;
       padding: 1rem 1.5rem;
       background-color: var(--surface-color);
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 2px 4px var(--box-shadow-color-light);
       /* margin: -1rem -1rem 1rem -1rem;*/
       position: sticky;
       top: 0;
@@ -75,7 +75,7 @@ import { RouterModule } from '@angular/router';
 
     .back-button:hover,
     .menu-button:hover {
-      background-color: rgba(0, 0, 0, 0.04);
+      background-color: var(--background-color-hover);
     }
 
     .spacer {

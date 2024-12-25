@@ -78,7 +78,7 @@ type Language = 'en' | 'bn';
       left: 0;
       right: 0;
       bottom: 0;
-      background-color: #ccc;
+      background-color: var(--dashed-border);
       transition: .4s;
       border-radius: 34px;
     }
@@ -90,7 +90,7 @@ type Language = 'en' | 'bn';
       width: 20px;
       left: 2px;
       bottom: 2px;
-      background-color: white;
+      background-color: var(--surface-color);
       transition: .4s;
       border-radius: 50%;
     }

@@ -130,12 +130,12 @@ import { MobileHeaderComponent } from '../../components/mobile-header/mobile-hea
       color: var(--primary-color);
       padding: 0.5rem 1rem;
       border-radius: 20px;
-      background: rgba(0, 0, 0, 0.04);
+      background: var(--background-color-hover);
       transition: background-color 0.2s;
     }
 
     .social-links a:hover {
-      background: rgba(0, 0, 0, 0.08);
+      background: var(--background-color);
     }
 
     .privacy {

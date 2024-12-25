@@ -39,7 +39,7 @@ import { FeatureFlagService } from '../../../services/feature-flag.service';
       justify-content: space-between;
       align-items: center;
       padding: 1rem 0;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      border-bottom: 1px solid var(--border-color-light);
     }
 
     .setting-item:last-child {
@@ -76,7 +76,7 @@ import { FeatureFlagService } from '../../../services/feature-flag.service';
       left: 0;
       right: 0;
       bottom: 0;
-      background-color: #ccc;
+      background-color: var(--dashed-border);
       transition: .4s;
       border-radius: 34px;
     }
@@ -88,7 +88,7 @@ import { FeatureFlagService } from '../../../services/feature-flag.service';
       width: 20px;
       left: 2px;
       bottom: 2px;
-      background-color: white;
+      background-color: var(--surface-color);
       transition: .4s;
       border-radius: 50%;
     }

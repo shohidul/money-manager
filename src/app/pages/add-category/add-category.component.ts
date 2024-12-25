@@ -99,11 +99,11 @@ import { TranslationService } from '../../services/translation.service';
       align-items: center;
       gap: 1rem;
       background-color: var(--surface-color);
-      padding: 1rem;
+      padding: 0.75rem 1rem;
       border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 2px 4px var(--box-shadow-color-light);
       position: sticky;
-      top: 0;
+      top: 5px;
     }
 
     .selected-icon-input .placeholder {
@@ -116,7 +116,7 @@ import { TranslationService } from '../../services/translation.service';
       font-size: 1rem;
       outline: none;
       padding: 0.5rem;
-      background: rgba(0, 0, 0, 0.04);
+      background: var(--background-color-hover);
       border-radius: 4px;
     }
 
@@ -153,12 +153,12 @@ import { TranslationService } from '../../services/translation.service';
       border-radius: 8px;
       background: none;
       cursor: pointer;
-      /*box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);*/
+      /*box-shadow: 0 2px 4px var(--box-shadow-color-light);*/
       transition: all 0.2s;
     }
 
     .icon-button:hover {
-      background-color: #0000000a;
+      background-color: var(--background-color-hover);
     }
 
     .icon-button.selected {

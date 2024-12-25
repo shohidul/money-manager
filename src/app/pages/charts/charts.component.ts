@@ -175,7 +175,7 @@ type ChartType = 'all' | 'income' | 'expense';
     background-color: var(--surface-color);
     padding: 0.5rem;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px var(--box-shadow-color-light);
   }
 
   .filter-buttons button {
@@ -233,7 +233,7 @@ type ChartType = 'all' | 'income' | 'expense';
   }
 
   .legend-item:hover {
-    background-color: rgba(0, 0, 0, 0.04);
+    background-color: var(--background-color-hover);
   }
 
   .legend-color {
@@ -338,6 +338,7 @@ export class ChartsComponent implements OnInit, AfterViewInit {
     '#FF6384',
     '#36A2EB',
   ];
+  
   isAdvancedMode: boolean = false;
 
   constructor(

@@ -60,7 +60,7 @@ import { FormsModule } from '@angular/forms';
       max-height: 200px;
       overflow-y: auto;
       z-index: 1000;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 4px var(--box-shadow-color-light);
     }
 
     .suggestion-item {
@@ -71,7 +71,7 @@ import { FormsModule } from '@angular/forms';
 
     .suggestion-item:hover,
     .suggestion-item.active {
-      background-color: #f5f5f5;
+      background-color: var(--background-color);
     }
 
     @media (max-width: 768px) {

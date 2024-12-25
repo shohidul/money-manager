@@ -68,7 +68,7 @@ import { TranslateNumberPipe } from "../shared/translate-number.pipe";
       right: 0;
       background-color: var(--surface-color);
       border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 6px var(--box-shadow-color-light);
       margin-top: 0.5rem;
       z-index: 1000;
       padding: 1rem;
@@ -94,7 +94,7 @@ import { TranslateNumberPipe } from "../shared/translate-number.pipe";
     }
 
     .year-selector button:hover {
-      background-color: rgba(0, 0, 0, 0.04);
+      background-color: var(--background-color-hover);
     }
 
     .months-grid {
@@ -113,7 +113,7 @@ import { TranslateNumberPipe } from "../shared/translate-number.pipe";
     }
 
     .month-item:hover {
-      background-color: rgba(0, 0, 0, 0.04);
+      background-color: var(--background-color-hover);
     }
 
     .month-item.selected {

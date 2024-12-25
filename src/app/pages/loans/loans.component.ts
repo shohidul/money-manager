@@ -51,7 +51,7 @@ import { LoanChartsComponent } from './components/loan-charts.component';
       padding: 0.75rem;
       border: none;
       border-radius: 8px;
-      background: rgba(0, 0, 0, 0.04);
+      background: var(--background-color-hover);
       cursor: pointer;
     }
 

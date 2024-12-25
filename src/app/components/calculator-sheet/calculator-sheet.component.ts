@@ -119,7 +119,7 @@ import { TranslateNumberPipe } from '../shared/translate-number.pipe';
       display: grid;
       grid-template-columns: 75% 25%;
       gap: 1px;
-      background-color: rgba(0, 0, 0, 0.08);
+      background-color: var(--background-color);
     }
     
     .keypad-number {
@@ -127,7 +127,7 @@ import { TranslateNumberPipe } from '../shared/translate-number.pipe';
       grid-template-columns: repeat(3, 1fr);
       grid-auto-rows: 55px;
       gap: 1px;
-      background: rgba(0, 0, 0, 0.08);
+      background: var(--background-color);
     }
     
     .keypad-function {
@@ -135,7 +135,7 @@ import { TranslateNumberPipe } from '../shared/translate-number.pipe';
       grid-template-columns: repeat(1, 1fr);
       grid-auto-rows: 55px;
       gap: 1px;
-      background: rgba(0, 0, 0, 0.08);
+      background: var(--background-color);
     }
 
     .key {
@@ -151,7 +151,7 @@ import { TranslateNumberPipe } from '../shared/translate-number.pipe';
     }
 
     .key:active {
-      background: rgba(0, 0, 0, 0.04);
+      background: var(--background-color-hover);
     }
 
     .operator-key {

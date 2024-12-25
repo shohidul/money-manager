@@ -71,7 +71,7 @@ import { ChartService } from '../../../services/chart.service';
     .stat-item {
       text-align: center;
       padding: 1rem;
-      background: rgba(0, 0, 0, 0.04);
+      background: var(--background-color-hover);
       border-radius: 8px;
     }
 

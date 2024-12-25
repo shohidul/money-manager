@@ -132,7 +132,7 @@ import { TranslatePipe } from '../../../components/shared/translate.pipe';
       padding: 0.5rem 1rem;
       border: none;
       border-radius: 20px;
-      background: rgba(0, 0, 0, 0.04);
+      background: var(--background-color-hover);
       cursor: pointer;
     }
 
@@ -160,7 +160,7 @@ import { TranslatePipe } from '../../../components/shared/translate.pipe';
     .order-number {
       min-width: 24px;
       height: 24px;
-      background: rgba(0, 0, 0, 0.04);
+      background: var(--background-color-hover);
       border-radius: 12px;
       display: flex;
       align-items: center;
@@ -192,7 +192,7 @@ import { TranslatePipe } from '../../../components/shared/translate.pipe';
     }
 
     .delete-button:hover {
-      background-color: rgba(0, 0, 0, 0.08);
+      background-color: var(--background-color);
     }
 
     .drag-handle {
@@ -220,16 +220,11 @@ import { TranslatePipe } from '../../../components/shared/translate.pipe';
     }
 
     .add-category-button:hover {
-      background-color: rgba(0, 0, 0, 0.04);
+      background-color: var(--background-color-hover);
     }
 
     .reset-order {
       margin-left: 10px;
-      background-color: #f0f0f0;
-      color: #333;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      padding: 5px 10px;
       font-size: 0.8em;
     }
 

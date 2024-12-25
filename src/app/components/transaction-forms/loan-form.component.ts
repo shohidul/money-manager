@@ -97,7 +97,7 @@ import { isLoanTransaction, isRepaidTransaction } from '../../models/transaction
       border-radius: 4px;
       font-size: 1em;
       width: 100%;
-      background-color: white;
+      background-color: va(--surface-color);
     }
 
     select.form-input {

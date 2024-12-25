@@ -103,7 +103,7 @@ import { TranslatePipe } from '../../../components/shared/translate.pipe';
       left: 0;
       right: 0;
       bottom: 0;
-      background-color: #ccc;
+      background-color: var(--dashed-border);
       border-radius: 34px;
       transition: .4s;
     }
@@ -115,7 +115,7 @@ import { TranslatePipe } from '../../../components/shared/translate.pipe';
       width: 20px;
       left: 2px;
       bottom: 2px;
-      background-color: white;
+      background-color: var(--surface-color);
       transition: .4s;
       border-radius: 50%;
     }
@@ -134,7 +134,7 @@ import { TranslatePipe } from '../../../components/shared/translate.pipe';
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.5);
+      background: var(--background-overlay);
       display: flex;
       justify-content: center;
       align-items: center;
