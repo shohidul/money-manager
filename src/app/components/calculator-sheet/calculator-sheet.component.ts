@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
@@ -184,6 +184,7 @@ import { TranslateNumberPipe } from '../shared/translate-number.pipe';
     }
   `,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CalculatorSheetComponent implements OnInit, OnDestroy, OnChanges {
   @Input() categoryIcon = 'help';
@@ -221,6 +222,8 @@ export class CalculatorSheetComponent implements OnInit, OnDestroy, OnChanges {
   showDatePicker = false;
   selectedDate = new Date();
   today = new Date();
+
+  private _memoizedDateIcon: { date: Date; html: SafeHtml } | null = null;
 
   constructor(
     private domSanitizer: DomSanitizer,
@@ -302,99 +305,112 @@ export class CalculatorSheetComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   get formattedDateIcon(): SafeHtml {
-    const isToday =
-      this.selectedDate.toDateString() === this.today.toDateString();
-    
+    if (
+      this._memoizedDateIcon &&
+      this._memoizedDateIcon.date.toDateString() === this.selectedDate.toDateString()
+    ) {
+      return this._memoizedDateIcon.html;
+    }
+
+    const isToday = this.selectedDate.toDateString() === this.today.toDateString();
     const todayText = this.translationService.translate('calculator.today');
-    
-    // Use TranslateDatePipe to get localized date string
     const translatedDateString = new TranslateDatePipe(this.translationService).transform(this.selectedDate);
-
-    // Parse the translated date string to extract localized month, day, year
     const dateParts = translatedDateString.split('/');
-    const translatedDay = dateParts[0];
-    const translatedMonth = dateParts[1];
-    const translatedYear = dateParts[2] || this.selectedDate.getFullYear().toString();
-
+    
     const html = isToday
-      ? `<div class="date-icon"><div class="top">${todayText}</div><div class="bottom">${translatedMonth}/${translatedDay}</div></div>`
-      : `<div class="date-icon"><div class="top">${translatedMonth}/${translatedDay}</div><div class="bottom">${translatedYear}</div></div>`;
+      ? `<div class="date-icon"><div class="top">${todayText}</div><div class="bottom">${dateParts[1]}/${dateParts[0]}</div></div>`
+      : `<div class="date-icon"><div class="top">${dateParts[1]}/${dateParts[0]}</div><div class="bottom">${dateParts[2] || this.selectedDate.getFullYear()}</div></div>`;
 
-    return this.domSanitizer.bypassSecurityTrustHtml(html);
+    this._memoizedDateIcon = { date: this.selectedDate, html: this.domSanitizer.bypassSecurityTrustHtml(html) };
+    return this._memoizedDateIcon.html;
   }
 
   onKeyPress(key: string) {
-    const numericPart = this.amount.replace(/[^0-9]/g, '');
-    if (numericPart.length >= 8 && !isNaN(Number(key)) && key !== '⌫') {
-      return;
+    try {
+      const MAX_DIGITS = 8;
+      const numericPart = this.amount.replace(/[^0-9]/g, '');
+
+      if (numericPart.length >= MAX_DIGITS && !isNaN(Number(key)) && key !== '⌫') {
+        return;
+      }
+
+      switch (key) {
+        case '⌫':
+          this.handleBackspace();
+          break;
+        case 'date':
+          this.showDatePicker = !this.showDatePicker;
+          break;
+        case '+':
+        case '-':
+          this.handleOperator(key);
+          break;
+        case '.':
+          this.handleDecimalPoint();
+          break;
+        case '=':
+          this.handleEquals();
+          break;
+        default:
+          this.handleNumericInput(key);
+      }
+    } catch (error) {
+      console.error('Calculator error:', error);
+      this.resetCalculator();
     }
+  }
 
-    switch (key) {
-      case '⌫':
-        if (
-          this.amount[this.amount.length - 1] === '+' ||
-          this.amount[this.amount.length - 1] === '-'
-        ) {
-          this.isCalculating = false;
-        }
-        this.amount = this.amount.slice(0, -1) || '0';
-        break;
-
-      case 'date':
-        this.showDatePicker = !this.showDatePicker;
-        break;
-
-      case '+':
-      case '-':
-        if (!this.isCalculating) {
-          this.operator = key;
-          this.prevAmount = Number(this.amount);
-          this.amount = `${this.amount}${key}`;
-          this.isCalculating = true;
-        } else {
-          this.calculateResult();
-          this.onKeyPress(key);
-        }
-        break;
-
-      case '.':
-        const lastOperatorIndex = Math.max(
-          this.amount.lastIndexOf('+'),
-          this.amount.lastIndexOf('-')
-        );
-        const afterOperator = this.amount.slice(lastOperatorIndex + 1);
-        if (!afterOperator.includes('.')) {
-          this.amount += key;
-        }
-        break;
-
-      case '=':
-        if (this.amount === '0') {
-          this.toggle.emit();
-        } else {
-          this.calculateResult();
-        }
-        break;
-
-      default:
-        if (!/^\.\d{2}$/.test(this.amount.slice(-3))) {
-          if (this.amount === '0') {
-            this.amount = key;
-          } else {
-            this.amount += key;
-          }
-        }
+  private handleBackspace() {
+    if (
+      this.amount[this.amount.length - 1] === '+' ||
+      this.amount[this.amount.length - 1] === '-'
+    ) {
+      this.isCalculating = false;
     }
+    this.amount = this.amount.slice(0, -1) || '0';
+  }
 
-    // this.amountChange.emit(Number(this.amount.replace(/[^0-9.]/g, '')));
+  private handleOperator(key: string) {
+    if (!this.isCalculating) {
+      this.operator = key;
+      this.prevAmount = Number(this.amount);
+      this.amount = `${this.amount}${key}`;
+      this.isCalculating = true;
+    } else {
+      this.calculateResult();
+      this.onKeyPress(key);
+    }
+  }
+
+  private handleDecimalPoint() {
+    const lastOperatorIndex = Math.max(
+      this.amount.lastIndexOf('+'),
+      this.amount.lastIndexOf('-')
+    );
+    const afterOperator = this.amount.slice(lastOperatorIndex + 1);
+    if (!afterOperator.includes('.')) {
+      this.amount += '.';
+    }
+  }
+
+  private handleEquals() {
+    if (this.amount === '0') {
+      this.toggle.emit();
+    } else {
+      this.calculateResult();
+    }
+  }
+
+  private handleNumericInput(key: string) {
+    if (!/^\.\d{2}$/.test(this.amount.slice(-3))) {
+      this.amount = this.amount === '0' ? key : this.amount + key;
+    }
   }
 
   calculateResult() {
     if (this.isCalculating) {
       const parts = this.amount.split(/[+\-]/);
-      const currentAmount = Number(
-        parts[parts.length - 1].replace(/[^0-9.]/g, '')
-      );
+      const currentAmount = Number(parts[parts.length - 1].replace(/[^0-9.]/g, ''));
 
       this.amount = String(
         this.operator === '+'
