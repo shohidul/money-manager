@@ -1,6 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DbService } from '../../../services/db.service';
 import { FilterBarComponent } from '../../../components/filter-bar/filter-bar.component';
 import { isFuelTransaction, FuelTransaction } from '../../../models/transaction-types';
 import { calculateMileage } from '../../../utils/fuel.utils';
@@ -112,26 +111,19 @@ import { FilterOptions } from '../../../utils/transaction-filters';
     }
   `]
 })
-export class FuelListComponent implements OnInit {
+export class FuelListComponent implements OnChanges {
+  @Input() transactions: FuelTransaction[] = [];
+  @Input() filters: FilterOptions = {};
+  @Output() filtersChange = new EventEmitter<FilterOptions>();
+
   fuelTransactions: FuelTransaction[] = [];
-  filters: FilterOptions = {};
-  previousTransaction?: FuelTransaction;
 
-  constructor(private dbService: DbService) {}
-
-  async ngOnInit() {
-    await this.loadTransactions();
-  }
-
-  async loadTransactions() {
-    const transactions = await this.dbService.getTransactions(
-      this.filters.startDate || new Date(0),
-      this.filters.endDate || new Date()
-    );
-
-    this.fuelTransactions = transactions
-      .filter(isFuelTransaction)
-      .sort((a, b) => b.date.getTime() - a.date.getTime());
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['transactions']) {
+      this.fuelTransactions = this.transactions
+        .filter(isFuelTransaction)
+        .sort((a, b) => b.date.getTime() - a.date.getTime());
+    }
   }
 
   getMileage(transaction: FuelTransaction): number {
@@ -141,8 +133,7 @@ export class FuelListComponent implements OnInit {
     return calculateMileage(transaction, prevTransaction);
   }
 
-  async onFiltersChange(filters: FilterOptions) {
-    this.filters = filters;
-    await this.loadTransactions();
+  onFiltersChange(filters: FilterOptions) {
+    this.filtersChange.emit(filters);
   }
 }

@@ -1,8 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MobileHeaderComponent } from '../../components/mobile-header/mobile-header.component';
 import { FuelListComponent } from './components/fuel-list.component';
-import { FuelChartsComponent } from '../../components/fuel-charts/fuel-charts.component';
+import { FuelChartsComponent } from './components/fuel-charts.component';
+import { DbService } from '../../services/db.service';
+import { isFuelTransaction, FuelTransaction } from '../../models/transaction-types';
+import { FilterOptions } from '../../utils/transaction-filters';
 
 @Component({
   selector: 'app-fuel',
@@ -23,9 +26,9 @@ import { FuelChartsComponent } from '../../components/fuel-charts/fuel-charts.co
         </div>
 
         @if (activeTab === 'list') {
-          <app-fuel-list />
+          <app-fuel-list [transactions]="transactions" [filters]="filters" (filtersChange)="onFiltersChange($event)" />
         } @else {
-          <app-fuel-charts />
+          <app-fuel-charts [transactions]="transactions" />
         }
       </div>
     </div>
@@ -61,8 +64,32 @@ import { FuelChartsComponent } from '../../components/fuel-charts/fuel-charts.co
     }
   `]
 })
-export class FuelComponent {
+export class FuelComponent implements OnInit {
   activeTab: 'list' | 'charts' = 'list';
+  transactions: FuelTransaction[] = [];
+  filters: FilterOptions = {};
+
+  constructor(private dbService: DbService) {}
+
+  async ngOnInit() {
+    await this.loadTransactions();
+  }
+
+  async loadTransactions() {
+    const transactions = await this.dbService.getTransactions(
+      this.filters.startDate || new Date(0),
+      this.filters.endDate || new Date()
+    );
+
+    this.transactions = transactions
+      .filter(isFuelTransaction)
+      .sort((a, b) => b.date.getTime() - a.date.getTime());
+  }
+
+  async onFiltersChange(filters: FilterOptions) {
+    this.filters = filters;
+    await this.loadTransactions();
+  }
 
   goBack() {
     window.history.back();

@@ -6,10 +6,13 @@ import {
 
 export interface FuelStats {
   mileage: number;
-  distance: number;
+  totalMileageDistance: number;
   fuelQuantity: number;
   fuelCost: number;
   costPerKm: number;
+  lastFuelPrice: number;
+  lastOdoReading: number;
+  totalFuelQuantity: number;
 }
 
 export function calculateMileage(
@@ -31,9 +34,12 @@ export function calculateFuelStats(transactions: Transaction[]): FuelStats {
     .filter(isFuelTransaction)
     .sort((a, b) => a.date.getTime() - b.date.getTime());
 
-  let totalDistance = 0;
+  let totalMileageDistance = 0;
   let totalFuel = 0;
   let totalCost = 0;
+  let lastFuelPrice = 0;
+  let lastOdoReading = 0;
+  let totalFuelQuantity = 0;
 
   for (let i = 1; i < fuelTransactions.length; i++) {
     const current = fuelTransactions[i];
@@ -41,18 +47,29 @@ export function calculateFuelStats(transactions: Transaction[]): FuelStats {
     const distance = current.odometerReading - previous.odometerReading;
 
     if (distance > 0) {
-      totalDistance += distance;
+      totalMileageDistance += distance;
       totalFuel += current.fuelQuantity;
       totalCost += current.amount;
     }
   }
 
+  // Get the last fuel transaction's price per liter
+  if (fuelTransactions.length > 0) {
+    const lastTransaction = fuelTransactions[fuelTransactions.length - 1];
+    lastFuelPrice = lastTransaction.amount / lastTransaction.fuelQuantity;
+    lastOdoReading = lastTransaction.odometerReading;
+    totalFuelQuantity = fuelTransactions.reduce((sum, tx) => sum + tx.fuelQuantity, 0);
+  }
+
   return {
-    mileage: totalFuel > 0 ? totalDistance / totalFuel : 0,
-    distance: totalDistance,
+    mileage: totalFuel > 0 ? totalMileageDistance / totalFuel : 0,
+    totalMileageDistance: totalMileageDistance,
     fuelQuantity: totalFuel,
     fuelCost: totalCost,
-    costPerKm: totalDistance > 0 ? totalCost / totalDistance : 0,
+    costPerKm: totalMileageDistance > 0 ? totalCost / totalMileageDistance : 0,
+    lastFuelPrice: lastFuelPrice,
+    lastOdoReading: lastOdoReading,
+    totalFuelQuantity: totalFuelQuantity
   };
 }
 

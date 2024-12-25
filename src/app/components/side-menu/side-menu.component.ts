@@ -135,6 +135,10 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
       color: white;
     }
 
+    .menu-items a.active .beta-badge {
+      color: white;
+    }
+
     .beta-badge {
       font-size: 0.6rem;
       color: var(--primary-color);
