@@ -11,7 +11,6 @@ import { Router } from '@angular/router';
 import { DbService } from '../../services/db.service';
 import { ChartService } from '../../services/chart.service';
 import { MonthPickerComponent } from '../../components/month-picker/month-picker.component';
-import { FuelChartsComponent } from '../../components/fuel-charts/fuel-charts.component';
 import { startOfMonth, endOfMonth, format } from 'date-fns';
 import { MobileHeaderComponent } from '../../components/mobile-header/mobile-header.component';
 import { ChangeDetectorRef } from '@angular/core';
@@ -26,8 +25,9 @@ import { calculateMileage } from '../../utils/fuel.utils';
 import { TranslatePipe } from '../../components/shared/translate.pipe';
 import { TranslateDatePipe } from "../../components/shared/translate-date.pipe";
 import { TranslateNumberPipe } from "../../components/shared/translate-number.pipe";
+import { FeatureFlagService } from '../../services/feature-flag.service';
 
-type ChartType = 'all' | 'income' | 'expense' | 'fuel';
+type ChartType = 'all' | 'income' | 'expense';
 
 @Component({
   selector: 'app-charts',
@@ -37,7 +37,6 @@ type ChartType = 'all' | 'income' | 'expense' | 'fuel';
     FormsModule,
     MobileHeaderComponent,
     MonthPickerComponent,
-    FuelChartsComponent,
     TranslatePipe,
     TranslateDatePipe,
     TranslateNumberPipe
@@ -68,30 +67,25 @@ type ChartType = 'all' | 'income' | 'expense' | 'fuel';
         </div>
 
         
-          @if (selectedType === 'fuel') {
-            <div class="card">
-              <app-fuel-charts [transactions]="transactions" />
+          <div class="chart-container card">
+            <div class="chart-wrapper">
+              <canvas #donutChart></canvas>
             </div>
-          } @else {
-            <div class="chart-container card">
-              <div class="chart-wrapper">
-                <canvas #donutChart></canvas>
-              </div>
-              <div class="legend">
-              @for (stat of categoryStats.slice(0, 5); track stat.categoryId) {
-                <div class="legend-item">
-                  <div class="legend-color" [style.background-color]="stat.color"></div>
-                  <div class="legend-info">
-                    <span class="category-name">
-                      <span class="material-symbols-rounded">{{ getCategoryIcon(stat.categoryId) }}</span>
-                      {{ stat.category  | translate }}
-                    </span>
-                  </div>
-                  <span class="percentage">{{ stat.percentage | translateNumber:'1.1-1' }}%</span>
+            <div class="legend">
+            @for (stat of categoryStats.slice(0, 5); track stat.categoryId) {
+              <div class="legend-item">
+                <div class="legend-color" [style.background-color]="stat.color"></div>
+                <div class="legend-info">
+                  <span class="category-name">
+                    <span class="material-symbols-rounded">{{ getCategoryIcon(stat.categoryId) }}</span>
+                    {{ stat.category  | translate }}
+                  </span>
                 </div>
-              }
-            </div>
+                <span class="percentage">{{ stat.percentage | translateNumber:'1.1-1' }}%</span>
+              </div>
+            }
           </div>
+        </div>
         <div class="transactions-by-category card">
         <span>{{ 'charts.types.' + selectedType | translate }} {{ 'charts.list' | translate }}</span>
           @for (stat of categoryStats; track stat.categoryId) {
@@ -121,24 +115,26 @@ type ChartType = 'all' | 'income' | 'expense' | 'fuel';
                             {{ tx.memo ? tx.memo : (stat.category | translate) }}
                             <span class="percentage text-sm ml-4 text-muted">{{ (tx.amount / stat.amount) * 100 | translateNumber:'1.1-1' }}%</span>
                           </span>
-                          @if (isAssetTransaction(tx)) {
-                            <span class="small-text">
-                              {{ tx.assetName || 'N/A' }}
-                            </span>
-                          }
+                          @if (isAdvancedMode) {
+                            @if (isAssetTransaction(tx)) {
+                              <span class="small-text">
+                                {{ tx.assetName || 'N/A' }}
+                              </span>
+                            }
 
-                          @if (isLoanTransaction(tx)) {
-                            <span class="small-text">
-                              {{ tx.personName || 'Unnamed' }} | {{ 'charts.dueDate' | translate }}: {{ tx.dueDate ? (tx.dueDate | translateDate) : 'N/A' }}
-                            </span>
-                          }
+                            @if (isLoanTransaction(tx)) {
+                              <span class="small-text">
+                                {{ tx.personName || 'Unnamed' }} | {{ 'charts.dueDate' | translate }}: {{ tx.dueDate ? (tx.dueDate | translateDate) : 'N/A' }}
+                              </span>
+                            }
 
-                          @if (isFuelTransaction(tx)) {
-                            <span class="small-text">
-                              {{ tx.fuelType || '' }}
-                              {{ tx.fuelQuantity || 0 }} {{ 'fuel.L' | translate }} | {{ 'fuel.odo' | translate }} {{ tx.odometerReading || 0 }} {{ 'fuel.km' | translate }} | 
-                              {{ 'fuel.mileage' | translate }} {{ getMileage(tx) || 0 | translateNumber:'1.1-1' }} {{ 'fuel.kmPerLiter' | translate }}
-                            </span>
+                            @if (isFuelTransaction(tx)) {
+                              <span class="small-text">
+                                {{ tx.fuelType || '' }}
+                                {{ tx.fuelQuantity || 0 }} {{ 'fuel.L' | translate }} | {{ 'fuel.odo' | translate }} {{ tx.odometerReading || 0 }} {{ 'fuel.km' | translate }} | 
+                                {{ 'fuel.mileage' | translate }} {{ getMileage(tx) || 0 | translateNumber:'1.1-1' }} {{ 'fuel.kmPerLiter' | translate }}
+                              </span>
+                            }
                           }
                         </div>
                         <span class="amount">
@@ -153,7 +149,6 @@ type ChartType = 'all' | 'income' | 'expense' | 'fuel';
           }
         </div>
 
-          }
         
       </div>
     </div>
@@ -328,7 +323,7 @@ export class ChartsComponent implements OnInit, AfterViewInit {
 
   currentMonth = format(new Date(), 'yyyy-MM');
   selectedType: ChartType = 'all';
-  chartTypes: ChartType[] = ['all', 'income', 'expense', 'fuel'];
+  chartTypes: ChartType[] = ['all', 'income', 'expense'];
   transactions: Transaction[] = [];
   categories: any[] = [];
   categoryStats: any[] = [];
@@ -343,15 +338,21 @@ export class ChartsComponent implements OnInit, AfterViewInit {
     '#FF6384',
     '#36A2EB',
   ];
+  isAdvancedMode: boolean = false;
 
   constructor(
     private dbService: DbService,
     private chartService: ChartService,
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private featureFlagService: FeatureFlagService
   ) {}
 
   async ngOnInit() {
+    this.featureFlagService.getAppMode().subscribe(
+      isAdvanced => this.isAdvancedMode = isAdvanced
+    );
+
     await this.loadData();
     // this.createDonutChart();
   }
@@ -421,7 +422,7 @@ export class ChartsComponent implements OnInit, AfterViewInit {
   }
 
   private createDonutChart() {
-    if (this.selectedType === 'fuel' || !this.donutChartRef) return;
+    if (!this.donutChartRef) return;
 
     const canvas = this.donutChartRef.nativeElement as HTMLCanvasElement;
     const ctx = canvas.getContext('2d');

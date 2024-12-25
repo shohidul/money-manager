@@ -13,9 +13,9 @@ export interface Feature {
 })
 export class FeatureFlagService {
   private features: Feature[] = [
-    { id: 'loans', name: 'Loans', isAdvanced: true, isBeta: true },
-    { id: 'assets', name: 'Assets', isAdvanced: true, isBeta: true },
-    { id: 'fuel', name: 'Fuel Tracking', isAdvanced: true, isBeta: true }
+    { id: 'fuel', name: 'Fuel Logs', isAdvanced: true, isBeta: true },
+    { id: 'loans', name: 'Loan Management', isAdvanced: true, isBeta: true },
+    { id: 'assets', name: 'Asset Management', isAdvanced: true, isBeta: true },
   ];
 
   private isAdvancedMode = new BehaviorSubject<boolean>(false);

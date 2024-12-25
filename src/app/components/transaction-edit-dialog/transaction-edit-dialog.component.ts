@@ -10,6 +10,7 @@ import { Category } from '../../services/db.service';
 import { TranslatePipe } from '../shared/translate.pipe';
 import { TranslateDatePipe } from '../shared/translate-date.pipe';
 import { TranslateNumberPipe } from "../shared/translate-number.pipe";
+import { FeatureFlagService } from '../../services/feature-flag.service';
 
 @Component({
   selector: 'app-transaction-edit-dialog',
@@ -31,10 +32,10 @@ import { TranslateNumberPipe } from "../shared/translate-number.pipe";
           <div class="dialog-header">
             <h2>{{ 'transaction.title.edit' | translate }}</h2>
             <button class="edit-full-button" (click)="onEditFull()">
-              @if (editedTransaction.subType !== 'none') {
-                {{ 'transaction.edit.editFull' | translate }}
-              } @else {
+              @if (editedTransaction.subType === 'none' || !isAdvancedMode) {
                 {{ 'transaction.edit.edit' | translate }}
+              } @else {
+                {{ 'transaction.edit.editFull' | translate }}
               }
               <span class="material-icons">chevron_right</span>
             </button>
@@ -42,7 +43,7 @@ import { TranslateNumberPipe } from "../shared/translate-number.pipe";
 
           <div class="dialog-body">
             <div class="dialog-content-grid" [class.no-form]="editedTransaction.subType === 'none'">
-              @if (editedTransaction.subType === 'none') {
+              @if (editedTransaction.subType === 'none' || !isAdvancedMode) {
                 <div class="transaction-summary-column">
                   <div class="summary-item category-item">
                     <div class="category-content">
@@ -418,10 +419,15 @@ export class TransactionEditDialogComponent implements OnInit {
   isAssetTransaction = isAssetTransaction;
   isFuelTransaction = isFuelTransaction;
   show = true;
+  isAdvancedMode: boolean = false;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private featureFlagService: FeatureFlagService) {}
 
   ngOnInit() {
+    this.featureFlagService.getAppMode().subscribe(
+      isAdvanced => this.isAdvancedMode = isAdvanced
+    );
+
     this.editedTransaction = { ...this.transaction };
   }
 

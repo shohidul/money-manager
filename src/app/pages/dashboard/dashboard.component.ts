@@ -20,6 +20,7 @@ import { TranslateDatePipe } from '../../components/shared/translate-date.pipe';
 import { TranslateNumberPipe } from '../../components/shared/translate-number.pipe';
 import { LoanService } from '../../services/loan.service';
 import { LoanTransaction } from '../../models/loan.model';
+import { FeatureFlagService } from '../../services/feature-flag.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -84,6 +85,7 @@ import { LoanTransaction } from '../../models/loan.model';
                 <span class="small-text">{{ tx.date | translateDate: 'shortTime' }}</span>
                 <span class="memo">{{ tx.memo ? tx.memo : getCategoryName(tx.categoryId) | translate }}</span>
 
+              @if (isAdvancedMode) {
                 @if (isAssetTransaction(tx)) {
                   <span class="small-text">
                     {{ tx.assetName || 'N/A' }}
@@ -122,7 +124,7 @@ import { LoanTransaction } from '../../models/loan.model';
                     {{ 'fuel.mileage' | translate }} {{ (getMileage(tx) || 0) | translateNumber:'1.1-1' }} {{ 'fuel.kmPerLiter' | translate }}
                   </span>
                 }
-
+              }
               </div>
               <span class="amount">
                 {{ tx.type === 'income' ? '' : '-' }}{{ tx.amount | translateNumber:'1.0-2' }}
@@ -292,10 +294,16 @@ export class DashboardComponent implements OnInit {
   isRepaidTransaction = isRepaidTransaction;
   isAssetTransaction = isAssetTransaction;
   parentLoanTransactions: LoanTransaction[] = [];
+  isAdvancedMode: boolean = false;
 
-  constructor(private router: Router, private dbService: DbService, private menuService: MenuService, private loanService: LoanService) {}
+  constructor(private router: Router, private dbService: DbService, private menuService: MenuService, private loanService: LoanService, private featureFlagService: FeatureFlagService) {}
 
   async ngOnInit() {
+
+    this.featureFlagService.getAppMode().subscribe(
+      isAdvanced => this.isAdvancedMode = isAdvanced
+    );
+    
     await this.loadCategories();
     await this.loadTransactions();
 
