@@ -48,6 +48,7 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
           (categoryDrop)="onCategoryDrop($event)"
           (deleteCategory)="deleteCategory($event)"
           (resetOrder)="resetCategoryOrder($event)"
+          (reloadCategories)="reloadCategories()"
         />
         <app-data-management-card
           (backup)="backupData()"
@@ -101,10 +102,17 @@ export class SettingsComponent implements OnInit {
       'expense'
     );
   }
+  
   async loadCategoriesIncome() {
     this.categoriesIncome = await this.categoryService.getCategoriesByType(
       'income'
     );
+  }
+  
+  reloadCategories() {
+    this.categoryService.clearCategoriesCache();
+    this.loadCategoriesExpense();
+    this.loadCategoriesIncome();
   }
 
   async deleteCategory(category: any) {

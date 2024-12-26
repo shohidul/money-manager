@@ -48,6 +48,12 @@ export class TranslateDatePipe implements PipeTransform {
 
           formattedDate = `${month}/${day} ${weekday}`;
           break;
+        case 'MMM d':
+          formattedDate = new Intl.DateTimeFormat(currentLang, {
+            month: 'short',
+            day: 'numeric'
+          }).format(dateValue);
+          break;
         case 'shortTime':
           formattedDate = new Intl.DateTimeFormat(currentLang, {
             hour: 'numeric',

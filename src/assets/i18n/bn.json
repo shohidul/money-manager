@@ -73,7 +73,11 @@
           "sports": "খেলাধুলা",
           "charity": "দান",
           "hobbies": "শখ",
-          "other": "অন্যান্য"
+          "other": "অন্যান্য",
+          "bolt": "বিদ্যুৎ",
+          "category": "বিভাগ",
+          "icecream": "আইসক্রিম",
+          "nutrition": "পুষ্টি"
         },
         "finance": {
           "salary": "বেতন",
@@ -94,7 +98,9 @@
           "bar": "বার",
           "foodDelivery": "খাবার ডেলিভারি",
           "dining": "ডাইনিং",
-          "chef": "শেফ"
+          "chef": "শেফ",
+          "liquor": "মদ",
+          "smokingRooms": "ধূমপান কক্ষ"
         },
         "transportation": {
           "bus": "বাস",
@@ -105,7 +111,8 @@
           "bike": "বাইক",
           "carRental": "গাড়ি ভাড়া",
           "traffic": "ট্রাফিক",
-          "navigation": "নেভিগেশন"
+          "navigation": "নেভিগেশন",
+          "flightTakeoff": "উড়ান প্রস্থান"
         },
         "vehicle": {
           "car": "গাড়ি",
@@ -127,7 +134,9 @@
           "beauty": "সৌন্দর্য",
           "discount": "ছাড়",
           "wallet": "মানিব্যাগ",
-          "market": "বাজার"
+          "market": "বাজার",
+          "shoppingBag": "কেনাকাটার ব্যাগ",
+          "attachFile": "ফাইল সংযুক্ত করুন"
         },
         "entertainment": {
           "movies": "সিনেমা",
@@ -138,7 +147,11 @@
           "sportsEvent": "খেলার ইভেন্ট",
           "party": "পার্টি",
           "art": "শিল্প",
-          "dance": "নৃত্য"
+          "dance": "নৃত্য",
+          "sportsAndOutdoors": "ক্রীড়া এবং বাইরের কাজ",
+          "featuredSeasonalAndGifts": "উপহার",
+          "book5": "বই ৫",
+          "kingBed": "রাজার বিছানা"
         },
         "healthFitness": {
           "medical": "চিকিৎসা",
@@ -148,7 +161,9 @@
           "dental": "দাঁতের চিকিৎসা",
           "yoga": "যোগব্যায়াম",
           "diet": "খাদ্যতালিকা",
-          "mentalHealth": "মানসিক স্বাস্থ্য"
+          "mentalHealth": "মানসিক স্বাস্থ্য",
+          "healthAndSafety": "স্বাস্থ্য এবং নিরাপত্তা",
+          "healthAndBeauty": "স্বাস্থ্য এবং সৌন্দর্য"
         },
         "billsUtilities": {
           "electricity": "বিদ্যুৎ",
@@ -181,7 +196,9 @@
           "education": "শিক্ষা",
           "pregnancy": "গর্ভাবস্থা",
           "playground": "খেলার মাঠ",
-          "parenting": "অভিভাবকত্ব"
+          "parenting": "অভিভাবকত্ব",
+          "person": "ব্যক্তি",
+          "group": "দল"
         },
         "home": {
           "furniture": "আসবাবপত্র",
@@ -203,7 +220,9 @@
           "camera": "ক্যামেরা",
           "gamingConsole": "গেমিং কনসোল",
           "wearables": "পরিধানযোগ্য",
-          "smartHome": "স্মার্ট হোম"
+          "smartHome": "স্মার্ট হোম",
+          "devicesOther": "অন্যান্য ডিভাইস",
+          "phoneIphone": "আইফোন"
         },
         "income": {
           "salary": "বেতন",
@@ -281,7 +300,8 @@
       },
       "asset": {
         "purchaseAsset": "সম্পদ ক্রয়",
-        "sellAsset": "সম্পদ বিক্রয়"
+        "sellAsset": "সম্পদ বিক্রয়",
+        "savings": "সঞ্চয়"
       },
       "fuel": {
         "carFuel": "গাড়ির জ্বালানি",
@@ -384,7 +404,10 @@
     "list": "তালিকা",
     "noMemo": "কোন মেমো নেই",
     "notApplicable": "প্রযোজ্য নয়",
-    "dueDate": "শেষ তারিখ"
+    "dueDate": "শেষ তারিখ",
+    "nearBudget": "বাজেটের কাছাকাছি",
+    "overBudget": "বাজেট অতিক্রম",
+    "inBudget": "বাজেটের মধ্যে"
   },
   "dashboard": {
     "title": "ড্যাশবোর্ড",
@@ -435,6 +458,18 @@
         "Teal": "সবুজ-নীল",
         "Pink": "গোলাপি",
         "Indigo": "নীল-বেগুনি"
+      }
+    },
+    "categories": {
+      "name": "ক্যাটাগরির নাম",
+      "budget": "মাসিক বাজেট",
+      "subType": "ক্যাটাগরি উপ-প্রকার",
+      "subTypes": {
+        "none": "সাধারণ",
+        "loan": "ঋণ",
+        "repaid": "ফেরত",
+        "asset": "সম্পদ",
+        "fuel": "জ্বালানি"
       }
     }
   },

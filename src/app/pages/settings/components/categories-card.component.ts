@@ -4,12 +4,16 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { Category } from '../../../services/db.service';
+import { TransactionSubType } from '../../../models/transaction-types';
 import { TranslatePipe } from '../../../components/shared/translate.pipe';
+import { DbService } from '../../../services/db.service';
+import { TranslateNumberPipe } from "../../../components/shared/translate-number.pipe";
 
 @Component({
   selector: 'app-categories-card',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, DragDropModule, TranslatePipe],
+  imports: [CommonModule, FormsModule, RouterLink, DragDropModule, TranslatePipe, TranslateNumberPipe],
+  providers: [TranslatePipe],
   template: `
     <div class="card">
       <div class="section-header">
@@ -42,13 +46,20 @@ import { TranslatePipe } from '../../../components/shared/translate.pipe';
 
       <div class="category-list" cdkDropList (cdkDropListDropped)="onDrop($event)">
         @for (category of getCategories; track category.id) {
-          <div class="category-item" cdkDrag>
+          <div class="category-item" cdkDrag
+          [class.expanded]="expandedCategoryId === category.id"
+          (click)="toggleCategoryEdit(category)"
+          >
             <div class="category-item-placeholder" *cdkDragPlaceholder></div>
             <div class="order-number">{{ category.order }}</div>
             <div class="category-info">
               <span class="material-symbols-rounded">{{ category.icon }}</span>
               <span>{{ category.name | translate }}</span>
               <span class="category-type">{{ 'transaction.types.' + category.type | translate }}</span>
+              @if (category.budget) {
+                <span class="budget-info">{{ 'settings.categories.budget' | translate }}:
+                  {{ category.budget | translateNumber }}</span>
+              }
             </div>
             @if (category.isCustom) {
               <button 
@@ -62,6 +73,88 @@ import { TranslatePipe } from '../../../components/shared/translate.pipe';
               <span class="material-icons">drag_indicator</span>
             </div>
           </div>
+          @if (expandedCategoryId === category.id) {
+            <div class="category-edit-form" (click)="$event.stopPropagation()">
+              <form class="edit-form">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="categoryName-{{category.id}}">
+                      {{ 'settings.categories.name' | translate }}
+                    </label>
+                    <input 
+                      id="categoryName-{{category.id}}"
+                      type="text" 
+                      class="form-control"
+                      [ngModel]="getEditingCategoryName() | translate" 
+                      (ngModelChange)="updateEditingCategoryName($event)"
+                      placeholder="{{ 'settings.categories.name' | translate }}"
+                      name="categoryName"
+                      [disabled]="!category.isCustom"
+                    />
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="categoryBudget-{{category.id}}">
+                      {{ 'settings.categories.budget' | translate }}
+                    </label>
+                    <input 
+                      id="categoryBudget-{{category.id}}"
+                      type="number" 
+                      class="form-control"
+                      [ngModel]="getEditingCategoryBudget()" 
+                      (ngModelChange)="updateEditingCategoryBudget($event)"
+                      min="0" 
+                      step="100"
+                      placeholder="{{ '00.0' }}"
+                      name="categoryBudget"
+                    />
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="categorySubType-{{category.id}}">
+                      {{ 'settings.categories.subType' | translate }}
+                    </label>
+                    <select 
+                      id="categorySubType-{{category.id}}"
+                      class="form-control"
+                      [ngModel]="getEditingCategorySubType() | translate" 
+                      (ngModelChange)="updateEditingCategorySubType($event)"
+                      name="categorySubType"
+                      [disabled]="!category.isCustom"
+                    >
+                      <option value="none">{{ 'settings.categories.subTypes.none' | translate }}</option>
+                      <option value="asset">{{ 'settings.categories.subTypes.asset' | translate }}</option>
+                      <option value="loan">{{ 'settings.categories.subTypes.loan' | translate }}</option>
+                      <option value="repaid">{{ 'settings.categories.subTypes.repaid' | translate }}</option>
+                      <option value="fuel">{{ 'settings.categories.subTypes.fuel' | translate }}</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-actions">
+                  <button 
+                    type="button" 
+                    class="btn-category-filter" 
+                    [class.active]="true"
+                    (click)="saveCategory()"
+                  >
+                    {{ 'common.save' | translate }}
+                  </button>
+                  <button 
+                    type="button" 
+                    class="btn-category-filter"
+                    (click)="cancelEdit()"
+                  >
+                    {{ 'common.cancel' | translate }}
+                  </button>
+                </div>
+              </form>
+            </div>
+          }
         }
       </div>
       <a [routerLink]="'/add-category'" [queryParams]="{ type: categoryFilter, referer: currentRoute }" class="add-category-button">
@@ -155,6 +248,48 @@ import { TranslatePipe } from '../../../components/shared/translate.pipe';
       background-color: var(--surface-color);
       border: 1px solid var(--border-color-light);
       gap: 1rem;
+      position: relative;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .category-item.expanded {
+      background-color: var(--background-hover);
+    }
+    .category-edit-form {
+      width: 100%;
+      padding: 16px;
+      background-color: var(--background-secondary);
+      border-radius: 8px;
+      margin-top: 8px;
+    }
+    .category-edit-form .form-row {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .category-edit-form .form-group {
+      margin-bottom: 12px;
+    }
+    .category-edit-form input,
+    .category-edit-form select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+    }
+    .category-edit-form label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .category-edit-form .form-actions {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 16px;
+    }
+    .category-edit-form .form-actions button {
+      flex: 1;
+      margin: 0 4px;
     }
 
     .order-number {
@@ -238,6 +373,24 @@ import { TranslatePipe } from '../../../components/shared/translate.pipe';
       border-color: #f44336 !important;
     }
 
+    .budget-info {
+      margin-left: 8px;
+      color: var(--text-secondary);
+      font-size: 0.9em;
+    }
+
+    .btn-category-filter {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 20px;
+      background: var(--background-color-hover);
+      cursor: pointer;
+    }
+
+    .btn-category-filter.active {
+      background: var(--primary-color);
+      color: white;
+    }
   `,
   ],
 })
@@ -264,12 +417,17 @@ export class CategoriesCardComponent implements OnInit {
   @Output() categoryDrop = new EventEmitter<CdkDragDrop<any[]>>();
   @Output() deleteCategory = new EventEmitter<Category>();
   @Output() resetOrder = new EventEmitter<'expense' | 'income'>();
+  @Output() reloadCategories = new EventEmitter<void>();
 
   categoryFilter: 'expense' | 'income' = 'expense';
 
+  expandedCategoryId: number | undefined = undefined;
+  editingCategory: Category | null = null;
+
   constructor(
     private router: Router,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
+    private dbService: DbService
   ) {
     this.currentRoute = this.router.url.split('?')[0];
   }
@@ -343,5 +501,61 @@ export class CategoriesCardComponent implements OnInit {
 
   resetCategoryOrder() {
     this.resetOrder.emit(this.categoryFilter);
+  }
+
+  toggleCategoryEdit(category: Category) {
+    if (this.expandedCategoryId === category.id) {
+      this.cancelEdit();
+    } else {
+      this.expandedCategoryId = category.id;
+      this.editingCategory = { ...category };
+    }
+  }
+
+  cancelEdit() {
+    this.expandedCategoryId = undefined;
+    this.editingCategory = null;
+  }
+
+  async saveCategory() {
+    if (!this.editingCategory) return;
+
+    try {
+      await this.dbService.updateCategory(this.editingCategory);
+      this.expandedCategoryId = undefined;
+      this.reloadCategories.emit();
+    } catch (error) {
+      console.error('Error saving category:', error);
+    }
+  }
+
+  getEditingCategoryName() {
+    return this.editingCategory?.name || '';
+  }
+
+  getEditingCategoryBudget() {
+    return this.editingCategory?.budget || null;
+  }
+
+  getEditingCategorySubType() {
+    return this.editingCategory?.subType || 'none';
+  }
+
+  updateEditingCategoryName(name: string) {
+    this.editingCategory = this.editingCategory 
+      ? { ...this.editingCategory, name: name } 
+      : null;
+  }
+
+  updateEditingCategoryBudget(budget: number) {
+    this.editingCategory = this.editingCategory 
+      ? { ...this.editingCategory, budget: budget } 
+      : null;
+  }
+
+  updateEditingCategorySubType(subType: TransactionSubType) {
+    this.editingCategory = this.editingCategory 
+      ? { ...this.editingCategory, subType: subType } 
+      : null;
   }
 }

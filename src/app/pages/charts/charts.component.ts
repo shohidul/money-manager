@@ -8,7 +8,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { DbService } from '../../services/db.service';
+import { Category, DbService } from '../../services/db.service';
 import { ChartService } from '../../services/chart.service';
 import { MonthPickerComponent } from '../../components/month-picker/month-picker.component';
 import { startOfMonth, endOfMonth, format } from 'date-fns';
@@ -145,6 +145,24 @@ type ChartType = 'all' | 'income' | 'expense';
                   </div>
                 </div>
               }
+              @if (categoryBudgets.length > 0) {
+                @if (getBudgetForCategory(stat.categoryId)?.category?.budget) {
+                  <div class="budget-progress">
+                    <div class="progress-bar-container">
+                      <div 
+                        class="progress-bar" 
+                        [class.warning]="isWarning(stat.categoryId)"
+                        [class.danger]="isDanger(stat.categoryId)"
+                        [style.width.%]="calculateBudgetPercentage(stat.categoryId)"
+                      ></div>
+                    </div>
+                    <span class="budget-text">
+                      <span>{{(isWarning(stat.categoryId) ? 'charts.nearBudget' : isDanger(stat.categoryId) ? 'charts.overBudget' : 'charts.inBudget') | translate}}</span>
+                      <span>{{ getBudgetForCategory(stat.categoryId)?.spent | translateNumber:'1.0-2'}} / {{ getBudgetForCategory(stat.categoryId)?.category?.budget  | translateNumber:'1.0-2'}}</span>
+                    </span>
+                  </div>
+                }
+              }
             </div>
           }
         </div>
@@ -262,15 +280,14 @@ type ChartType = 'all' | 'income' | 'expense';
   }
 
   .category-details {
-    /* margin-top: 1rem; */
     border-bottom: 1px solid var(--border-color);
+    padding: 1rem 0;
   }
 
   .category-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 0;
     cursor: pointer;
   }
 
@@ -309,6 +326,45 @@ type ChartType = 'all' | 'income' | 'expense';
     color: #999;
     margin-top: 0.25rem;
   }
+  
+  .budget-progress {
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+  
+  .progress-bar-container {
+    background: var(--surface-color);
+    overflow: hidden;
+    position: relative;
+    flex: 3;
+    height: 3px;
+    border-radius: 3px;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: var(--primary-color);
+    transition: width 0.3s ease;
+  }
+  
+  .progress-bar.warning {
+    background: var(--warning-color);
+  }
+  
+  .progress-bar.danger {
+    background: var(--danger-color);
+  }
+
+  .budget-text {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    display: contents;
+    flex: 1;
+  }
 `,
   ],
 })
@@ -340,6 +396,12 @@ export class ChartsComponent implements OnInit, AfterViewInit {
   ];
   
   isAdvancedMode: boolean = false;
+  categoryBudgets: Array<{
+    category: Category;
+    spent: number;
+  }> = [];
+
+  chart: any;
 
   constructor(
     private dbService: DbService,
@@ -355,7 +417,7 @@ export class ChartsComponent implements OnInit, AfterViewInit {
     );
 
     await this.loadData();
-    // this.createDonutChart();
+    await this.loadCategoryBudgets();
   }
 
   ngAfterViewInit() {
@@ -384,9 +446,11 @@ export class ChartsComponent implements OnInit, AfterViewInit {
     this.createDonutChart();
   }
 
-  onMonthChange(month: string) {
+  async onMonthChange(month: string) {
     this.currentMonth = month;
     this.loadData();
+    await this.loadCategoryBudgets();
+
   }
 
   calculateStats() {
@@ -491,5 +555,57 @@ export class ChartsComponent implements OnInit, AfterViewInit {
     const index = fuelTransactions.findIndex((t) => t.id === tx.id);
     if (index === 0) return undefined;
     return fuelTransactions[index - 1];
+  }
+
+  isWarning(categoryId: number): boolean {
+    const spent = this.getBudgetForCategory(categoryId)?.spent ?? 0;
+    const budget = this.getBudgetForCategory(categoryId)?.category?.budget ?? 0;
+    return spent >= budget * 0.75 && spent <= budget;
+  }
+  
+  isDanger(categoryId: number): boolean {
+    const spent = this.getBudgetForCategory(categoryId)?.spent ?? 0;
+    const budget = this.getBudgetForCategory(categoryId)?.category?.budget ?? 0;
+    return spent > budget;
+  }
+
+  getBudgetForCategory(categoryId: number) {
+    const budget = this.categoryBudgets.find((budget) => budget.category.id === categoryId);
+    return budget;
+  }
+
+  calculateBudgetPercentage(categoryId: number) {
+    const budget = this.getBudgetForCategory(categoryId);
+    if (!budget || !budget.category || budget.category.budget == null) {
+      return 0;
+    }
+    const percentage = (budget.spent / budget.category.budget) * 100;
+    return percentage;
+  }
+
+  async loadCategoryBudgets() {
+    const startDate = startOfMonth(this.currentMonth);
+    const endDate = endOfMonth(this.currentMonth);
+    
+    const categories = await this.dbService.getCategories();
+    const transactions = await this.dbService.getTransactions(startDate, endDate);
+    
+    this.categoryBudgets = categories
+      .filter(category => category && category.budget != null && category.budget > 0)
+      .map(category => {
+        const spent = transactions
+          .filter(t => t.categoryId === category.id)
+          .reduce((sum, t) => sum + t.amount, 0);
+        
+        return { 
+          category, 
+          spent 
+        };
+      })
+      .sort((a, b) => {
+        const aBudget = a.category?.budget ?? 0;
+        const bBudget = b.category?.budget ?? 0;
+        return (bBudget > 0 ? b.spent / bBudget : 0) - (aBudget > 0 ? a.spent / aBudget : 0);
+      });    
   }
 }

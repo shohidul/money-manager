@@ -35,6 +35,10 @@ export const categoryGroups: CategoryGroup[] = [
       { name: 'categories.groups.icons.common.sports', icon: 'sports_soccer' },
       { name: 'categories.groups.icons.common.charity', icon: 'volunteer_activism' },
       { name: 'categories.groups.icons.common.hobbies', icon: 'palette' },
+      { name: 'categories.groups.icons.common.bolt', icon: 'bolt' },
+      { name: 'categories.groups.icons.common.category', icon: 'category' },
+      { name: 'categories.groups.icons.common.icecream', icon: 'icecream' },
+      { name: 'categories.groups.icons.common.nutrition', icon: 'nutrition' },
       { name: 'categories.groups.icons.common.other', icon: 'more_horiz' },
     ],
   },
@@ -63,6 +67,8 @@ export const categoryGroups: CategoryGroup[] = [
       { name: 'categories.groups.icons.food.foodDelivery', icon: 'delivery_dining' },
       { name: 'categories.groups.icons.food.dining', icon: 'dining' },
       { name: 'categories.groups.icons.food.chef', icon: 'restaurant_menu' },
+      { name: 'categories.groups.icons.food.liquor', icon: 'liquor' },
+      { name: 'categories.groups.icons.food.smokingRooms', icon: 'smoking_rooms' },
     ],
   },
   {
@@ -77,6 +83,7 @@ export const categoryGroups: CategoryGroup[] = [
       { name: 'categories.groups.icons.transportation.carRental', icon: 'car_rental' },
       { name: 'categories.groups.icons.transportation.traffic', icon: 'traffic' },
       { name: 'categories.groups.icons.transportation.navigation', icon: 'navigation' },
+      { name: 'categories.groups.icons.transportation.flightTakeoff', icon: 'flight_takeoff' },
     ],
   },
   {
@@ -105,6 +112,8 @@ export const categoryGroups: CategoryGroup[] = [
       { name: 'categories.groups.icons.shopping.discount', icon: 'sell' },
       { name: 'categories.groups.icons.shopping.wallet', icon: 'account_balance_wallet' },
       { name: 'categories.groups.icons.shopping.market', icon: 'storefront' },
+      { name: 'categories.groups.icons.shopping.shoppingBag', icon: 'shopping_bag' },
+      { name: 'categories.groups.icons.shopping.attachFile', icon: 'attach_file' },
     ],
   },
   {
@@ -119,6 +128,10 @@ export const categoryGroups: CategoryGroup[] = [
       { name: 'categories.groups.icons.entertainment.party', icon: 'celebration' },
       { name: 'categories.groups.icons.entertainment.art', icon: 'brush' },
       { name: 'categories.groups.icons.entertainment.dance', icon: 'emoji_people' },
+      { name: 'categories.groups.icons.entertainment.sportsAndOutdoors', icon: 'sports_and_outdoors' },
+      { name: 'categories.groups.icons.entertainment.featuredSeasonalAndGifts', icon: 'featured_seasonal_and_gifts' },
+      { name: 'categories.groups.icons.entertainment.book5', icon: 'book_5' },
+      { name: 'categories.groups.icons.entertainment.kingBed', icon: 'king_bed' },
     ],
   },
   {
@@ -132,6 +145,8 @@ export const categoryGroups: CategoryGroup[] = [
       { name: 'categories.groups.icons.healthFitness.yoga', icon: 'self_improvement' },
       { name: 'categories.groups.icons.healthFitness.diet', icon: 'emoji_food_beverage' },
       { name: 'categories.groups.icons.healthFitness.mentalHealth', icon: 'psychology' },
+      { name: 'categories.groups.icons.healthFitness.healthAndSafety', icon: 'health_and_safety' },
+      { name: 'categories.groups.icons.healthFitness.healthAndBeauty', icon: 'health_and_beauty' },
     ],
   },
   {
@@ -146,6 +161,8 @@ export const categoryGroups: CategoryGroup[] = [
       { name: 'categories.groups.icons.family.pregnancy', icon: 'pregnant_woman' },
       { name: 'categories.groups.icons.family.playground', icon: 'toys' },
       { name: 'categories.groups.icons.family.parenting', icon: 'supervised_user_circle' },
+      { name: 'categories.groups.icons.family.person', icon: 'person' },
+      { name: 'categories.groups.icons.family.group', icon: 'group' },
     ],
   },
   {
@@ -174,6 +191,8 @@ export const categoryGroups: CategoryGroup[] = [
       { name: 'categories.groups.icons.electronics.gamingConsole', icon: 'videogame_asset' },
       { name: 'categories.groups.icons.electronics.wearables', icon: 'watch' },
       { name: 'categories.groups.icons.electronics.smartHome', icon: 'villa' },
+      { name: 'categories.groups.icons.electronics.devicesOther', icon: 'devices_other' },
+      { name: 'categories.groups.icons.electronics.phoneIphone', icon: 'phone_iphone' },
     ],
   },
   {
@@ -271,6 +290,7 @@ export const defaultCategories: DefaultCategories[] = [
   { name: 'categories.defaults.loan.businessLoanGiven', icon: 'business', type: 'expense', subType: 'loan' },
   { name: 'categories.defaults.loan.loan', icon: 'account_balance_wallet', type: 'expense', subType: 'loan' },
   
+  { name: 'categories.defaults.asset.savings', icon: 'savings', type: 'expense', subType: 'asset' },
   { name: 'categories.defaults.asset.purchaseAsset', icon: 'apartment', type: 'expense', subType: 'asset' },
   
   // Income categories

@@ -22,6 +22,7 @@ export interface Category {
   subType: TransactionSubType;
   isCustom: boolean;
   order?: number;
+  budget?: number;  // Monthly budget amount
 }
 
 @Injectable({

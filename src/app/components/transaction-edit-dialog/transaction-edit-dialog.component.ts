@@ -150,7 +150,7 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
 
     .dialog-content {
       background-color: var(--surface-color);
-      padding: 3.5rem;
+      padding: 2.5rem;
       width: 60%;
       height: 85%;
       max-height: 90vh;

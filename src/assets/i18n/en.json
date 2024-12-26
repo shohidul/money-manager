@@ -73,7 +73,11 @@
           "sports": "Sports",
           "charity": "Charity",
           "hobbies": "Hobbies",
-          "other": "Other"
+          "other": "Other",
+          "bolt": "Bolt",
+          "category": "Category",
+          "icecream": "Ice Cream",
+          "nutrition": "Nutrition"
         },
         "finance": {
           "salary": "Salary",
@@ -94,7 +98,9 @@
           "bar": "Bar",
           "foodDelivery": "Food Delivery",
           "dining": "Dining",
-          "chef": "Chef"
+          "chef": "Chef",
+          "liquor": "Liquor",
+          "smokingRooms": "Smoking Rooms"
         },
         "transportation": {
           "bus": "Bus",
@@ -105,7 +111,8 @@
           "bike": "Bike",
           "carRental": "Car Rental",
           "traffic": "Traffic",
-          "navigation": "Navigation"
+          "navigation": "Navigation",
+          "flightTakeoff": "Flight Takeoff"
         },
         "vehicle": {
           "car": "Car",
@@ -127,7 +134,9 @@
           "beauty": "Beauty",
           "discount": "Discount",
           "wallet": "Wallet",
-          "market": "Market"
+          "market": "Market",
+          "shoppingBag": "Shopping Bag",
+          "attachFile": "Attach File"
         },
         "entertainment": {
           "movies": "Movies",
@@ -138,7 +147,11 @@
           "sportsEvent": "Sports Event",
           "party": "Party",
           "art": "Art",
-          "dance": "Dance"
+          "dance": "Dance",
+          "sportsAndOutdoors": "Sports and Outdoors",
+          "featuredSeasonalAndGifts": "Gifts",
+          "book5": "Book 5",
+          "kingBed": "King Bed"
         },
         "healthFitness": {
           "medical": "Medical",
@@ -148,7 +161,9 @@
           "dental": "Dental",
           "yoga": "Yoga",
           "diet": "Diet",
-          "mentalHealth": "Mental Health"
+          "mentalHealth": "Mental Health",
+          "healthAndSafety": "Health and Safety",
+          "healthAndBeauty": "Health and Beauty"
         },
         "billsUtilities": {
           "electricity": "Electricity",
@@ -181,7 +196,9 @@
           "education": "Education",
           "pregnancy": "Pregnancy",
           "playground": "Playground",
-          "parenting": "Parenting"
+          "parenting": "Parenting",
+          "person": "Person",
+          "group": "Group"
         },
         "home": {
           "furniture": "Furniture",
@@ -203,7 +220,9 @@
           "camera": "Camera",
           "gamingConsole": "Gaming Console",
           "wearables": "Wearables",
-          "smartHome": "Smart Home"
+          "smartHome": "Smart Home",
+          "devicesOther": "Other Devices",
+          "phoneIphone": "iPhone"
         },
         "income": {
           "salary": "Salary",
@@ -281,7 +300,8 @@
       },
       "asset": {
         "purchaseAsset": "Purchase Asset",
-        "sellAsset": "Sell Asset"
+        "sellAsset": "Sell Asset",
+        "savings": "Savings"
       },
       "fuel": {
         "carFuel": "Car Fuel",
@@ -394,7 +414,10 @@
     "list": "list",
     "noMemo": "No Memo",
     "notApplicable": "N/A",
-    "dueDate": "Due Date"
+    "dueDate": "Due Date",
+    "nearBudget": "Near Budget",
+    "overBudget": "Over Budget",
+    "inBudget": "Within Budget"
   },
   "settings": {
     "title": "Settings",
@@ -435,6 +458,18 @@
         "Teal": "Teal",
         "Pink": "Pink",
         "Indigo": "Indigo"
+      }
+    },
+    "categories": {
+      "name": "Category Name",
+      "budget": "Monthly Budget",
+      "subType": "Category Sub-Type",
+      "subTypes": {
+        "none": "Regular",
+        "loan": "Loan",
+        "repaid": "Repaid",
+        "asset": "Asset",
+        "fuel": "Fuel"
       }
     }
   },
