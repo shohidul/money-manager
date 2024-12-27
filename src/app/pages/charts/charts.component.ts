@@ -26,6 +26,7 @@ import { TranslatePipe } from '../../components/shared/translate.pipe';
 import { TranslateDatePipe } from "../../components/shared/translate-date.pipe";
 import { TranslateNumberPipe } from "../../components/shared/translate-number.pipe";
 import { FeatureFlagService } from '../../services/feature-flag.service';
+import { TranslationService } from '../../services/translation.service';
 
 type ChartType = 'all' | 'income' | 'expense';
 
@@ -412,7 +413,8 @@ export class ChartsComponent implements OnInit, AfterViewInit {
     private chartService: ChartService,
     private router: Router,
     private cdr: ChangeDetectorRef,
-    private featureFlagService: FeatureFlagService
+    private featureFlagService: FeatureFlagService,
+    private translationService: TranslationService
   ) {}
 
   async ngOnInit() {
@@ -534,8 +536,10 @@ export class ChartsComponent implements OnInit, AfterViewInit {
     if (!canvas) return;
 
     const transactions = this.getTransactionsByCategory(categoryId);
+    const tdp = new TranslateDatePipe(this.translationService);
+    
     const chartData = {
-      labels: transactions.map((tx) => format(tx.date, 'MMM d')),
+      labels: transactions.map((tx) => tdp.transform(tx.date, 'MMM d')),
       values: transactions.map((tx) => tx.amount),
     };
 

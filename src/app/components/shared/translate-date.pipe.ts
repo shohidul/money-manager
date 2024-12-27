@@ -49,10 +49,14 @@ export class TranslateDatePipe implements PipeTransform {
           formattedDate = `${month}/${day} ${weekday}`;
           break;
         case 'MMM d':
-          formattedDate = new Intl.DateTimeFormat(currentLang, {
-            month: 'short',
+          const parts2 = new Intl.DateTimeFormat(currentLang, {
+            month: currentLang === 'en-GB' ? 'short' : 'long',
             day: 'numeric'
-          }).format(dateValue);
+          }).formatToParts(dateValue);
+          const month2 = parts2.find(p => p.type === 'month')?.value || '';
+          const day2 = parts2.find(p => p.type === 'day')?.value || '';
+
+          formattedDate = `${month2} ${day2}`;
           break;
         case 'shortTime':
           formattedDate = new Intl.DateTimeFormat(currentLang, {

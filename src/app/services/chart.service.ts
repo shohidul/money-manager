@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Chart, CategoryScale, ChartConfiguration, DoughnutController, ArcElement, LineController, LineElement, PointElement, LinearScale, Title, Tooltip, Legend } from 'chart.js';
+import { TranslationService } from './translation.service';
 
 @Injectable({
   providedIn: 'root'
@@ -7,7 +8,9 @@ import { Chart, CategoryScale, ChartConfiguration, DoughnutController, ArcElemen
 export class ChartService {
   private charts: Map<string, Chart> = new Map();
 
-    constructor() {
+    constructor(
+      private translationService: TranslationService
+    ) {
     // Register all required components for Chart.js
     Chart.register(
       CategoryScale,
@@ -67,6 +70,8 @@ export class ChartService {
       },
       options: {
         responsive: true,
+        locale: this.translationService.getCurrentLanguage(),
+        maintainAspectRatio: true,
         plugins: {
           legend: {
             display: false
