@@ -417,7 +417,12 @@
     "dueDate": "Due Date",
     "nearBudget": "Near Budget",
     "overBudget": "Over Budget",
-    "inBudget": "Within Budget"
+    "inBudget": "Within Budget",
+    "goal25Percent": "Great start! 🌱",
+    "goal50Percent": "Halfway there! 🚀",
+    "goal75Percent": "Almost there! 💪",
+    "goal100Percent": "Goal achieved! 🎉",
+    "goalKeepItUp": "Keep pushing! 💰"
   },
   "settings": {
     "title": "Settings",
@@ -463,6 +468,7 @@
     "categories": {
       "name": "Category Name",
       "budget": "Monthly Budget",
+      "goal": "Monthly Goal",
       "subType": "Category Sub-Type",
       "subTypes": {
         "none": "Regular",

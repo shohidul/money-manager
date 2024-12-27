@@ -54,12 +54,20 @@ import { TranslateNumberPipe } from "../../../components/shared/translate-number
             <div class="order-number">{{ category.order }}</div>
             <div class="category-info">
               <span class="material-symbols-rounded">{{ category.icon }}</span>
-              <span>{{ category.name | translate }}</span>
-              <span class="category-type">{{ 'transaction.types.' + category.type | translate }}</span>
-              @if (category.budget) {
-                <span class="budget-info">{{ 'settings.categories.budget' | translate }}:
-                  {{ category.budget | translateNumber }}</span>
-              }
+              <span class="flex">
+                <span class="flex">
+                  <span>{{ category.name | translate }}</span>
+                  <span class="category-type">{{ 'transaction.types.' + category.type | translate }}</span>
+                </span>
+                @if (category.budget) {
+                  <span class="budget-info">
+                    <span>
+                      {{ (category.subType === 'asset' ? 'settings.categories.goal' : 'settings.categories.budget') | translate }}
+                    </span>
+                    <span>{{ category.budget | translateNumber }}</span>
+                  </span>
+                }
+              </span>
             </div>
             @if (category.isCustom) {
               <button 
@@ -97,7 +105,7 @@ import { TranslateNumberPipe } from "../../../components/shared/translate-number
                 <div class="form-row">
                   <div class="form-group">
                     <label for="categoryBudget-{{category.id}}">
-                      {{ 'settings.categories.budget' | translate }}
+                      {{ (category.subType === 'asset' ? 'settings.categories.goal' : 'settings.categories.budget') | translate }}
                     </label>
                     <input 
                       id="categoryBudget-{{category.id}}"
@@ -304,6 +312,13 @@ import { TranslateNumberPipe } from "../../../components/shared/translate-number
       color: var(--text-secondary);
     }
 
+    .flex {
+      display: flex;
+      align-items: center;
+      column-gap: 1rem;
+      flex-wrap: wrap;
+    }
+
     .category-info {
       display: flex;
       align-items: center;
@@ -374,9 +389,10 @@ import { TranslateNumberPipe } from "../../../components/shared/translate-number
     }
 
     .budget-info {
-      margin-left: 8px;
-      color: var(--text-secondary);
       font-size: 0.9em;
+      display: flex;
+      column-gap: 0.5rem;
+      color: var(--text-muted);
     }
 
     .btn-category-filter {

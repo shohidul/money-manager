@@ -100,6 +100,29 @@ type ChartType = 'all' | 'income' | 'expense';
                 </div>
                 <span class="amount">{{ stat.amount | translateNumber:'1.0-0' }}</span>
               </div>
+              @if (categoryBudgets.length > 0) {
+                @if (getBudgetForCategory(stat.categoryId)?.category?.budget) {
+                  <div class="budget-progress">
+                    <div class="progress-bar-container">
+                      <div 
+                        class="progress-bar" 
+                        [class.warning]="is75Percent(stat.categoryId) && !isSubTypeAsset(stat.categoryId)"
+                        [class.danger]="is100PercentOrOver(stat.categoryId) && !isSubTypeAsset(stat.categoryId)"
+                        [style.width.%]="calculateBudgetPercentage(stat.categoryId)"
+                      ></div>
+                    </div>
+                    <span class="budget-text">
+                      <span *ngIf="isSubTypeAsset(stat.categoryId)">{{(
+                        is25Percent(stat.categoryId) ? 'charts.goal25Percent' : 
+                        is50Percent(stat.categoryId) ? 'charts.goal50Percent': 
+                        is75Percent(stat.categoryId) ? 'charts.goal75Percent' : 
+                        is100PercentOrOver(stat.categoryId) ? 'charts.goal100Percent' : 'charts.goalKeepItUp') | translate}}</span>
+                      <span *ngIf="!isSubTypeAsset(stat.categoryId)">{{(is75Percent(stat.categoryId) ? 'charts.nearBudget' : is100PercentOrOver(stat.categoryId) ? 'charts.overBudget' : 'charts.inBudget') | translate}}</span>
+                      <span>{{ getBudgetForCategory(stat.categoryId)?.spent | translateNumber:'1.0-2'}} / {{ getBudgetForCategory(stat.categoryId)?.category?.budget  | translateNumber:'1.0-2'}}</span>
+                    </span>
+                  </div>
+                }
+              }
               @if (expandedCategories.includes(stat.categoryId)) {
                 <div class="category-transactions">
                   <canvas [id]="'chart-' + stat.categoryId"></canvas>
@@ -144,24 +167,6 @@ type ChartType = 'all' | 'income' | 'expense';
                     }
                   </div>
                 </div>
-              }
-              @if (categoryBudgets.length > 0) {
-                @if (getBudgetForCategory(stat.categoryId)?.category?.budget) {
-                  <div class="budget-progress">
-                    <div class="progress-bar-container">
-                      <div 
-                        class="progress-bar" 
-                        [class.warning]="isWarning(stat.categoryId)"
-                        [class.danger]="isDanger(stat.categoryId)"
-                        [style.width.%]="calculateBudgetPercentage(stat.categoryId)"
-                      ></div>
-                    </div>
-                    <span class="budget-text">
-                      <span>{{(isWarning(stat.categoryId) ? 'charts.nearBudget' : isDanger(stat.categoryId) ? 'charts.overBudget' : 'charts.inBudget') | translate}}</span>
-                      <span>{{ getBudgetForCategory(stat.categoryId)?.spent | translateNumber:'1.0-2'}} / {{ getBudgetForCategory(stat.categoryId)?.category?.budget  | translateNumber:'1.0-2'}}</span>
-                    </span>
-                  </div>
-                }
               }
             </div>
           }
@@ -299,7 +304,6 @@ type ChartType = 'all' | 'income' | 'expense';
 
   .category-transactions {
     padding: 1rem;
-    border-top: 1px solid var(--border-color-light);
   }
 
   .transaction-list {
@@ -336,7 +340,7 @@ type ChartType = 'all' | 'income' | 'expense';
   }
   
   .progress-bar-container {
-    background: var(--surface-color);
+    background: var(--background-color);
     overflow: hidden;
     position: relative;
     flex: 3;
@@ -346,7 +350,7 @@ type ChartType = 'all' | 'income' | 'expense';
 
   .progress-bar {
     height: 100%;
-    background: var(--primary-color);
+    background: #4CAF50;
     transition: width 0.3s ease;
   }
   
@@ -418,6 +422,8 @@ export class ChartsComponent implements OnInit, AfterViewInit {
 
     await this.loadData();
     await this.loadCategoryBudgets();
+
+    console.log(this.is100PercentOrOver(2));
   }
 
   ngAfterViewInit() {
@@ -557,17 +563,37 @@ export class ChartsComponent implements OnInit, AfterViewInit {
     return fuelTransactions[index - 1];
   }
 
-  isWarning(categoryId: number): boolean {
-    const spent = this.getBudgetForCategory(categoryId)?.spent ?? 0;
-    const budget = this.getBudgetForCategory(categoryId)?.category?.budget ?? 0;
-    return spent >= budget * 0.75 && spent <= budget;
+  isSubTypeAsset(categoryId: number): boolean{
+    return this.getBudgetForCategory(categoryId)?.category?.subType === 'asset';
+  }
+
+  getBudgetAndSpent(categoryId: number) {
+    const data = this.getBudgetForCategory(categoryId);
+    return {
+      spent: data?.spent ?? 0,
+      budget: data?.category?.budget ?? 0
+    };
   }
   
-  isDanger(categoryId: number): boolean {
-    const spent = this.getBudgetForCategory(categoryId)?.spent ?? 0;
-    const budget = this.getBudgetForCategory(categoryId)?.category?.budget ?? 0;
-    return spent > budget;
+  is25Percent(categoryId: number): boolean {
+    const { spent, budget } = this.getBudgetAndSpent(categoryId);
+    return spent >= budget * 0.25 && spent < budget * 0.50;
   }
+  
+  is50Percent(categoryId: number): boolean {
+    const { spent, budget } = this.getBudgetAndSpent(categoryId);
+    return spent >= budget * 0.50 && spent < budget * 0.75;
+  }
+  
+  is75Percent(categoryId: number): boolean {
+    const { spent, budget } = this.getBudgetAndSpent(categoryId);
+    return spent >= budget * 0.75 && spent < budget;
+  }
+  
+  is100PercentOrOver(categoryId: number): boolean {
+    const { spent, budget } = this.getBudgetAndSpent(categoryId);
+    return spent >= budget;
+  }  
 
   getBudgetForCategory(categoryId: number) {
     const budget = this.categoryBudgets.find((budget) => budget.category.id === categoryId);
