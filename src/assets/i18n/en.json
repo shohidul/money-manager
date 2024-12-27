@@ -33,6 +33,17 @@
   },
   "categories": {
     "title": "Categories",
+    "name": "Category Name",
+    "budget": "Monthly Budget",
+    "goal": "Monthly Goal",
+    "subType": "Category Sub-Type",
+    "subTypes": {
+      "none": "Regular",
+      "loan": "Loan",
+      "repaid": "Repaid",
+      "asset": "Asset",
+      "fuel": "Fuel"
+    },
     "filters": {
       "title": "Filters",
       "expense": "Expense",
@@ -465,19 +476,6 @@
         "Teal": "Teal",
         "Pink": "Pink",
         "Indigo": "Indigo"
-      }
-    },
-    "categories": {
-      "name": "Category Name",
-      "budget": "Monthly Budget",
-      "goal": "Monthly Goal",
-      "subType": "Category Sub-Type",
-      "subTypes": {
-        "none": "Regular",
-        "loan": "Loan",
-        "repaid": "Repaid",
-        "asset": "Asset",
-        "fuel": "Fuel"
       }
     }
   },

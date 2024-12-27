@@ -62,7 +62,7 @@ import { TranslateNumberPipe } from "../../../components/shared/translate-number
                 @if (category.budget) {
                   <span class="budget-info">
                     <span>
-                      {{ (category.subType === 'asset' ? 'settings.categories.goal' : 'settings.categories.budget') | translate }}
+                      {{ (category.subType === 'asset' ? 'categories.goal' : 'categories.budget') | translate }}
                     </span>
                     <span>{{ category.budget | translateNumber }}</span>
                   </span>
@@ -87,7 +87,7 @@ import { TranslateNumberPipe } from "../../../components/shared/translate-number
                 <div class="form-row">
                   <div class="form-group">
                     <label for="categoryName-{{category.id}}">
-                      {{ 'settings.categories.name' | translate }}
+                      {{ 'categories.name' | translate }}
                     </label>
                     <input 
                       id="categoryName-{{category.id}}"
@@ -95,7 +95,7 @@ import { TranslateNumberPipe } from "../../../components/shared/translate-number
                       class="form-control"
                       [ngModel]="getEditingCategoryName() | translate" 
                       (ngModelChange)="updateEditingCategoryName($event)"
-                      placeholder="{{ 'settings.categories.name' | translate }}"
+                      placeholder="{{ 'categories.name' | translate }}"
                       name="categoryName"
                       [disabled]="!category.isCustom"
                     />
@@ -105,7 +105,8 @@ import { TranslateNumberPipe } from "../../../components/shared/translate-number
                 <div class="form-row">
                   <div class="form-group">
                     <label for="categoryBudget-{{category.id}}">
-                      {{ (category.subType === 'asset' ? 'settings.categories.goal' : 'settings.categories.budget') | translate }}
+                      {{ (category.subType === 'asset' || category.type === 'income' ? 
+                        'categories.goal' : 'categories.budget') | translate }}
                     </label>
                     <input 
                       id="categoryBudget-{{category.id}}"
@@ -124,7 +125,7 @@ import { TranslateNumberPipe } from "../../../components/shared/translate-number
                 <div class="form-row">
                   <div class="form-group">
                     <label for="categorySubType-{{category.id}}">
-                      {{ 'settings.categories.subType' | translate }}
+                      {{ 'categories.subType' | translate }}
                     </label>
                     <select 
                       id="categorySubType-{{category.id}}"
@@ -134,11 +135,11 @@ import { TranslateNumberPipe } from "../../../components/shared/translate-number
                       name="categorySubType"
                       [disabled]="!category.isCustom"
                     >
-                      <option value="none">{{ 'settings.categories.subTypes.none' | translate }}</option>
-                      <option value="asset">{{ 'settings.categories.subTypes.asset' | translate }}</option>
-                      <option value="loan">{{ 'settings.categories.subTypes.loan' | translate }}</option>
-                      <option value="repaid">{{ 'settings.categories.subTypes.repaid' | translate }}</option>
-                      <option value="fuel">{{ 'settings.categories.subTypes.fuel' | translate }}</option>
+                      <option value="none">{{ 'categories.subTypes.none' | translate }}</option>
+                      <option value="asset">{{ 'categories.subTypes.asset' | translate }}</option>
+                      <option value="loan">{{ 'categories.subTypes.loan' | translate }}</option>
+                      <option value="repaid">{{ 'categories.subTypes.repaid' | translate }}</option>
+                      <option value="fuel">{{ 'categories.subTypes.fuel' | translate }}</option>
                     </select>
                   </div>
                 </div>

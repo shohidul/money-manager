@@ -106,18 +106,18 @@ type ChartType = 'all' | 'income' | 'expense';
                     <div class="progress-bar-container">
                       <div 
                         class="progress-bar" 
-                        [class.warning]="is75Percent(stat.categoryId) && !isSubTypeAsset(stat.categoryId)"
-                        [class.danger]="is100PercentOrOver(stat.categoryId) && !isSubTypeAsset(stat.categoryId)"
+                        [class.warning]="is75Percent(stat.categoryId) && !isTypeIncomeOrAsset(stat.categoryId)"
+                        [class.danger]="is100PercentOrOver(stat.categoryId) && !isTypeIncomeOrAsset(stat.categoryId)"
                         [style.width.%]="calculateBudgetPercentage(stat.categoryId)"
                       ></div>
                     </div>
                     <span class="budget-text">
-                      <span *ngIf="isSubTypeAsset(stat.categoryId)">{{(
+                      <span *ngIf="isTypeIncomeOrAsset(stat.categoryId)">{{(
                         is25Percent(stat.categoryId) ? 'charts.goal25Percent' : 
                         is50Percent(stat.categoryId) ? 'charts.goal50Percent': 
                         is75Percent(stat.categoryId) ? 'charts.goal75Percent' : 
                         is100PercentOrOver(stat.categoryId) ? 'charts.goal100Percent' : 'charts.goalKeepItUp') | translate}}</span>
-                      <span *ngIf="!isSubTypeAsset(stat.categoryId)">{{(is75Percent(stat.categoryId) ? 'charts.nearBudget' : is100PercentOrOver(stat.categoryId) ? 'charts.overBudget' : 'charts.inBudget') | translate}}</span>
+                      <span *ngIf="!isTypeIncomeOrAsset(stat.categoryId)">{{(is75Percent(stat.categoryId) ? 'charts.nearBudget' : is100PercentOrOver(stat.categoryId) ? 'charts.overBudget' : 'charts.inBudget') | translate}}</span>
                       <span>{{ getBudgetForCategory(stat.categoryId)?.spent | translateNumber:'1.0-2'}} / {{ getBudgetForCategory(stat.categoryId)?.category?.budget  | translateNumber:'1.0-2'}}</span>
                     </span>
                   </div>
@@ -563,8 +563,9 @@ export class ChartsComponent implements OnInit, AfterViewInit {
     return fuelTransactions[index - 1];
   }
 
-  isSubTypeAsset(categoryId: number): boolean{
-    return this.getBudgetForCategory(categoryId)?.category?.subType === 'asset';
+  isTypeIncomeOrAsset(categoryId: number): boolean{
+    const category = this.getBudgetForCategory(categoryId)?.category;
+    return category?.subType === 'asset' || category?.type === 'income';
   }
 
   getBudgetAndSpent(categoryId: number) {

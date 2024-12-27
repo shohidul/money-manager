@@ -179,10 +179,6 @@ export class CategoriesComponent implements OnInit {
     }
   }
 
-  toggleAppMode(event: any) {
-    this.featureFlagService.setAppMode(event.target.checked);
-  }
-
   goBack() {
     this.router.navigate(['/']);
   }
