@@ -9,9 +9,13 @@ export class TranslateNumberPipe implements PipeTransform {
   constructor(private translationService: TranslationService) {}
 
   transform(value: string | number | null | undefined, format: string = '1.0-2', useGrouping: boolean = false): string {
+    return this.transformByLocale(value, null, format, useGrouping);
+  }
+
+  transformByLocale(value: string | number | null | undefined, lang: string | null = null, format: string = '1.0-2', useGrouping: boolean = false): string {
     if (value == null || value === '') return ''; // Handle null or undefined
 
-    const currentLang = this.translationService.getCurrentLanguage();
+    const currentLang = lang || this.translationService.getCurrentLanguage();
 
     try {
       if (typeof value === 'number') {
@@ -20,10 +24,28 @@ export class TranslateNumberPipe implements PipeTransform {
       }
 
       if (typeof value === 'string') {
-        // Split the string into numeric and non-numeric parts
-        const parts = value.match(/\d+|\D+/g); // Match numbers and non-numbers separately
+        // Define a map to translate Bengali digits to English
+        const bengaliToEnglishMap: { [key: string]: string } = {
+          '০': '0',
+          '১': '1',
+          '২': '2',
+          '৩': '3',
+          '৪': '4',
+          '৫': '5',
+          '৬': '6',
+          '৭': '7',
+          '৮': '8',
+          '৯': '9',
+        };
+      
+        // Replace Bengali digits with English digits
+        const translatedValue = value.replace(/[০-৯]/g, (bengaliDigit) => bengaliToEnglishMap[bengaliDigit]);
+      
+        // Split the translated string into numeric and non-numeric parts
+        const parts = translatedValue.match(/\d+|\D+/g); // Match numbers and non-numbers separately
         if (!parts) return value;
-
+      
+        // Map each part to either format numbers or leave non-numeric parts as-is
         return parts
           .map(part => {
             if (/\d+/.test(part)) {
@@ -33,7 +55,7 @@ export class TranslateNumberPipe implements PipeTransform {
             return part; // Preserve non-numeric parts as-is
           })
           .join('');
-      }
+      }      
 
       return String(value); // Convert unknown types safely to string
     } catch (error) {

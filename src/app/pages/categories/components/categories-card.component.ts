@@ -8,6 +8,7 @@ import { TransactionSubType } from '../../../models/transaction-types';
 import { TranslatePipe } from '../../../components/shared/translate.pipe';
 import { DbService } from '../../../services/db.service';
 import { TranslateNumberPipe } from "../../../components/shared/translate-number.pipe";
+import { TranslationService } from '../../../services/translation.service';
 
 @Component({
   selector: 'app-categories-card',
@@ -108,15 +109,13 @@ import { TranslateNumberPipe } from "../../../components/shared/translate-number
                       {{ (category.subType === 'asset' || category.type === 'income' ? 
                         'categories.goal' : 'categories.budget') | translate }}
                     </label>
-                    <input 
+                    <input
                       id="categoryBudget-{{category.id}}"
-                      type="number" 
+                      type="text"
                       class="form-control"
-                      [ngModel]="getEditingCategoryBudget()" 
-                      (ngModelChange)="updateEditingCategoryBudget($event)"
-                      min="0" 
-                      step="100"
-                      placeholder="{{ '00.0' }}"
+                      [ngModel]="getEditingCategoryBudget() | translateNumber"
+                      (input)="onCategoryBudgetInput($event)"
+                      placeholder="{{ '00.0' | translateNumber }}"
                       name="categoryBudget"
                     />
                   </div>
@@ -444,8 +443,8 @@ export class CategoriesCardComponent implements OnInit {
   constructor(
     private router: Router,
     private activatedRoute: ActivatedRoute,
-    private dbService: DbService
-  ) {
+    private dbService: DbService,
+    private translationService: TranslationService  ) {
     this.currentRoute = this.router.url.split('?')[0];
   }
 
@@ -564,9 +563,12 @@ export class CategoriesCardComponent implements OnInit {
       : null;
   }
 
-  updateEditingCategoryBudget(budget: number) {
+  updateEditingCategoryBudget(budget: string) {
+    // Convert to english numbers before saving
+    const result = new TranslateNumberPipe(this.translationService).transformByLocale (budget, 'en');
+
     this.editingCategory = this.editingCategory 
-      ? { ...this.editingCategory, budget: budget } 
+      ? { ...this.editingCategory, budget: parseFloat(result) } 
       : null;
   }
 
@@ -574,5 +576,16 @@ export class CategoriesCardComponent implements OnInit {
     this.editingCategory = this.editingCategory 
       ? { ...this.editingCategory, subType: subType } 
       : null;
+  }
+
+  onCategoryBudgetInput(event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    const rawInput = inputElement?.value || '';
+  
+    // Remove commas to make it a parseable string
+    const parseableString = rawInput.replace(/,/g, '');
+  
+    // Update the editing category budget using the parseable string
+    this.updateEditingCategoryBudget(parseableString);
   }
 }

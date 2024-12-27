@@ -424,8 +424,6 @@ export class ChartsComponent implements OnInit, AfterViewInit {
 
     await this.loadData();
     await this.loadCategoryBudgets();
-
-    console.log(this.is100PercentOrOver(2));
   }
 
   ngAfterViewInit() {
