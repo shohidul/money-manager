@@ -17,21 +17,6 @@ export const routes: Routes = [
           import('./pages/add-transaction/add-transaction.component').then(m => m.AddTransactionComponent)
       },
       {
-        path: 'loans',
-        loadComponent: () => 
-          import('./pages/loans/loans.component').then(m => m.LoansComponent)
-      },
-      {
-        path: 'assets',
-        loadComponent: () => 
-          import('./pages/assets/assets.component').then(m => m.AssetsComponent)
-      },
-      {
-        path: 'fuel',
-        loadComponent: () => 
-          import('./pages/fuel/fuel.component').then(m => m.FuelComponent)
-      },
-      {
         path: 'add-category',
         loadComponent: () => 
           import('./pages/add-category/add-category.component').then(m => m.AddCategoryComponent)
@@ -42,14 +27,19 @@ export const routes: Routes = [
           import('./pages/charts/charts.component').then(m => m.ChartsComponent)
       },
       {
-        path: 'settings',
+        path: 'fuel',
         loadComponent: () => 
-          import('./pages/settings/settings.component').then(m => m.SettingsComponent)
+          import('./pages/fuel/fuel.component').then(m => m.FuelComponent)
       },
       {
-        path: 'about',
+        path: 'loans',
         loadComponent: () => 
-          import('./pages/about/about.component').then(m => m.AboutComponent)
+          import('./pages/loans/loans.component').then(m => m.LoansComponent)
+      },
+      {
+        path: 'assets',
+        loadComponent: () => 
+          import('./pages/assets/assets.component').then(m => m.AssetsComponent)
       },
       {
         path: 'export',
@@ -57,10 +47,25 @@ export const routes: Routes = [
           import('./pages/export/export.component').then(m => m.ExportComponent)
       },
       {
+        path: 'categories',
+        loadComponent: () => 
+          import('./pages/categories/categories.component').then(m => m.CategoriesComponent)
+      },
+      {
+        path: 'settings',
+        loadComponent: () => 
+          import('./pages/settings/settings.component').then(m => m.SettingsComponent)
+      },
+      {
         path: 'tutorial',
         loadComponent: () => 
           import('./pages/tutorial/tutorial.component').then(m => m.TutorialComponent)
-      }
+      },
+      {
+        path: 'about',
+        loadComponent: () => 
+          import('./pages/about/about.component').then(m => m.AboutComponent)
+      },
     ]
   },
   {

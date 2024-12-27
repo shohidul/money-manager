@@ -28,11 +28,13 @@
     "export": "Export",
     "settings": "Settings",
     "howToUse": "How to Use",
-    "about": "About"
+    "about": "About",
+    "categories": "Categories"
   },
   "categories": {
     "title": "Categories",
     "filters": {
+      "title": "Filters",
       "expense": "Expense",
       "income": "Income"
     },

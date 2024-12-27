@@ -28,11 +28,13 @@
     "export": "সংরক্ষণ",
     "settings": "সেটিংস",
     "howToUse": "ব্যবহার পদ্ধতি",
-    "about": "সম্পর্কে"
+    "about": "সম্পর্কে",
+    "categories": "বিভাগসমূহ"
   },
   "categories": {
     "title": "বিভাগসমূহ",
     "filters": {
+      "title": "ফিল্টারসমূহ",
       "expense": "ব্যয়",
       "income": "আয়"
     },

@@ -48,6 +48,11 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
           <span class="material-icons">download</span>
           {{ 'menu.export' | translate }}
         </a>
+        
+        <a routerLink="/categories" routerLinkActive="active" (click)="close()">
+          <span class="material-icons">category</span>
+          {{ 'menu.categories' | translate }}
+        </a>
 
         <a routerLink="/settings" routerLinkActive="active" (click)="close()">
           <span class="material-icons">settings</span>
