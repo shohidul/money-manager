@@ -1,10 +1,16 @@
 {
   "name": "money-manager",
+  "version": "1.0.0",
   "private": true,
+  "main": "main.js",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build"
+    "build": "ng build",
+    "electron": "npm run build && electron .",
+    "electron:dev": "electron .",
+    "make": "electron-forge make",
+    "package": "electron-forge package"
   },
   "dependencies": {
     "@angular/animations": "^17.0.0",
@@ -20,6 +26,7 @@
     "@ngx-translate/http-loader": "^16.0.1",
     "chart.js": "^4.4.1",
     "date-fns": "^3.0.6",
+    "electron-squirrel-startup": "^1.0.1",
     "idb": "^8.0.0",
     "rxjs": "^7.8.1",
     "tslib": "^2.6.2",
@@ -30,6 +37,59 @@
     "@angular-devkit/build-angular": "^17.0.0",
     "@angular/cli": "^17.0.0",
     "@angular/compiler-cli": "^17.0.0",
+    "@electron-forge/cli": "^7.6.0",
+    "@electron-forge/maker-deb": "^7.6.0",
+    "@electron-forge/maker-dmg": "^7.6.0",
+    "@electron-forge/maker-rpm": "^7.6.0",
+    "@electron-forge/maker-squirrel": "^7.6.0",
+    "@electron-forge/maker-zip": "^7.6.0",
+    "@electron-forge/plugin-auto-unpack-natives": "^7.6.0",
+    "@electron-forge/plugin-fuses": "^7.6.0",
+    "@electron/fuses": "^1.8.0",
+    "electron": "^28.0.0",
+    "ts-node": "^10.9.2",
     "typescript": "~5.2.0"
+  },
+  "build": {
+    "appId": "com.io.money.manager",
+    "productName": "IO Money Manager",
+    "win": {
+      "icon": "assets/images/logo.ico"
+    },
+    "mac": {
+      "icon": "assets/images/logo.icns"
+    },
+    "linux": {
+      "icon": "assets/images/logo.png"
+    }
+  },
+  "electron": {
+    "packagerConfig": {
+      "icon": "assets/logo.icns"
+    },
+    "makers": [
+      {
+        "name": "@electron-forge/maker-squirrel",
+        "config": {
+          "name": "io-money-manager"
+        }
+      },
+      {
+        "name": "@electron-forge/maker-zip",
+        "platforms": [
+          "darwin",
+          "win32",
+          "linux"
+        ]
+      },
+      {
+        "name": "@electron-forge/maker-dmg",
+        "config": {
+          "background": "assets/dmg-background.png",
+          "icon": "assets/images/logo.icns",
+          "format": "ULFO"
+        }
+      }
+    ]
   }
 }
