@@ -1,9 +1,8 @@
-import { Component, Input, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FilterBarComponent } from '../../../components/filter-bar/filter-bar.component';
 import { isFuelTransaction, FuelTransaction } from '../../../models/transaction-types';
 import { calculateMileage } from '../../../utils/fuel.utils';
-import { FilterOptions } from '../../../utils/transaction-filters';
 import { Category } from '../../../services/db.service';
 import { TranslatePipe } from "../../../components/shared/translate.pipe";
 import { TranslateNumberPipe } from "../../../components/shared/translate-number.pipe";
@@ -12,18 +11,9 @@ import { TranslateDatePipe } from "../../../components/shared/translate-date.pip
 @Component({
   selector: 'app-fuel-list',
   standalone: true,
-  imports: [CommonModule, FilterBarComponent, TranslatePipe, TranslateNumberPipe, TranslateDatePipe],
+  imports: [CommonModule, TranslatePipe, TranslateNumberPipe, TranslateDatePipe],
   template: `
   <div class="fuel-list">
-    <app-filter-bar
-      [filters]="filters"
-      [fuelCategories]="fuelCategories"
-      [showFuelCategories]="true"
-      (filtersChange)="onFiltersChange($event)"
-      (startDateChange)="onStartDateChange($event)"
-      (endDateChange)="onEndDateChange($event)"
-    ></app-filter-bar>
-
     <div class="transactions card">
       <div *ngIf="transactionGroups.length > 0; else noTransactions">
         <div class="category-group" *ngFor="let group of transactionGroups">
@@ -104,7 +94,8 @@ import { TranslateDatePipe } from "../../../components/shared/translate-date.pip
     .category-details {
       flex: 1;
       display: flex;
-    justify-content: space-between;
+      justify-content: space-between;
+      flex-wrap: wrap;
     }
 
     .category-name {
@@ -120,7 +111,7 @@ import { TranslateDatePipe } from "../../../components/shared/translate-date.pip
       display: flex;
       align-items: center;
       gap: 1rem;
-      padding: 0.1rem 2rem 0.8rem 2rem;
+      padding: 1rem 2rem;
       transition: background-color 0.2s;
       border-bottom: 1px solid var(--background-color);
       font-size: 0.875rem;
@@ -193,9 +184,7 @@ export class FuelListComponent implements OnChanges {
     averageMileage: number;
   }[] = [];
 
-  @Input() filters: FilterOptions = {};
   @Input() fuelCategories: Category[] = [];
-  @Output() filtersChange = new EventEmitter<FilterOptions>();
 
   get fuelTransactions(): FuelTransaction[] {
     return this.transactionGroups.flatMap(group => group.transactions);
@@ -224,19 +213,5 @@ export class FuelListComponent implements OnChanges {
   getCategoryName(categoryId: number): string {
     const category = this.fuelCategories.find((c) => c.id === categoryId);
     return category?.name || 'Unknown';
-  }
-
-  onFiltersChange(filters: FilterOptions) {
-    this.filtersChange.emit(filters);
-  }
-
-  onStartDateChange(date: Date) {
-    this.filters.startDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
-    this.filtersChange.emit(this.filters);
-  }
-
-  onEndDateChange(date: Date) {
-    this.filters.endDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
-    this.filtersChange.emit(this.filters);
   }
 }

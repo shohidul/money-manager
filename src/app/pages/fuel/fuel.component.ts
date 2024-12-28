@@ -8,11 +8,13 @@ import { isFuelTransaction, FuelTransaction } from '../../models/transaction-typ
 import { FilterOptions } from '../../utils/transaction-filters';
 import { startOfMonth, endOfMonth, format, parseISO } from 'date-fns';
 import { calculateMileage } from '../../utils/fuel.utils';
+import { FilterBarComponent } from '../../components/filter-bar/filter-bar.component';
+import { CategoryService } from '../../services/category.service';
 
 @Component({
   selector: 'app-fuel',
   standalone: true,
-  imports: [CommonModule, MobileHeaderComponent, FuelListComponent, FuelChartsComponent],
+  imports: [CommonModule, MobileHeaderComponent, FuelListComponent, FuelChartsComponent, FilterBarComponent],
   template: `
     <div class="fuel">
       <app-mobile-header
@@ -22,16 +24,23 @@ import { calculateMileage } from '../../utils/fuel.utils';
       />
 
       <div class="content">
+        <app-filter-bar 
+          [filters]="filters" 
+          [fuelCategories]="fuelCategories"
+          [showFuelCategories]="true"
+          (filtersChange)="onFiltersChange($event)"
+          (startDateChange)="onStartDateChange($event)"
+          (endDateChange)="onEndDateChange($event)"
+        />
         <div class="tabs">
           <button [class.active]="activeTab === 'list'" (click)="activeTab = 'list'">Logs</button>
           <button [class.active]="activeTab === 'charts'" (click)="activeTab = 'charts'">Analytics</button>
         </div>
 
         @if (activeTab === 'list') {
-          <app-fuel-list [transactionGroups]="transactionGroups" 
-          [fuelCategories]="fuelCategories" [filters]="filters" (filtersChange)="onFiltersChange($event)" />
+          <app-fuel-list [transactionGroups]="transactionGroups" [fuelCategories]="fuelCategories" (filtersChange)="onFiltersChange($event)" />
         } @else {
-          <app-fuel-charts />
+          <app-fuel-charts [transactionGroups]="transactionGroups" [fuelCategories]="fuelCategories" (filtersChange)="onFiltersChange($event)"/>
         }
       </div>
     </div>
@@ -68,7 +77,7 @@ import { calculateMileage } from '../../utils/fuel.utils';
   `]
 })
 export class FuelComponent implements OnInit {
-  activeTab: 'list' | 'charts' = 'charts';
+  activeTab: 'list' | 'charts' = 'list';
   transactions: FuelTransaction[] = [];
   transactionGroups: {
     categoryId: number;
@@ -85,7 +94,10 @@ export class FuelComponent implements OnInit {
   };
   fuelCategories: Category[] = [];
 
-  constructor(private dbService: DbService) {}
+  constructor(
+    private dbService: DbService, 
+    private categoryService: CategoryService
+  ) {}
 
   async ngOnInit() {
     // Set default filters
@@ -94,58 +106,87 @@ export class FuelComponent implements OnInit {
       category: 'all'
     };
 
+    await this.extractFuelCategories();
     await this.loadTransactions();
-    this.extractFuelCategories();
   }
 
-  async extractFuelCategories() {
-    // First, get all categories
-    const categories = await this.dbService.getCategories();
+  async getMostUsedCategories() {
+    try {
+      const transactions = await this.dbService.getTransactionsBySubType('fuel');
+  
+      // Count occurrences of categoryId
+      const categoryCounts = transactions.reduce((acc, transaction) => {
+        const categoryId = transaction.categoryId;
+        acc[categoryId] = (acc[categoryId] || 0) + 1;
+        return acc;
+      }, {} as Record<number, number>);
+  
+      // Convert to an array and sort by count (descending)
+      const sortedCategories = Object.entries(categoryCounts)
+        .map(([categoryId, count]) => ({
+          categoryId: Number(categoryId),
+          count,
+        }))
+        .sort((a, b) => b.count - a.count);
+  
+      return sortedCategories;
+    } catch (error) {
+      console.error('Error getting most used categories:', error);
+      return [];
+    }
+  }
+  
+    
 
-    // Find the fuel categories
-    this.fuelCategories = categories
+  async extractFuelCategories() {
+    // Find fuel categories
+    this.fuelCategories = (await this.dbService.getCategories())
       .filter(cat => cat.subType === 'fuel');
+
+    // Get most used categories
+    const mostUsedCategories = await this.getMostUsedCategories();
+
+    // Determine default category
+    const defaultCategory = mostUsedCategories.length > 0
+      ? mostUsedCategories[0].categoryId
+      : this.fuelCategories[0]?.id;
+
+    // Update filters with the selected category
+    if (defaultCategory) {
+      this.filters = {
+        ...this.filters,
+        category: defaultCategory.toString()
+      };
+    }
   }
 
   async loadTransactions() {
-    let startDate: Date;
-    let endDate: Date;
+    try {
+      // Convert category to number if not 'all'
+      const categoryId = this.filters.category === 'all' 
+        ? undefined 
+        : Number(this.filters.category);
 
-    // Determine date range for filtering
-    if (this.filters.startDate) {
-      startDate = this.filters.startDate;
-    } else {
-      startDate = new Date(0);
+      const transactions = await this.dbService.getTransactionsBySubType(
+        'fuel', 
+        this.filters.startDate, 
+        this.filters.endDate
+      );
+
+      this.transactions = transactions.filter(isFuelTransaction)
+      .filter(tx => {
+        return !categoryId || tx.categoryId === categoryId;
+      });
+      this.transactionGroups = this.groupTransactions(this.transactions);
+    } catch (error) {
+      console.error('Error loading fuel transactions:', error);
     }
+  }
 
-    if (this.filters.endDate) {
-      endDate = this.filters.endDate;
-    } else {
-      endDate = new Date();
-    }
-
-    // Ensure fuel categories are loaded
-    if (this.fuelCategories.length === 0) {
-      await this.extractFuelCategories();
-    }
-
-    const transactions = await this.dbService.getTransactions(
-      startDate,
-      endDate
-    );
-
-    // Filter and group transactions
-    const filteredTransactions = transactions
-      .filter(isFuelTransaction)
-      .filter(tx => 
-        this.filters.category === 'all' || 
-        tx.categoryId === Number(this.filters.category)
-      )
-      .sort((a, b) => b.date.getTime() - a.date.getTime());
-
+  groupTransactions(transactions: FuelTransaction[]) {
     // Group transactions by categoryId
     const groupedTransactions: { [key: number]: FuelTransaction[] } = 
-      filteredTransactions.reduce((acc: { [key: number]: FuelTransaction[] }, transaction) => {
+      transactions.reduce((acc: { [key: number]: FuelTransaction[] }, transaction) => {
         const categoryId = transaction.categoryId;
         if (!acc[categoryId]) {
           acc[categoryId] = [];
@@ -155,7 +196,7 @@ export class FuelComponent implements OnInit {
       }, {});
 
     // Convert grouped transactions to an array of groups
-    this.transactionGroups = Object.entries(groupedTransactions)
+    return Object.entries(groupedTransactions)
       .map(([categoryId, transactions]) => ({
         categoryId: Number(categoryId),
         transactions,
@@ -185,6 +226,16 @@ export class FuelComponent implements OnInit {
   onFiltersChange(filters: FilterOptions) {
     // Update filters
     this.filters = { ...filters };
+    this.loadTransactions();
+  }
+
+  onStartDateChange(date: Date) {
+    this.filters.startDate = date;
+    this.loadTransactions();
+  }
+
+  onEndDateChange(date: Date) {
+    this.filters.endDate = date;
     this.loadTransactions();
   }
 

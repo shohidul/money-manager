@@ -78,14 +78,24 @@ export class DbService {
     return index.getAll(IDBKeyRange.bound(startDate, endDate));
   }
 
-  async getTransactionsBySubType(subType: TransactionSubType): Promise<Transaction[]> {
+  async getTransactionsBySubType(
+    subType: TransactionSubType, 
+    startDate?: Date, 
+    endDate?: Date
+  ): Promise<Transaction[]> {
     if (!this.db) {
       await this.initializeDB();
     }
 
     try {
       const allTransactions = await this.db.getAll('transactions');
-      return allTransactions.filter(tx => tx.subType === subType);
+      return allTransactions.filter(tx => {
+        const matchesSubType = tx.subType === subType;
+        const matchesStartDate = !startDate || new Date(tx.date) >= startDate;
+        const matchesEndDate = !endDate || new Date(tx.date) <= endDate;
+        
+        return matchesSubType && matchesStartDate && matchesEndDate;
+      });
     } catch (error) {
       throw error;
     }

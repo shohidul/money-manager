@@ -1,13 +1,13 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Transaction } from '../../../models/transaction-types';
+import { FuelTransaction, Transaction } from '../../../models/transaction-types';
 import {
   getFuelChartData,
   calculateFuelStats,
   FuelStats,
 } from '../../../utils/fuel.utils';
 import { ChartService } from '../../../services/chart.service';
-import { DbService } from '../../../services/db.service';
+import { Category, DbService } from '../../../services/db.service';
 
 @Component({
   selector: 'app-fuel-charts',
@@ -100,7 +100,21 @@ import { DbService } from '../../../services/db.service';
   ],
 })
 export class FuelChartsComponent implements OnChanges {
-   transactions: Transaction[] = [];
+
+  @Input() transactionGroups: {
+    categoryId: number;
+    transactions: FuelTransaction[];
+    total: number;
+    totalFuel: number;
+    averageMileage: number;
+  }[] = [];
+
+  @Input() fuelCategories: Category[] = [];
+
+  get fuelTransactions(): FuelTransaction[] {
+    return this.transactionGroups.flatMap(group => group.transactions);
+  }
+
   stats: FuelStats = {
     mileage: 0,
     totalMileageDistance: 0,
@@ -113,25 +127,25 @@ export class FuelChartsComponent implements OnChanges {
   };
 
   constructor(private chartService: ChartService, private dbService: DbService) {
-    this.loadFuelTransactions();
-  }
-
-  async loadFuelTransactions() {
-    this.transactions = await this.dbService.getTransactionsBySubType('fuel');
-    console.log(this.transactions);
     this.updateCharts();
   }
 
+
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['transactions']) {
+    if (changes['transactionGroups']) {
+      this.transactionGroups = this.transactionGroups.map(group => ({
+        ...group,
+        transactions: group.transactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      }));
+
       this.updateCharts();
     }
   }
 
   private updateCharts() {
-    this.stats = calculateFuelStats(this.transactions);
+    this.stats = calculateFuelStats(this.fuelTransactions);
     const { mileageData, costData, odoData } = getFuelChartData(
-      this.transactions
+      this.fuelTransactions
     );
 
     // Update mileage chart

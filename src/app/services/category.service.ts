@@ -47,6 +47,11 @@ export class CategoryService {
     return allCategories.filter(category => category.type === type);
   }
 
+  async getCategoriesBySubType(subType: 'fuel' | 'asset' | 'loan' | 'repaid' | 'none') {
+    const allCategories = await this.getAllCategories();
+    return allCategories.filter(category => category.subType === subType);
+  }
+
   async addCategory(category: Omit<Category, 'id'>) {
     // Clear cache to force reload
     this.clearCategoriesCache();

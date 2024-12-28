@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, SimpleChanges } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FilterOptions } from '../../utils/transaction-filters';
@@ -18,7 +18,7 @@ import { Category } from '../../services/db.service';
           [value]="startDate | date:'yyyy-MM-dd'"
           (change)="onStartDateChange($event)"
         />
-        <span class="date-separator">-</span>
+        <!-- <span class="date-separator">-</span> -->
         <input 
           type="date" 
           [value]="endDate | date:'yyyy-MM-dd'"
@@ -48,6 +48,7 @@ import { Category } from '../../services/db.service';
       gap: 1rem;
       margin-bottom: 1rem;
       align-items: center;
+      justify-content: space-between;
     }
 
     .date-range-picker {
@@ -75,7 +76,7 @@ import { Category } from '../../services/db.service';
     @media (max-width: 768px) {
       .filter-bar {
         gap: 0.6rem;
-        flex-direction: column;
+        flex-wrap: wrap;
       }
     }
   `]
@@ -117,6 +118,12 @@ export class FilterBarComponent implements OnInit {
 
     // Set category filter if exists
     if (this.filters?.category) {
+      this.fuelCategoryFilter = this.filters.category;
+    }
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['filters'] && this.filters?.category) {
       this.fuelCategoryFilter = this.filters.category;
     }
   }
