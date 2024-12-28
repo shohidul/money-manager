@@ -22,13 +22,15 @@
               "namedChunks": false,
               "optimization": true,
               "outputHashing": "all",
-              "sourceMap": false
+              "sourceMap": false,
+              "serviceWorker": "ngsw-config.json"
             }
           },
           "options": {
             "assets": [
-              "src/favicon.ico", 
-              "src/assets"
+              "src/favicon.ico",
+              "src/assets",
+              "src/manifest.webmanifest"
             ],
             "index": "src/index.html",
             "browser": "src/main.ts",
