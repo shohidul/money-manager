@@ -7,36 +7,40 @@ export interface FilterOptions {
   type?: string;
   subType?: string;
   status?: 'pending' | 'partial' | 'completed' | 'all';
+  category?: string;
 }
 
-export function filterTransactions<T extends { date: Date; type: string; subType: string }>(
+export function filterTransactions<T extends { date: Date; type: string; subType: string; category?: string }>(
   transactions: T[],
-  options: FilterOptions
+  filters: FilterOptions
 ): T[] {
-  return transactions.filter(tx => {
-    // Month-based filtering
-    if (options.month) {
-      const monthDate = new Date(options.month);
-      const startDate = startOfMonth(monthDate);
-      const endDate = endOfMonth(monthDate);
-      
-      if (tx.date < startDate || tx.date > endDate) {
-        return false;
-      }
-    } else {
-      // Existing date range filtering
-      const dateMatch = (!options.startDate || tx.date >= options.startDate) &&
-                       (!options.endDate || tx.date <= options.endDate);
+  return transactions.filter(transaction => {
+    // Prioritize startDate and endDate over month
+    if (filters.startDate || filters.endDate) {
+      const dateMatch = (!filters.startDate || transaction.date >= filters.startDate) &&
+                       (!filters.endDate || transaction.date <= filters.endDate);
       
       if (!dateMatch) {
         return false;
       }
+    } else if (filters.month) {
+      const monthDate = new Date(filters.month);
+      const startDate = startOfMonth(monthDate);
+      const endDate = endOfMonth(monthDate);
+      
+      if (transaction.date < startDate || transaction.date > endDate) {
+        return false;
+      }
     }
 
-    const typeMatch = !options.type || tx.type === options.type;
-    const subTypeMatch = !options.subType || tx.subType === options.subType;
-    
-    return typeMatch && subTypeMatch;
+    const typeMatch = !filters.type || transaction.type === filters.type;
+    const subTypeMatch = !filters.subType || transaction.subType === filters.subType;
+    const statusMatch = !filters.status || filters.status === 'all' || 
+                        (transaction as any).status === filters.status;
+    const categoryMatch = !filters.category || filters.category === 'all' || 
+                          transaction.category === filters.category;
+
+    return typeMatch && subTypeMatch && statusMatch && categoryMatch;
   });
 }
 

@@ -13,22 +13,21 @@ export class LoanService {
 
   constructor(private dbService: DbService) {}
 
-  async getRepaidTransactions(month?: string): Promise<LoanTransaction[]> {
+  async getRepaidTransactions(startDate?: Date, endDate?: Date): Promise<LoanTransaction[]> {
     try {
-      let startDate: Date;
-      let endDate: Date;
+      let start: Date;
+      let end: Date;
 
-      if (month) {
-        const date = new Date(month);
-        startDate = startOfMonth(date);
-        endDate = endOfMonth(date);
+      if (startDate && endDate) {
+        start = startOfMonth(startDate);
+        end = endOfMonth(endDate);
       } else {
         // If no month specified, get all transactions
-        startDate = new Date(0);
-        endDate = new Date();
+        start = new Date(0);
+        end = new Date();
       }
 
-      const transactions = await this.dbService.getTransactions(startDate, endDate);
+      const transactions = await this.dbService.getTransactions(start, end);
       // Filter for both loan and repaid transactions
       const loanTransactions = transactions
       .filter(isRepaidTransaction);
@@ -39,10 +38,10 @@ export class LoanService {
     }
   }
 
-  async getChildrenLoansByType(type: TransactionType): Promise<LoanTransaction[]> {
+  async getChildrenLoansByType(type: TransactionType, startDate?: Date, endDate?: Date): Promise<LoanTransaction[]> {
     try {
       // Get all loan transactions that can be potential parents
-      const transactions = await this.getRepaidTransactions();
+      const transactions = await this.getRepaidTransactions(startDate, endDate);
 
       // Filter based on transaction type:
       // - If current transaction is income (repayment), show expense (given loans) as parents
@@ -59,13 +58,13 @@ export class LoanService {
     }
   }
 
-  async getLoansGiven(month?: string): Promise<LoanGroup[]> {
+  async getLoansGiven(startDate?: Date, endDate?: Date): Promise<LoanGroup[]> {
     try {
       // Get parent loans (expense type)
-      const parentLoans = await this.getParentLoansByType('expense');
+      const parentLoans = await this.getParentLoansByType('expense', startDate, endDate);
 
       // Get children loans (income type repayments)
-      const childrenLoans = await this.getChildrenLoansByType('income');
+      const childrenLoans = await this.getChildrenLoansByType('income', startDate, endDate);
 
       // Combine parent and children loans, ensuring they are LoanTransaction[]
       const transactions: LoanTransaction[] = [...parentLoans, ...childrenLoans];
@@ -84,13 +83,13 @@ export class LoanService {
     }
   }
 
-  async getLoansTaken(month?: string): Promise<LoanGroup[]> {
+  async getLoansTaken(startDate?: Date, endDate?: Date): Promise<LoanGroup[]> {
     try {
       // Get parent loans (income type)
-      const parentLoans = await this.getParentLoansByType('income');
+      const parentLoans = await this.getParentLoansByType('income', startDate, endDate);
       
       // Get children loans (expense type repayments)
-      const childrenLoans = await this.getChildrenLoansByType('expense');
+      const childrenLoans = await this.getChildrenLoansByType('expense', startDate, endDate);
       
       // Combine parent and children loans, ensuring they are LoanTransaction[]
       const transactions: LoanTransaction[] = [...parentLoans, ...childrenLoans];
@@ -109,10 +108,10 @@ export class LoanService {
     }
   }
 
-  async getParentLoansByType(type: TransactionType): Promise<LoanTransaction[]> {
+  async getParentLoansByType(type: TransactionType, startDate?: Date, endDate?: Date): Promise<LoanTransaction[]> {
     try {
       // Get all loan transactions that can be potential parents
-      const transactions = await this.getLoanTransactions();
+      const transactions = await this.getLoanTransactions(startDate, endDate);
       
       // Filter based on transaction type:
       // - If current transaction is income (repayment), show expense (given loans) as parents
@@ -129,22 +128,21 @@ export class LoanService {
     }
   }
 
-  async getLoanTransactions(month?: string): Promise<LoanTransaction[]> {
+  async getLoanTransactions(startDate?: Date, endDate?: Date): Promise<LoanTransaction[]> {
     try {
-      let startDate: Date;
-      let endDate: Date;
+      let start: Date;
+      let end: Date;
 
-      if (month) {
-        const date = new Date(month);
-        startDate = startOfMonth(date);
-        endDate = endOfMonth(date);
+      if (startDate && endDate) {
+        start = new Date(startDate);
+        end = new Date(endDate);
       } else {
-        // If no month specified, get all transactions
-        startDate = new Date(0);
-        endDate = new Date();
+        // If no dates specified, get all transactions
+        start = new Date(0);
+        end = new Date();
       }
 
-      const transactions = await this.dbService.getTransactions(startDate, endDate);
+      const transactions = await this.dbService.getTransactions(start, end);
       
       // Filter using the type guard and ensure all required fields are present
       const loanTransactions = transactions

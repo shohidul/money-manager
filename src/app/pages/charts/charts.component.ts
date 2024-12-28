@@ -154,9 +154,13 @@ type ChartType = 'all' | 'income' | 'expense';
 
                             @if (isFuelTransaction(tx)) {
                               <span class="small-text">
-                                {{ tx.fuelType || '' }}
-                                {{ tx.fuelQuantity || 0 }} {{ 'fuel.L' | translate }} | {{ 'fuel.odo' | translate }} {{ tx.odometerReading || 0 }} {{ 'fuel.km' | translate }} | 
-                                {{ 'fuel.mileage' | translate }} {{ getMileage(tx) || 0 | translateNumber:'1.1-1' }} {{ 'fuel.kmPerLiter' | translate }}
+                                {{ tx.fuelType === undefined
+                                  ? ('categories.subTypes.fuel' | translate)
+                                  : ('fuel.types.' + tx.fuelType | lowercase | translate) }}
+                                {{ tx.fuelQuantity || 0 | translateNumber:'1.1-1' }} {{ 'fuel.L' | translate }} | 
+                                {{ 'fuel.odo' | translate }} {{ tx.odometerReading || 0 | translateNumber:'1.0-0' }} {{ 'fuel.km' | translate }} | 
+                                {{ 'fuel.mileage' | translate }} {{ getMileage(tx) || 0 | translateNumber:'1.1-1' }} {{ 'fuel.kmPerLiter' | translate }} |
+                                {{ 'fuel.price' | translate }} {{ tx.amount / tx.fuelQuantity || 0 | translateNumber:'1.1-1' }}   
                               </span>
                             }
                           }

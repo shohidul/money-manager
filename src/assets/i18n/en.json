@@ -12,7 +12,8 @@
     "type": "Type",
     "required": "Required",
     "add": "Add",
-    "noMemo": "No memo"
+    "noMemo": "No memo",
+    "total": "Total"
   },
   "calculator": {
     "add_memo": "Add memo",
@@ -34,6 +35,7 @@
   "categories": {
     "title": "Categories",
     "name": "Category Name",
+    "all": "All",
     "budget": "Monthly Budget",
     "goal": "Monthly Goal",
     "subType": "Category Sub-Type",
@@ -390,6 +392,7 @@
     "completed": "Completed"
   },
   "fuel": {
+    "price": "Price",
     "odo": "Odo",
     "km": "km",
     "L": "L",

@@ -30,7 +30,8 @@ import { FilterOptions } from '../../../utils/transaction-filters';
         [filters]="filters"
         [showStatus]="true"
         (filtersChange)="onFiltersChange($event)"
-        (monthChange)="onMonthChange($event)"
+        (startDateChange)="onStartDateChange($event)"
+        (endDateChange)="onEndDateChange($event)"
       />
 
       <app-loan-summary
@@ -126,9 +127,27 @@ export class LoanListComponent implements OnInit {
 
   async loadLoans() {
     try {
+      let startDate: Date;
+      let endDate: Date;
+  
+      // Determine date range for filtering
+      if (this.filters.startDate) {
+        startDate = this.filters.startDate;
+      } else {
+        // Default to start of current year
+        startDate = new Date(new Date().getFullYear(), 0, 1);
+      }
+  
+      if (this.filters.endDate) {
+        endDate = this.filters.endDate;
+      } else {
+        // Default to current date
+        endDate = new Date();
+      }
+
       const [givenLoans, takenLoans] = await Promise.all([
-        this.loanService.getLoansGiven(this.filters.month),
-        this.loanService.getLoansTaken(this.filters.month)
+        this.loanService.getLoansGiven(startDate, endDate),
+        this.loanService.getLoansTaken(startDate, endDate)
       ]);
       console.log( 'givenLoans');
 console.log( givenLoans);
@@ -212,8 +231,13 @@ console.log( givenLoans);
     this.loadLoans();
   }
 
-  onMonthChange(month: string) {
-    this.filters.month = month;
+  onStartDateChange(date: Date) {
+    this.filters.startDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
+    this.loadLoans();
+  }
+
+  onEndDateChange(date: Date) {
+    this.filters.endDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
     this.loadLoans();
   }
 }

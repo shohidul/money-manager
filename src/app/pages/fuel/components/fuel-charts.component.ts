@@ -7,6 +7,7 @@ import {
   FuelStats,
 } from '../../../utils/fuel.utils';
 import { ChartService } from '../../../services/chart.service';
+import { DbService } from '../../../services/db.service';
 
 @Component({
   selector: 'app-fuel-charts',
@@ -99,7 +100,7 @@ import { ChartService } from '../../../services/chart.service';
   ],
 })
 export class FuelChartsComponent implements OnChanges {
-  @Input() transactions: Transaction[] = [];
+   transactions: Transaction[] = [];
   stats: FuelStats = {
     mileage: 0,
     totalMileageDistance: 0,
@@ -111,7 +112,15 @@ export class FuelChartsComponent implements OnChanges {
     totalFuelQuantity: 0,
   };
 
-  constructor(private chartService: ChartService) {}
+  constructor(private chartService: ChartService, private dbService: DbService) {
+    this.loadFuelTransactions();
+  }
+
+  async loadFuelTransactions() {
+    this.transactions = await this.dbService.getTransactionsBySubType('fuel');
+    console.log(this.transactions);
+    this.updateCharts();
+  }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['transactions']) {

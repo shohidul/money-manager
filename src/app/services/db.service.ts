@@ -6,7 +6,7 @@ interface MoneyManagerDB extends DBSchema {
   transactions: {
     key: number;
     value: Transaction;
-    indexes: { 'by-date': Date };
+    indexes: { 'by-date': Date, 'by-subType': TransactionSubType };
   };
   categories: {
     key: number;
@@ -36,17 +36,28 @@ export class DbService {
   async initializeDB() {
     this.db = await openDB<MoneyManagerDB>(this.DB_NAME, this.VERSION, {
       upgrade(db) {
-        const txStore = db.createObjectStore('transactions', {
-          keyPath: 'id',
-          autoIncrement: true,
-        });
-        txStore.createIndex('by-date', 'date');
+        // Ensure transactions store exists
+        if (!db.objectStoreNames.contains('transactions')) {
+          const txStore = db.createObjectStore('transactions', {
+            keyPath: 'id',
+            autoIncrement: true,
+          });
+          
+          // Explicitly create indexes
+          txStore.createIndex('by-date', 'date', { unique: false });
+          txStore.createIndex('by-subType', 'subType', { unique: false });
+        }
 
-        db.createObjectStore('categories', {
-          keyPath: 'id',
-          autoIncrement: true,
-        });
-      }
+        // Ensure categories store exists
+        if (!db.objectStoreNames.contains('categories')) {
+          db.createObjectStore('categories', {
+            keyPath: 'id',
+            autoIncrement: true,
+          });
+        }
+      },
+      blocked() {},
+      blocking() {}
     });
   }
 
@@ -65,6 +76,19 @@ export class DbService {
   async getTransactions(startDate: Date, endDate: Date): Promise<Transaction[]> {
     const index = this.db.transaction('transactions').store.index('by-date');
     return index.getAll(IDBKeyRange.bound(startDate, endDate));
+  }
+
+  async getTransactionsBySubType(subType: TransactionSubType): Promise<Transaction[]> {
+    if (!this.db) {
+      await this.initializeDB();
+    }
+
+    try {
+      const allTransactions = await this.db.getAll('transactions');
+      return allTransactions.filter(tx => tx.subType === subType);
+    } catch (error) {
+      throw error;
+    }
   }
 
   async getTransaction(id: number): Promise<Transaction | undefined> {
