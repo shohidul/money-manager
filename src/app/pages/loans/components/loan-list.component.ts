@@ -1,23 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FilterBarComponent } from '../../../components/filter-bar/filter-bar.component';
 import { LoanSummaryComponent } from './loan-summary.component';
 import { LoanItemComponent } from './loan-item.component';
 import { LoanService } from '../../../services/loan.service';
-import { LoanTransaction, LoanGroup, LoanStatus } from '../../../models/loan.model';
-import { differenceInDays } from 'date-fns';
-import { format } from 'date-fns';
+import { LoanGroup } from '../../../models/loan.model';
 import { TranslatePipe } from '../../../components/shared/translate.pipe';
 import { TranslateDatePipe } from '../../../components/shared/translate-date.pipe';
 import { TranslateNumberPipe } from '../../../components/shared/translate-number.pipe';
-import { FilterOptions } from '../../../utils/transaction-filters';
 
 @Component({
   selector: 'app-loan-list',
   standalone: true,
   imports: [
     CommonModule,
-    FilterBarComponent,
     LoanSummaryComponent,
     LoanItemComponent,
     TranslatePipe,
@@ -26,21 +21,13 @@ import { FilterOptions } from '../../../utils/transaction-filters';
   ],
   template: `
     <div class="loan-list">
-      <app-filter-bar
-        [filters]="filters"
-        [showStatus]="true"
-        (filtersChange)="onFiltersChange($event)"
-        (startDateChange)="onStartDateChange($event)"
-        (endDateChange)="onEndDateChange($event)"
-      />
-
       <app-loan-summary
         [totalGiven]="totalGiven"
         [totalTaken]="totalTaken"
       />
 
       <div class="loan-groups">
-        <div class="loan-section">
+        <div class="loan-section card">
           <h3>{{ 'loan.loansGiven' | translate }}</h3>
           <div class="loan-items">
             @for (group of givenLoans; track group.parentId) {
@@ -52,7 +39,7 @@ import { FilterOptions } from '../../../utils/transaction-filters';
           </div>
         </div>
 
-        <div class="loan-section">
+        <div class="loan-section card">
           <h3>{{ 'loan.loansTaken' | translate }}</h3>
           <div class="loan-items">
             @for (group of takenLoans; track group.parentId) {
@@ -70,8 +57,6 @@ import { FilterOptions } from '../../../utils/transaction-filters';
     .loan-list {
       display: flex;
       flex-direction: column;
-      gap: 1rem;
-      padding: 1rem;
     }
 
     .loan-groups {
@@ -86,7 +71,7 @@ import { FilterOptions } from '../../../utils/transaction-filters';
       gap: 1rem;
       background: var(--surface-color);
       padding: 1rem;
-      border-radius: 8px;
+      height: 100%;
     }
 
     .loan-section h3 {
@@ -112,132 +97,13 @@ import { FilterOptions } from '../../../utils/transaction-filters';
   `]
 })
 export class LoanListComponent implements OnInit {
-  filters: FilterOptions = {};
-  givenLoans: LoanGroup[] = [];
-  takenLoans: LoanGroup[] = [];
-  totalGiven: number = 0;
-  totalTaken: number = 0;
+
+  @Input() givenLoans: LoanGroup[] = [];
+  @Input() takenLoans: LoanGroup[] = [];
+  @Input() totalGiven: number = 0;
+  @Input() totalTaken: number = 0;
 
   constructor(private loanService: LoanService) {}
 
-  async ngOnInit() {
-    // Initialize with all loans
-    await this.loadLoans();
-  }
-
-  async loadLoans() {
-    try {
-      let startDate: Date;
-      let endDate: Date;
-  
-      // Determine date range for filtering
-      if (this.filters.startDate) {
-        startDate = this.filters.startDate;
-      } else {
-        // Default to start of current year
-        startDate = new Date(new Date().getFullYear(), 0, 1);
-      }
-  
-      if (this.filters.endDate) {
-        endDate = this.filters.endDate;
-      } else {
-        // Default to current date
-        endDate = new Date();
-      }
-
-      const [givenLoans, takenLoans] = await Promise.all([
-        this.loanService.getLoansGiven(startDate, endDate),
-        this.loanService.getLoansTaken(startDate, endDate)
-      ]);
-      console.log( 'givenLoans');
-console.log( givenLoans);
-      // Assign grouped loans directly since they're already grouped by the service
-      this.givenLoans = givenLoans;
-      this.takenLoans = takenLoans;
-
-      // Filter loans based on status
-      const filterByStatus = (loans: LoanGroup[]) => {
-        if (!this.filters.status || this.filters.status === 'all') return loans;
-        
-        return loans.filter(loan => {
-          switch (this.filters.status) {
-            case 'pending': 
-              return loan.status.remainingAmount === loan.status.totalAmount;
-            case 'partial': 
-              return loan.status.remainingAmount > 0 && 
-                     loan.status.remainingAmount < loan.status.totalAmount;
-            case 'completed': 
-              return loan.status.remainingAmount <= 0;
-            default: 
-              return true;
-          }
-        });
-      };
-
-      this.givenLoans = filterByStatus(this.givenLoans);
-      this.takenLoans = filterByStatus(this.takenLoans);
-
-      // Calculate totals
-      this.totalGiven = this.givenLoans.reduce((sum, group) => sum + group.status.totalAmount, 0);
-      this.totalTaken = this.takenLoans.reduce((sum, group) => sum + group.status.totalAmount, 0);
-    } catch (error) {
-      console.error('Error loading loans:', error);
-    }
-  }
-
-  calculateLoanStatus(transactions: LoanTransaction[]): LoanStatus {
-    // If no transactions, return default status
-    if (transactions.length === 0) {
-      return {
-        totalAmount: 0,
-        paidAmount: 0,
-        remainingAmount: 0,
-        isCompleted: true,
-        dueDate: undefined,
-        isOverdue: false,
-        daysUntilDue: undefined
-      };
-    }
-
-    // Get the parent transaction (first transaction in the group)
-    const parentTransaction = transactions[0];
-    
-    // Calculate total amount from the parent transaction
-    const totalAmount = parentTransaction.amount;
-
-    // Calculate paid amount by finding child transactions with this parent's ID
-    const paidAmount = transactions
-      .filter(tx => tx.parentId === parentTransaction.id)
-      .reduce((sum, tx) => sum + tx.amount, 0);
-    
-    const remainingAmount = totalAmount - paidAmount;
-    const isCompleted = remainingAmount <= 0;
-
-    return {
-      totalAmount,
-      paidAmount,
-      remainingAmount,
-      isCompleted,
-      dueDate: parentTransaction.dueDate,
-      isOverdue: parentTransaction.dueDate ? new Date() > parentTransaction.dueDate : false,
-      daysUntilDue: parentTransaction.dueDate 
-        ? differenceInDays(parentTransaction.dueDate, new Date()) 
-        : undefined
-    };
-  }
-
-  onFiltersChange(filters: FilterOptions) {
-    this.filters = filters;
-    this.loadLoans();
-  }
-
-  onStartDateChange(date: Date) {
-    this.filters.startDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
-    this.loadLoans();
-  }
-
-  onEndDateChange(date: Date) {
-    this.filters.endDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
-    this.loadLoans();
-  }
+  ngOnInit() {}
 }

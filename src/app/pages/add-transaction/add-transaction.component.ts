@@ -69,7 +69,7 @@ import { TranslatePipe } from '../../components/shared/translate.pipe';
     styles: [
     `
     .add-transaction {
-      height: 100vh;
+      height: 100%;
       display: flex;
       flex-direction: column;
       position: relative;

@@ -163,7 +163,6 @@ interface DueStatus {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      padding: 0.5rem;
       border-radius: 0.5rem;
     }
 
