@@ -1,5 +1,5 @@
 import { Router } from '@angular/router';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Category, DbService } from '../../services/db.service';
@@ -21,6 +21,8 @@ import { TranslateNumberPipe } from '../../components/shared/translate-number.pi
 import { LoanService } from '../../services/loan.service';
 import { LoanTransaction } from '../../models/loan.model';
 import { FeatureFlagService } from '../../services/feature-flag.service';
+import { CategoryService } from '../../services/category.service';
+import { DOCUMENT } from '@angular/common';
 
 @Component({
   selector: 'app-dashboard',
@@ -44,7 +46,7 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
           [currentMonth]="currentMonth"
           (monthChange)="onMonthChange($event)"
         />
-        <button class="sync-button" (click)="loadTransactions()">
+        <button class="sync-button" (click)="reloadPage()">
           <span class="material-icons">sync</span>
         </button>
       </div>
@@ -299,7 +301,19 @@ export class DashboardComponent implements OnInit {
   parentLoanTransactions: LoanTransaction[] = [];
   isAdvancedMode: boolean = false;
 
-  constructor(private router: Router, private dbService: DbService, private menuService: MenuService, private loanService: LoanService, private featureFlagService: FeatureFlagService) {}
+  constructor(
+    private router: Router, 
+    private dbService: DbService, 
+    private menuService: MenuService, 
+    private loanService: LoanService, 
+    private featureFlagService: FeatureFlagService, 
+    private categoryService: CategoryService,
+    @Inject(DOCUMENT) private document: Document
+  ) {}
+
+  reloadPage() {
+    this.document.defaultView?.location.reload();
+  }
 
   async ngOnInit() {
 
@@ -330,7 +344,7 @@ export class DashboardComponent implements OnInit {
   }
 
   async loadCategories() {
-    this.categories = await this.dbService.getCategories();
+    this.categories = await this.categoryService.getAllCategories();
   }
 
   async loadTransactions() {
