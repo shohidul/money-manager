@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { Meta } from '@angular/platform-browser';
 
 type ThemeMode = 'system' | 'light' | 'dark';
 
@@ -13,7 +14,7 @@ export class ThemeService {
   currentMode$ = this._currentMode.asObservable();
   currentColor$ = this._currentColor.asObservable();
 
-  constructor() {
+  constructor(private meta: Meta) {    
     // Load saved preferences on service initialization
     this.loadSavedPreferences();
     this.applyTheme();
@@ -58,6 +59,9 @@ export class ThemeService {
 
     // Apply primary color
     document.documentElement.style.setProperty('--primary-color', color);
+
+    // Update PWA theme-color dynamically
+    this.meta.updateTag({ name: 'theme-color', content: color });
 
     // Setup system theme listener
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
