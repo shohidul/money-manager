@@ -12,6 +12,11 @@ interface MoneyManagerDB extends DBSchema {
     key: number;
     value: Category;
   };
+  budget_history: {
+    key: number;
+    value: BudgetHistory;
+    indexes: { 'by-category': number };
+  };
 }
 
 export interface Category {
@@ -22,7 +27,15 @@ export interface Category {
   subType: TransactionSubType;
   isCustom: boolean;
   order?: number;
-  budget?: number;  // Monthly budget amount
+  budget?: number;
+}
+
+export interface BudgetHistory {
+  id?: number;
+  categoryId: number;
+  budget: number;
+  startDate: Date;
+  endDate: Date | null;
 }
 
 @Injectable({
@@ -31,7 +44,7 @@ export interface Category {
 export class DbService {
   private db!: IDBPDatabase<MoneyManagerDB>;
   private readonly DB_NAME = 'money-manager-db';
-  private readonly VERSION = 1;
+  private readonly VERSION = 2;
 
   async initializeDB() {
     this.db = await openDB<MoneyManagerDB>(this.DB_NAME, this.VERSION, {
@@ -54,6 +67,15 @@ export class DbService {
             keyPath: 'id',
             autoIncrement: true,
           });
+        }
+
+        // Ensure budget_history store exists
+        if (!db.objectStoreNames.contains('budget_history')) {
+          const bhStore = db.createObjectStore('budget_history', {
+            keyPath: 'id',
+            autoIncrement: true,
+          });
+          bhStore.createIndex('by-category', 'categoryId', { unique: false });
         }
       },
       blocked() {},
@@ -125,7 +147,16 @@ export class DbService {
 
   async getCategories(): Promise<Category[]> {
     const categories = await this.db.getAll('categories');
-    return categories.sort((a, b) => {
+    
+    // Fetch budgets for each category
+    const categoriesWithBudgets = await Promise.all(
+      categories.map(async (category) => ({
+        ...category,
+        budget: await this.getCurrentBudget(category.id!)
+      }))
+    );
+
+    return categoriesWithBudgets.sort((a, b) => {
       // First sort by type (expense before income)
       const typeCompare = a.type.localeCompare(b.type);
       if (typeCompare !== 0) return typeCompare;
@@ -192,22 +223,81 @@ export class DbService {
     return this.db.delete('categories', id);
   }
 
+  async addBudgetHistory(budgetHistory: Omit<BudgetHistory, 'id'>) {
+    return this.db.add('budget_history', budgetHistory);
+  }
+
+  async getBudgetHistoryByCategory(categoryId: number): Promise<BudgetHistory[]> {
+    const index = this.db.transaction('budget_history').store.index('by-category');
+    return index.getAll(categoryId);
+  }
+
+  async updateBudget(categoryId: number, budget: number) {
+    const now = new Date();
+    const startOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const budgetHistories = await this.getBudgetHistoryByCategory(categoryId);
+    
+    // Find current active budget (one with null end_date)
+    const currentBudget = budgetHistories.find(bh => bh.endDate === null);
+    
+    if (currentBudget) {
+      const currentBudgetStart = new Date(currentBudget.startDate);
+      
+      // If current budget is from the same month, update it
+      if (currentBudgetStart.getMonth() === now.getMonth() && 
+          currentBudgetStart.getFullYear() === now.getFullYear()) {
+        currentBudget.budget = budget;
+        return this.db.put('budget_history', currentBudget);
+      } else {
+        // Close current budget
+        currentBudget.endDate = new Date(now.getFullYear(), now.getMonth(), 0); // Last day of previous month
+        await this.db.put('budget_history', currentBudget);
+      }
+    }
+    
+    // Create new budget for current month
+    return this.addBudgetHistory({
+      categoryId,
+      budget,
+      startDate: startOfCurrentMonth,
+      endDate: null
+    });
+  }
+
+  async getCurrentBudget(categoryId: number): Promise<number> {
+    const budgetHistories = await this.getBudgetHistoryByCategory(categoryId);
+    const currentBudget = budgetHistories.find(bh => bh.endDate === null);
+    return currentBudget?.budget || 0;
+  }
+
+  async getBudgetForDate(categoryId: number, date: Date): Promise<number> {
+    const budgetHistories = await this.getBudgetHistoryByCategory(categoryId);
+    const budget = budgetHistories.find(bh => {
+      const start = new Date(bh.startDate);
+      const end = bh.endDate ? new Date(bh.endDate) : new Date();
+      return date >= start && date <= end;
+    });
+    return budget?.budget || 0;
+  }
+
   async clearAllData() {
     const transaction = this.db.transaction(
-      ['categories', 'transactions'],
+      ['categories', 'transactions', 'budget_history'],
       'readwrite'
     );
     await transaction.objectStore('transactions').clear();
     await transaction.objectStore('categories').clear();
+    await transaction.objectStore('budget_history').clear();
     await transaction.done;
   }
 
   async restoreData(data: {
     transactions: Transaction[];
     categories: Category[];
+    budgetHistory: BudgetHistory[];
   }) {
-    const { transactions, categories } = data;
-    const tx = this.db.transaction(['categories', 'transactions'], 'readwrite');
+    const { transactions, categories, budgetHistory } = data;
+    const tx = this.db.transaction(['categories', 'transactions', 'budget_history'], 'readwrite');
 
     try {
       for (const category of categories) {
@@ -223,6 +313,10 @@ export class DbService {
             : new Date(transaction.date)
         };
         await tx.objectStore('transactions').put(restoredTransaction);
+      }
+
+      for (const bh of budgetHistory) {
+        await tx.objectStore('budget_history').put(bh);
       }
 
       await tx.done;

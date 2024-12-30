@@ -102,13 +102,12 @@ type ChartType = 'all' | 'income' | 'expense';
                 <span class="amount">{{ stat.amount | translateNumber:'1.0-0' }}</span>
               </div>
               @if (categoryBudgets.length > 0) {
-                @if (getBudgetForCategory(stat.categoryId)?.category?.budget) {
+                @if (getBudgetForCategory(stat.categoryId)?.budget) {
                   <div class="budget-progress">
                     <div class="progress-bar-container">
                       <div 
                         class="progress-bar" 
-                        [class.warning]="is75Percent(stat.categoryId) && !isTypeIncomeOrAsset(stat.categoryId)"
-                        [class.danger]="is100PercentOrOver(stat.categoryId) && !isTypeIncomeOrAsset(stat.categoryId)"
+                        [class.danger]="is100PercentOver(stat.categoryId) && !isTypeIncomeOrAsset(stat.categoryId)"
                         [style.width.%]="calculateBudgetPercentage(stat.categoryId)"
                       ></div>
                     </div>
@@ -117,9 +116,9 @@ type ChartType = 'all' | 'income' | 'expense';
                         is25Percent(stat.categoryId) ? 'charts.goal25Percent' : 
                         is50Percent(stat.categoryId) ? 'charts.goal50Percent': 
                         is75Percent(stat.categoryId) ? 'charts.goal75Percent' : 
-                        is100PercentOrOver(stat.categoryId) ? 'charts.goal100Percent' : 'charts.goalKeepItUp') | translate}}</span>
-                      <span *ngIf="!isTypeIncomeOrAsset(stat.categoryId)">{{(is75Percent(stat.categoryId) ? 'charts.nearBudget' : is100PercentOrOver(stat.categoryId) ? 'charts.overBudget' : 'charts.inBudget') | translate}}</span>
-                      <span>{{ getBudgetForCategory(stat.categoryId)?.spent | translateNumber:'1.0-2'}} / {{ getBudgetForCategory(stat.categoryId)?.category?.budget  | translateNumber:'1.0-2'}}</span>
+                        is100Percent(stat.categoryId) ? 'charts.goal100Percent' : 'charts.goalKeepItUp') | translate}}</span>
+                      <span *ngIf="!isTypeIncomeOrAsset(stat.categoryId)">{{(is75Percent(stat.categoryId) ? 'charts.nearBudget' : is100Percent(stat.categoryId) ? 'charts.budgetReached' : is100PercentOver(stat.categoryId) ? 'charts.overBudget' : 'charts.inBudget') | translate}}</span>
+                      <span>{{ getBudgetForCategory(stat.categoryId)?.spent | translateNumber:'1.0-2'}} / {{ getBudgetForCategory(stat.categoryId)?.budget  | translateNumber:'1.0-2'}}</span>
                     </span>
                   </div>
                 }
@@ -408,6 +407,7 @@ export class ChartsComponent implements OnInit, AfterViewInit {
   categoryBudgets: Array<{
     category: Category;
     spent: number;
+    budget: number;
   }> = [];
 
   chart: any;
@@ -575,10 +575,10 @@ export class ChartsComponent implements OnInit, AfterViewInit {
   }
 
   getBudgetAndSpent(categoryId: number) {
-    const data = this.getBudgetForCategory(categoryId);
+    const budgetInfo = this.categoryBudgets.find(b => b.category.id === categoryId);
     return {
-      spent: data?.spent ?? 0,
-      budget: data?.category?.budget ?? 0
+      spent: budgetInfo?.spent || 0,
+      budget: budgetInfo?.budget || 0
     };
   }
   
@@ -597,9 +597,14 @@ export class ChartsComponent implements OnInit, AfterViewInit {
     return spent >= budget * 0.75 && spent < budget;
   }
   
-  is100PercentOrOver(categoryId: number): boolean {
+  is100Percent(categoryId: number): boolean {
     const { spent, budget } = this.getBudgetAndSpent(categoryId);
-    return spent >= budget;
+    return spent == budget;
+  }  
+  
+  is100PercentOver(categoryId: number): boolean {
+    const { spent, budget } = this.getBudgetAndSpent(categoryId);
+    return spent > budget;
   }  
 
   getBudgetForCategory(categoryId: number) {
@@ -609,36 +614,38 @@ export class ChartsComponent implements OnInit, AfterViewInit {
 
   calculateBudgetPercentage(categoryId: number) {
     const budget = this.getBudgetForCategory(categoryId);
-    if (!budget || !budget.category || budget.category.budget == null) {
+    if (!budget || !budget.category || budget.budget == null) {
       return 0;
     }
-    const percentage = (budget.spent / budget.category.budget) * 100;
+    const percentage = (budget.spent / budget.budget) * 100;
     return percentage;
   }
 
   async loadCategoryBudgets() {
-    const startDate = startOfMonth(this.currentMonth);
-    const endDate = endOfMonth(this.currentMonth);
-    
-    const categories = await this.dbService.getCategories();
+    const startDate = startOfMonth(new Date(this.currentMonth));
+    const endDate = endOfMonth(startDate);
     const transactions = await this.dbService.getTransactions(startDate, endDate);
+    const categories = await this.dbService.getCategories();
     
-    this.categoryBudgets = categories
-      .filter(category => category && category.budget != null && category.budget > 0)
-      .map(category => {
-        const spent = transactions
-          .filter(t => t.categoryId === category.id)
-          .reduce((sum, t) => sum + t.amount, 0);
-        
-        return { 
-          category, 
-          spent 
+    // Calculate spent amount for each category
+    const spentByCategory = transactions.reduce((acc, tx) => {
+      if (tx.type === 'expense') {
+        acc[tx.categoryId] = (acc[tx.categoryId] || 0) + tx.amount;
+      }
+      return acc;
+    }, {} as { [key: number]: number });
+
+    // Get budgets for each category
+    const expenseCategories = categories.filter(c => c.type === 'expense');
+    this.categoryBudgets = await Promise.all(
+      expenseCategories.map(async category => {
+        const budget = await this.dbService.getBudgetForDate(category.id!, startDate);
+        return {
+          category,
+          spent: spentByCategory[category.id!] || 0,
+          budget
         };
       })
-      .sort((a, b) => {
-        const aBudget = a.category?.budget ?? 0;
-        const bBudget = b.category?.budget ?? 0;
-        return (bBudget > 0 ? b.spent / bBudget : 0) - (aBudget > 0 ? a.spent / aBudget : 0);
-      });    
+    );
   }
 }

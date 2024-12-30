@@ -105,24 +105,6 @@ import { TranslationService } from '../../../services/translation.service';
 
                 <div class="form-row">
                   <div class="form-group">
-                    <label for="categoryBudget-{{category.id}}">
-                      {{ (category.subType === 'asset' || category.type === 'income' ? 
-                        'categories.goal' : 'categories.budget') | translate }}
-                    </label>
-                    <input
-                      id="categoryBudget-{{category.id}}"
-                      type="text"
-                      class="form-control"
-                      [ngModel]="getEditingCategoryBudget() | translateNumber"
-                      (input)="onCategoryBudgetInput($event)"
-                      placeholder="{{ '00.0' | translateNumber }}"
-                      name="categoryBudget"
-                    />
-                  </div>
-                </div>
-
-                <div class="form-row">
-                  <div class="form-group">
                     <label for="categorySubType-{{category.id}}">
                       {{ 'categories.subType' | translate }}
                     </label>
@@ -140,6 +122,24 @@ import { TranslationService } from '../../../services/translation.service';
                       <option value="repaid">{{ 'categories.subTypes.repaid' | translate }}</option>
                       <option value="fuel">{{ 'categories.subTypes.fuel' | translate }}</option>
                     </select>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="categoryBudget-{{category.id}}">
+                      {{ (category.subType === 'asset' || category.type === 'income' ? 
+                        'categories.goal' : 'categories.budget') | translate }}
+                    </label>
+                    <input
+                      id="categoryBudget-{{category.id}}"
+                      type="text"
+                      class="form-control"
+                      [ngModel]="getEditingCategoryBudget() | translateNumber"
+                      (input)="onCategoryBudgetInput($event)"
+                      placeholder="{{ '00.0' | translateNumber }}"
+                      name="categoryBudget"
+                    />
                   </div>
                 </div>
 
@@ -504,7 +504,7 @@ export class CategoriesCardComponent implements OnInit {
     return originalIndex + 1;
   }
 
-  onDrop(event: CdkDragDrop<any[]>) {
+  async onDrop(event: CdkDragDrop<any[]>) {
     const modifiedEvent = {
       ...event,
       categoryType: this.categoryFilter
@@ -519,8 +519,8 @@ export class CategoriesCardComponent implements OnInit {
     this.resetOrder.emit(this.categoryFilter);
   }
 
-  toggleCategoryEdit(category: Category) {
-    if (this.expandedCategoryId === category.id) {
+  async toggleCategoryEdit(category: Category) {
+    if (this.editingCategory?.id === category.id) {
       this.cancelEdit();
     } else {
       this.expandedCategoryId = category.id;
@@ -536,21 +536,30 @@ export class CategoriesCardComponent implements OnInit {
   async saveCategory() {
     if (!this.editingCategory) return;
 
-    try {
-      await this.dbService.updateCategory(this.editingCategory);
-      this.expandedCategoryId = undefined;
-      this.reloadCategories.emit();
-    } catch (error) {
-      console.error('Error saving category:', error);
+    const budget = parseFloat(this.getEditingCategoryBudget());
+    if (!isNaN(budget)) {
+      await this.dbService.updateBudget(this.editingCategory.id!, budget);
     }
+
+    const updatedCategory = {
+      ...this.editingCategory,
+      name: this.getEditingCategoryName(),
+      subType: this.getEditingCategorySubType()
+    };
+    delete (updatedCategory as any).budget;
+
+    await this.dbService.updateCategory(updatedCategory);
+    this.reloadCategories.emit();
+    this.editingCategory = null;
+    this.expandedCategoryId = undefined;
   }
 
   getEditingCategoryName() {
     return this.editingCategory?.name || '';
   }
 
-  getEditingCategoryBudget() {
-    return this.editingCategory?.budget || null;
+  getEditingCategoryBudget(): string {
+    return this.editingCategory?.budget?.toString() || '';
   }
 
   getEditingCategorySubType() {
@@ -565,11 +574,13 @@ export class CategoriesCardComponent implements OnInit {
 
   updateEditingCategoryBudget(budget: string) {
     // Convert to english numbers before saving
-    const result = new TranslateNumberPipe(this.translationService).transformByLocale (budget, 'en');
-
-    this.editingCategory = this.editingCategory 
-      ? { ...this.editingCategory, budget: parseFloat(result) } 
-      : null;
+    const result = new TranslateNumberPipe(this.translationService).transformByLocale(budget, 'en');
+    if (this.editingCategory) {
+      this.editingCategory = {
+        ...this.editingCategory,
+        budget: parseFloat(result) || 0
+      };
+    }
   }
 
   updateEditingCategorySubType(subType: TransactionSubType) {
