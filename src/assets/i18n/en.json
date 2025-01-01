@@ -513,7 +513,8 @@
     "buttons": {
       "backup": "Backup Data",
       "clear": "Reset All Data",
-      "restore": "Restore Data"
+      "restore": "Restore Data",
+      "demo": "Load Demo Data"
     }
   },
   "security": {

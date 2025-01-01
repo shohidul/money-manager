@@ -232,6 +232,10 @@ export class DbService {
     return index.getAll(categoryId);
   }
 
+  async getBudgetHistory(): Promise<BudgetHistory[]> {
+    return this.db.getAll('budget_history');
+  }
+
   async updateBudget(categoryId: number, budget: number) {
     const now = new Date();
     const startOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);

@@ -629,16 +629,16 @@ export class ChartsComponent implements OnInit, AfterViewInit {
     
     // Calculate spent amount for each category
     const spentByCategory = transactions.reduce((acc, tx) => {
-      if (tx.type === 'expense') {
+      if (tx.type === 'expense' || tx.type === 'income') {
         acc[tx.categoryId] = (acc[tx.categoryId] || 0) + tx.amount;
       }
       return acc;
     }, {} as { [key: number]: number });
 
     // Get budgets for each category
-    const expenseCategories = categories.filter(c => c.type === 'expense');
+    const budgetCategories = categories.filter(c => c.type === 'expense' || c.type === 'income');
     this.categoryBudgets = await Promise.all(
-      expenseCategories.map(async category => {
+      budgetCategories.map(async category => {
         const budget = await this.dbService.getBudgetForDate(category.id!, startDate);
         return {
           category,

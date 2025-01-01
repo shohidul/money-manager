@@ -25,6 +25,10 @@ import { format } from 'date-fns';
           <span class="material-icons">restore</span>
           {{ 'dataManagement.buttons.restore' | translate }}
         </button>
+        <button class="restore-button" (click)="restoreDemoData()">
+          <span class="material-icons">restore</span>
+          {{ 'dataManagement.buttons.demo' | translate }}
+        </button>
       </div>
     </div>
   `,
@@ -85,8 +89,9 @@ export class DataManagementCardComponent {
       endDate
     );
     const categories = await this.dbService.getCategories();
+    const budgetHistory = await this.dbService.getBudgetHistory();
 
-    const data = { transactions, categories };
+    const data = { transactions, categories, budgetHistory };
     const blob = new Blob([JSON.stringify(data, null, 2)], {
       type: 'application/json',
     });
@@ -161,6 +166,39 @@ export class DataManagementCardComponent {
       }
     };
     fileInput.click();
+  }
+
+  async restoreDemoData() {
+    try {
+      // Fetch demo data directly from the JSON file
+      const response = await fetch('assets/demo_data.json');
+      if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+
+      // Validate data structure
+      if (!this.isValidBackupData(data)) {
+        alert(this.translate.transform('settings.invalidDataFormat'));
+        return;
+      }
+
+      // Confirm restore action
+      const confirmRestore = confirm(this.translate.transform('settings.confirmRestore'));
+      if (!confirmRestore) return;
+
+      // Clear existing data and restore
+      await this.dbService.clearAllData();
+      await this.dbService.restoreData(data);
+
+      // Clear categories cache
+      this.categoryService.clearCategoriesCache();
+
+      alert(this.translate.transform('settings.dataRestored'));
+    } catch (error) {
+      console.error('Restore demo data failed:', error);
+      alert(this.translate.transform('settings.failedToParseFile'));
+    }
   }
 
   private isValidBackupData(data: any): boolean {
