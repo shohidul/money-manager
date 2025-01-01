@@ -448,7 +448,7 @@
       "label": "Enable Advanced Features",
       "description": "Unlock premium features like Loans, Assets, and Fuel tracking"
     },
-    "deleteCategory": "Are you sure you want to delete the category '{0}'?",
+    "deleteCategory": "Are you sure you want to delete the category '{0}'? This will also permanently delete all the transactions and budget history associated with it.",
     "clearData": "Are you sure you want to clear all data? This action cannot be undone.",
     "dataCleared": "All data has been cleared successfully.",
     "confirmRestore": "Are you sure you want to restore this backup? This will replace all existing data.",

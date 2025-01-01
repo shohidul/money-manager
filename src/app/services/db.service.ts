@@ -220,7 +220,37 @@ export class DbService {
   }
 
   async deleteCategory(id: number) {
-    return this.db.delete('categories', id);
+    const db = this.db;
+    const transaction = db.transaction(['categories', 'transactions', 'budget_history'], 'readwrite');
+    
+    // Check if category exists before deleting
+    const category = await transaction.objectStore('categories').get(id);
+    if (!category) {
+      throw new Error(`Category with id ${id} not found`);
+    }
+    
+    // Delete the category
+    await transaction.objectStore('categories').delete(id);
+    
+    // Delete associated transactions
+    const transactionsStore = transaction.objectStore('transactions');
+    const allTransactions = await transactionsStore.getAll();
+    const transactionsToDelete = allTransactions.filter(tx => tx.categoryId === id);
+    
+    for (const transaction of transactionsToDelete) {
+      await transactionsStore.delete(transaction.id!);
+    }
+
+    // Delete associated budget history
+    const budgetHistoryStore = transaction.objectStore('budget_history');
+    const allBudgetHistory = await budgetHistoryStore.getAll();
+    const budgetHistoryToDelete = allBudgetHistory.filter(bh => bh.categoryId === id);
+    
+    for (const budgetHistory of budgetHistoryToDelete) {
+      await budgetHistoryStore.delete(budgetHistory.id!);
+    }
+    
+    await transaction.done;
   }
 
   async addBudgetHistory(budgetHistory: Omit<BudgetHistory, 'id'>) {

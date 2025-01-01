@@ -339,6 +339,7 @@ import { TranslationService } from '../../../services/translation.service';
       cursor: pointer;
       padding: 0.5rem;
       border-radius: 50%;
+      display: flex;
     }
 
     .delete-button:hover {

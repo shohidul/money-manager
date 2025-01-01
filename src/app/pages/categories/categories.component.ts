@@ -117,6 +117,9 @@ export class CategoriesComponent implements OnInit {
       // Update the order in the database
       await this.dbService.updateCategoryOrder(this.categoriesExpnse);
 
+      // Clear categories cache
+      this.categoryService.clearCategoriesCache();
+
       // Reload the categories (if needed)
       await this.loadCategoriesExpense();
 
@@ -132,6 +135,9 @@ export class CategoriesComponent implements OnInit {
   
       // Update the order in the database
       await this.dbService.updateCategoryOrder(this.categoriesIncome);
+
+      // Clear categories cache
+      this.categoryService.clearCategoriesCache();
 
       // Reload the categories (if needed)
       await this.loadCategoriesIncome();
