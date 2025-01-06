@@ -13,7 +13,7 @@ export interface Feature {
 })
 export class FeatureFlagService {
   private features: Feature[] = [
-    { id: 'fuel', name: 'Fuel Logs', isAdvanced: true, isBeta: true },
+    { id: 'fuel', name: 'Fuel Logs', isAdvanced: true, isBeta: false },
     { id: 'loans', name: 'Loan Management', isAdvanced: true, isBeta: true },
     { id: 'assets', name: 'Asset Management', isAdvanced: true, isBeta: true },
   ];

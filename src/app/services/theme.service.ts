@@ -53,15 +53,14 @@ export class ThemeService {
     if (mode === 'system') {
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+      this.setMetaTagColor(prefersDark ? 'dark' : 'light');
     } else {
       document.documentElement.setAttribute('data-theme', mode);
+      this.setMetaTagColor(mode);
     }
 
     // Apply primary color
     document.documentElement.style.setProperty('--primary-color', color);
-
-    // Update PWA theme-color dynamically
-    this.meta.updateTag({ name: 'theme-color', content: color });
 
     // Setup system theme listener
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -74,6 +73,11 @@ export class ThemeService {
     // Remove previous listeners to prevent multiple attachments
     mediaQuery.removeEventListener('change', handleThemeChange);
     mediaQuery.addEventListener('change', handleThemeChange);
+  }
+
+  setMetaTagColor(mode: string){
+   // Update PWA theme-color dynamically
+   this.meta.updateTag({ name: 'theme-color', content: mode === 'dark' ? '#121212' : '#f5f5f5' }); // --background-color
   }
 
   getCurrentMode(): ThemeMode {
