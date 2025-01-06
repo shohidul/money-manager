@@ -1,4 +1,4 @@
-import { Component, Inject, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Inject, Input, Output, EventEmitter, OnInit, NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -125,9 +125,11 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
               <button class="cancel-button" (click)="onCancel()">
                 {{ 'common.cancel' | translate }}
               </button>
-              <button class="save-button" (click)="onSave()">
-                {{ 'common.save' | translate }}
-              </button>
+              @if(isAdvancedMode) {
+                <button class="save-button" (click)="onSave()">
+                  {{ 'common.save' | translate }}
+                </button>
+              }
             </div>
           </div>
         </div>
