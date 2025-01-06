@@ -72,7 +72,8 @@ export function groupLoanTransactions(transactions: LoanTransaction[]): LoanGrou
       return {
         parentId,
         personName: parentTx?.personName || txs[0].personName,
-        transactions: txs.sort((a, b) => b.date.getTime() - a.date.getTime()),
+        parent: parentTx!,
+        transactions: [...childTxs].sort((a, b) => b.date.getTime() - a.date.getTime()),
         status: calculateLoanStatus(allTxs)
       };
     });

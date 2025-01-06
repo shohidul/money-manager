@@ -9,11 +9,11 @@ import { LoanStatus } from '../../../models/loan.model';
   template: `
     <div class="loan-summary">
       <div class="summary-item card">
-        <span class="label">Total Given</span>
+        <span class="label">Remaining Given Loans</span>
         <span class="amount">{{ totalGiven }}</span>
       </div>
       <div class="summary-item card">
-        <span class="label">Total Taken</span>
+        <span class="label">Remaining Taken Loans</span>
         <span class="amount">{{ totalTaken }}</span>
       </div>
     </div>

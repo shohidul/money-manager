@@ -249,23 +249,27 @@ export class CalculatorSheetComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   onGlobalKeyDown(event: KeyboardEvent) {
+    const activeElement = document.activeElement as HTMLElement;
+    if (activeElement && activeElement.classList.contains('memo-input')) {
+      return;
+    }
+
     // Prevent default if we're handling the key
     const key = event.key;
 
     // Backspace key
     if (key === 'Backspace') {
       event.preventDefault();
-      
       // If amount is 0, remove last character from memo
-      if (this.amount === '0') {
+      // if (this.amount === '0') {
         if (this.memo.length > 0) {
           this.memo = this.memo.slice(0, -1);
           this.onMemoChange(this.memo);
         }
-      } else {
-        // Otherwise, use calculator's backspace
-        this.onKeyPress('⌫');
-      }
+      // } else {
+      //   // Otherwise, use calculator's backspace
+      //   this.onKeyPress('⌫');
+      // }
       return;
     }
 

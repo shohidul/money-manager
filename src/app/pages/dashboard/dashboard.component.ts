@@ -407,13 +407,11 @@ export class DashboardComponent implements OnInit {
   }
 
   getCategoryIcon(categoryId: number): string {
-    const category = this.categories.find((c) => c.id === categoryId);
-    return category?.icon || 'help';
+    return this.getCategory(categoryId)?.icon || 'help';
   }
 
   getCategoryName(categoryId: number): string {
-    const category = this.categories.find((c) => c.id === categoryId);
-    return category?.name || 'Unknown';
+    return this.getCategory(categoryId)?.name || 'Unknown';
   }
 
   getCategory(categoryId: number): Category | null {

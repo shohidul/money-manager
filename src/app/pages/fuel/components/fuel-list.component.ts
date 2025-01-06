@@ -35,7 +35,7 @@ import { TranslateDatePipe } from "../../../components/shared/translate-date.pip
             </span>
             <div class="transaction-details">
               <span class="small-text">
-                {{ transaction.date | translateDate: 'MM/dd E' }}, {{ transaction.date | translateDate: 'shortTime' }}
+                {{ transaction.date | translateDate }}, {{ transaction.date | translateDate: 'shortTime' }}
               </span>
               <span class="small-text">
                 {{ transaction.fuelType === undefined 

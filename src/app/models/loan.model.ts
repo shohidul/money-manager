@@ -15,6 +15,7 @@ export interface LoanStatus {
 export interface LoanGroup {
   parentId?: number;
   personName: string;
+  parent: LoanTransaction;
   transactions: LoanTransaction[];
   status: LoanStatus;
 }

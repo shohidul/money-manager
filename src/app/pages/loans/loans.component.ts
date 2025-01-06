@@ -118,7 +118,7 @@ export class LoansComponent {
         this.loanService.getLoansGiven(startDate, endDate),
         this.loanService.getLoansTaken(startDate, endDate)
       ]);
-
+console.log(givenLoans);
       // Assign grouped loans directly since they're already grouped by the service
       this.givenLoans = givenLoans;
       this.takenLoans = takenLoans;
@@ -146,8 +146,8 @@ export class LoansComponent {
       this.takenLoans = filterByStatus(this.takenLoans);
 
       // Calculate totals
-      this.totalGiven = this.givenLoans.reduce((sum, group) => sum + group.status.totalAmount, 0);
-      this.totalTaken = this.takenLoans.reduce((sum, group) => sum + group.status.totalAmount, 0);
+      this.totalGiven = this.givenLoans.reduce((sum, group) => sum + group.status.remainingAmount, 0);
+      this.totalTaken = this.takenLoans.reduce((sum, group) => sum + group.status.remainingAmount, 0);
     } catch (error) {
       console.error('Error loading loans:', error);
     }

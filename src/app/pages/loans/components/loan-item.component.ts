@@ -1,10 +1,12 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LoanGroup } from '../../../models/loan.model';
 import { LoanService } from '../../../services/loan.service';
 import { TranslatePipe } from '../../../components/shared/translate.pipe';
 import { TranslateDatePipe } from '../../../components/shared/translate-date.pipe';
 import { TranslateNumberPipe } from '../../../components/shared/translate-number.pipe';
+import { CategoryService } from '../../../services/category.service';
+import { Category } from '../../../services/db.service';
 
 interface DueStatus {
   class: string;
@@ -17,9 +19,29 @@ interface DueStatus {
   imports: [CommonModule, TranslatePipe, TranslateDatePipe, TranslateNumberPipe],
   template: `
     @if (group) {
-      <div class="loan-item card" [class.completed]="group.status.isCompleted">
+      <div class="loan-item" [class.completed]="group.status.isCompleted">
+        <div class="parent-transaction-item ">
+          <span class="material-symbols-rounded" [class]="group.parent.type">
+            {{ getCategoryIcon(group.parent.categoryId) }}
+          </span>
+          <div class="parent-transaction-details">
+            <span class="small-text">{{ group.parent.date | translateDate }}, {{ group.parent.date | translateDate: 'shortTime' }}</span>
+            <span class="memo">{{ group.parent.memo ? group.parent.memo : getCategoryName(group.parent.categoryId) | translate }}</span>
+            <span class="small-text">
+              {{ 'loan.dueDate' | translate }}: {{ group.parent.dueDate ? (group.parent.dueDate | translateDate) : 'N/A' }} |
+              {{ 'loan.'+(group.parent.status || 'pending')  | translate  }} 
+            </span>
+          </div>
+          <span class="amount">
+            {{ group.parent.amount | translateNumber:'1.0-2' }}
+          </span>
+        </div>
+
+
+
+
         <div class="loan-header">
-          <div class="person-info">
+          <!-- <div class="person-info">
             <span class="material-symbols-rounded">person</span>
             <div class="person-details">
               <span class="person-name">{{ group.personName }}</span>
@@ -29,48 +51,43 @@ interface DueStatus {
                 </span>
               }
             </div>
-          </div>
+          </div> -->
           <div class="loan-amount">
-            <div class="total">{{ group.status.totalAmount | translateNumber:'1.0-2' }}</div>
-            @if (!group.status.isCompleted) {
-              <div class="remaining">
+            <!-- <div class="total">{{ group.status.totalAmount | translateNumber:'1.0-2' }}</div> -->
+            <!-- @if (!group.status.isCompleted) { -->
+              <!-- <div class="remaining">
                 {{ 'loan.remaining' | translate }}: {{ group.status.remainingAmount | translateNumber:'1.0-2' }}
-              </div>
-            } @else {
+              </div> -->
+            <!-- } @else {
               <div class="completed-tag">{{ 'loan.completed' | translate }}</div>
-            }
+            } -->
           </div>
         </div>
-
+        
+        <div class="transactions">
+          @for (tx of group.transactions; track tx.id) {
+            <div class="transaction" [class.repayment]="tx.parentId">
+              <div class="tx-info">
+                <div class="tx-header">
+                  <span class="date">{{ tx.date | translateDate:'short' }}</span>
+                  <span class="memo">{{ tx.memo }}</span>
+                </div>
+              </div>
+              <span class="" [class.payment]="tx.parentId">
+                {{ tx.parentId ? '+' : '' }}{{ tx.amount | translateNumber:'1.0-2' }}
+              </span>
+            </div>
+          }
+        </div>
+        
         <div class="progress-bar">
           <div 
             class="progress" 
             [style.width.%]="progressPercentage"
           ></div>
         </div>
-
-        <div class="transactions">
-          @for (tx of group.transactions; track tx.id) {
-            <div class="transaction" [class.repayment]="tx.parentId">
-              <div class="tx-info">
-                <div class="tx-header">
-                  @if (tx.parentId) {
-                    <span class="material-symbols-rounded repayment-icon">payments</span>
-                  }
-                  <span class="date">{{ tx.date | translateDate:'short' }}</span>
-                  <span class="memo">{{ tx.memo }}</span>
-                </div>
-                @if (tx.dueDate) {
-                  <span class="due-date">
-                    {{ 'loan.dueDate' | translate }}: {{ tx.dueDate | translateDate }}
-                  </span>
-                }
-              </div>
-              <span class="amount" [class.payment]="tx.parentId">
-                {{ tx.parentId ? '+' : '' }}{{ tx.amount | translateNumber:'1.0-2' }}
-              </span>
-            </div>
-          }
+        <div class="remaining amount">
+          {{ 'loan.remaining' | translate }}: {{ group.status.remainingAmount | translateNumber:'1.0-2' }}
         </div>
       </div>
     }
@@ -78,6 +95,39 @@ interface DueStatus {
   styles: [`
     .loan-item {
       margin-bottom: 1rem;
+      padding: 1rem;
+      background-color: var(--surface-color);
+      box-shadow: 0 2px 4px var(--box-shadow-color-light);
+    }
+    .parent-transaction-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.1rem 1rem 0.8rem 1rem;
+      margin: 0 -1rem;
+      transition: background-color 0.2s;
+      border-bottom: 1px solid var(--background-color);
+      font-size: 0.875rem;
+    }
+
+    .parent-transaction-item:hover {
+      background-color: var(--background-color-hover);
+    }
+
+    .parent-transaction-details {
+      flex: 1;
+    }
+
+    .parent-transaction-details .small-text {
+      display: block;
+      font-size: 0.65rem;
+      color: #999;
+      margin-top: 0.25rem;
+    }
+
+    .memo {
+      display: block;
+      font-weight: 500;
     }
 
     .loan-header {
@@ -131,7 +181,7 @@ interface DueStatus {
 
     .remaining {
       font-size: 0.875rem;
-      color: var(--color-gray-600);
+      text-align: right;
     }
 
     .completed-tag {
@@ -140,15 +190,15 @@ interface DueStatus {
     }
 
     .progress-bar {
-      height: 4px;
-      background-color: var(--color-gray-100);
+      height: 3px;
+      background-color: var(--background-color);
       border-radius: 2px;
-      margin-bottom: 1rem;
+      margin: 1.5rem 0 0.5rem 0;
     }
 
     .progress {
       height: 100%;
-      background-color: var(--color-primary);
+      background-color: #4CAF50;
       border-radius: 2px;
       transition: width 0.3s ease;
     }
@@ -163,11 +213,13 @@ interface DueStatus {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      padding: 0.5rem 1rem;
+      margin: 0 -1rem;
     }
 
-    .transaction.repayment {
-      background-color: var(--color-success-bg);
+    .transaction:hover {
+      background-color: var(--background-color-hover);
     }
 
     .tx-info {
@@ -177,9 +229,9 @@ interface DueStatus {
     }
 
     .tx-header {
-      display: flex;
+      /*display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.5rem;*/
     }
 
     .repayment-icon {
@@ -214,10 +266,15 @@ interface DueStatus {
     }
   `]
 })
-export class LoanItemComponent {
+export class LoanItemComponent implements OnInit {
   @Input() group!: LoanGroup;
+  categories: any[] = [];
 
-  constructor(private loanService: LoanService) {}
+  constructor(private loanService: LoanService, private categoryService: CategoryService,) {}
+
+  async ngOnInit(): Promise<void> {
+    this.categories = await this.categoryService.getAllCategories();
+  }
 
   get dueStatus(): DueStatus | null {
     if (!this.group?.transactions[0]?.dueDate) {
@@ -241,5 +298,18 @@ export class LoanItemComponent {
     if (!this.group) return 0;
     const { totalAmount, paidAmount } = this.group.status;
     return (paidAmount / totalAmount) * 100;
+  }
+
+  getCategoryIcon(categoryId: number): string {
+    return this.getCategory(categoryId)?.icon || 'help';
+  }
+
+  getCategoryName(categoryId: number): string {
+    return this.getCategory(categoryId)?.name || 'Unknown';
+  }
+
+  getCategory(categoryId: number): Category | null {
+    const category = this.categories.find((c) => c.id === categoryId);
+    return category || null;
   }
 }
