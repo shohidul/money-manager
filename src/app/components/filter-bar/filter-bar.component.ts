@@ -2,7 +2,7 @@ import { Component, Input, Output, EventEmitter, OnInit, SimpleChanges } from '@
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FilterOptions } from '../../utils/transaction-filters';
-import { format } from 'date-fns';
+import { endOfDay, format, startOfDay } from 'date-fns';
 import { TranslatePipe } from "../shared/translate.pipe";
 import { Category } from '../../services/db.service';
 
@@ -46,7 +46,7 @@ import { Category } from '../../services/db.service';
     .filter-bar {
       display: flex;
       gap: 1rem;
-      margin-bottom: 1rem;
+      margin-bottom: 0.5rem;
       align-items: center;
       justify-content: space-between;
     }
@@ -130,13 +130,13 @@ export class FilterBarComponent implements OnInit {
 
   onStartDateChange(event: Event) {
     const input = event.target as HTMLInputElement;
-    this.startDate = new Date(input.value);
+    this.startDate = startOfDay(new Date(input.value));
     this.startDateChange.emit(this.startDate);
   }
 
   onEndDateChange(event: Event) {
     const input = event.target as HTMLInputElement;
-    this.endDate = new Date(input.value);
+    this.endDate = endOfDay(new Date(input.value));
     this.endDateChange.emit(this.endDate);
   }
 

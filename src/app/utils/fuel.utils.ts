@@ -7,8 +7,7 @@ import {
 export interface FuelStats {
   mileage: number;
   totalMileageDistance: number;
-  fuelQuantity: number;
-  fuelCost: number;
+  totalFuelCost: number;
   costPerKm: number;
   lastFuelPrice: number;
   lastOdoReading: number;
@@ -35,11 +34,12 @@ export function calculateFuelStats(transactions: Transaction[]): FuelStats {
     .sort((a, b) => a.date.getTime() - b.date.getTime());
 
   let totalMileageDistance = 0;
-  let totalFuel = 0;
-  let totalCost = 0;
+  let totalFuel = 0; // for mileage excluding the first transaction
+  let totalCost = 0; // for costPerKm excluding the first transaction
   let lastFuelPrice = 0;
   let lastOdoReading = 0;
   let totalFuelQuantity = 0;
+  let totalFuelCost = 0;
 
   for (let i = 1; i < fuelTransactions.length; i++) {
     const current = fuelTransactions[i];
@@ -59,17 +59,17 @@ export function calculateFuelStats(transactions: Transaction[]): FuelStats {
     lastFuelPrice = lastTransaction.amount / lastTransaction.fuelQuantity;
     lastOdoReading = lastTransaction.odometerReading;
     totalFuelQuantity = fuelTransactions.reduce((sum, tx) => sum + tx.fuelQuantity, 0);
+    totalFuelCost = fuelTransactions.reduce((sum, tx) => sum + tx.amount, 0);
   }
 
   return {
-    mileage: totalFuel > 0 ? totalMileageDistance / totalFuel : 0,
     totalMileageDistance: totalMileageDistance,
-    fuelQuantity: totalFuel,
-    fuelCost: totalCost,
+    totalFuelQuantity: totalFuelQuantity,
+    lastOdoReading: lastOdoReading,
+    mileage: totalFuel > 0 ? totalMileageDistance / totalFuel : 0,
     costPerKm: totalMileageDistance > 0 ? totalCost / totalMileageDistance : 0,
     lastFuelPrice: lastFuelPrice,
-    lastOdoReading: lastOdoReading,
-    totalFuelQuantity: totalFuelQuantity
+    totalFuelCost: totalFuelCost,
   };
 }
 

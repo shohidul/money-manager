@@ -35,8 +35,8 @@ import { Category, DbService } from '../../../services/db.service';
           <span class="value">{{ stats.mileage | number:'1.1-1' }} km/L</span>
         </div>
         <div class="stat-item">
-          <span class="label">Fuel Cost/km</span>
-          <span class="value">{{ stats.costPerKm | number:'1.2-2' }}/km</span>
+          <span class="label">Fuel Cost</span>
+          <span class="value">{{ stats.totalFuelCost | number:'1.2-2' }}</span>
         </div>
         <div class="stat-item">
           <span class="label">Last Fuel Price</span>
@@ -118,8 +118,7 @@ export class FuelChartsComponent implements OnChanges {
   stats: FuelStats = {
     mileage: 0,
     totalMileageDistance: 0,
-    fuelQuantity: 0,
-    fuelCost: 0,
+    totalFuelCost: 0,
     costPerKm: 0,
     lastFuelPrice: 0,
     lastOdoReading: 0,
