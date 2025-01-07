@@ -117,7 +117,7 @@ import { DOCUMENT } from '@angular/common';
                           ? (parentLoan.dueDate | translateDate) 
                           : 'N/A'
                       }} |
-                      {{ 'loan.'+(parentLoan.status || 'remaining') | translate }}
+                      {{ 'loan.status.'+(parentLoan.status || 'remaining') | translate }}
                     </ng-container>
                   </span>
                 }

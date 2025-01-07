@@ -4,6 +4,8 @@ import { LoanService } from '../../../services/loan.service';
 import { ChartService } from '../../../services/chart.service';
 import { TranslatePipe } from '../../../components/shared/translate.pipe';
 import { TranslateNumberPipe } from '../../../components/shared/translate-number.pipe';
+import { TranslateDatePipe } from '../../../components/shared/translate-date.pipe';
+import { TranslationService } from '../../../services/translation.service';
 
 @Component({
   selector: 'app-loan-charts',
@@ -31,7 +33,24 @@ import { TranslateNumberPipe } from '../../../components/shared/translate-number
             {{ 'loan.stats.activeLoans' | translate }}: {{ activeTakenLoans | translateNumber:'1.0-0' }}
           </div>
         </div>
+
+        <div class="stat-card card">
+          <h4>{{ 'loan.stats.remainingGivenLoans' | translate }}</h4>
+          <div class="stat-value">{{ remainingGiven | translateNumber:'1.0-2' }}</div>
+          <div class="stat-detail">
+            {{ (remainingGivenPercentage | translateNumber:'1.0-0') }}% {{ 'loan.status.remaining' | translate }}
+          </div>
+        </div>
+
+        <div class="stat-card card">
+          <h4>{{ 'loan.stats.remainingTakenLoans' | translate }}</h4>
+          <div class="stat-value">{{ remainingTaken | translateNumber:'1.0-2' }}</div>
+          <div class="stat-detail">
+            {{ (remainingTakenPercentage | translateNumber:'1.0-0') }}% {{ 'loan.status.remaining' | translate }}
+          </div>
+        </div>
       </div>
+
       <div class="chart-container card">
         <h3>{{ 'loan.charts.overview' | translate }}</h3>
         <canvas id="overviewChart"></canvas>
@@ -41,29 +60,19 @@ import { TranslateNumberPipe } from '../../../components/shared/translate-number
         <h3>{{ 'loan.charts.monthlyActivity' | translate }}</h3>
         <canvas id="activityChart"></canvas>
       </div>
+
+      <div class="chart-container card">
+        <h3>{{ 'loan.charts.repaymentTrend' | translate }}</h3>
+        <canvas id="repaymentChart"></canvas>
+      </div>
     </div>
   `,
   styles: [`
-    .chart-container {
-      margin-bottom: 1rem;
-    }
-
-    .chart-container h3 {
-      margin-bottom: 1rem;
-      color: var(--text-secondary);
-      font-size: 1.1rem;
-      font-weight: 500;
-    }
-
-    canvas {
-      width: 100% !important;
-      height: 300px !important;
-    }
-
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 1rem;
+      margin-bottom: 1rem;
     }
 
     .stat-card {
@@ -84,6 +93,23 @@ import { TranslateNumberPipe } from '../../../components/shared/translate-number
       font-size: 0.875rem;
       color: var(--text-secondary);
     }
+
+    .chart-container {
+      margin-bottom: 1rem;
+      position: relative;
+      width: 100%;
+      padding-bottom: 1rem;
+    }
+
+    canvas {
+      max-height: 400px !important; 
+    }
+
+    @media (max-width: 768px) {
+      canvas {
+        max-height: 300px !important;
+      }
+    }
   `]
 })
 export class LoanChartsComponent implements OnInit {
@@ -91,10 +117,15 @@ export class LoanChartsComponent implements OnInit {
   totalTaken = 0;
   activeGivenLoans = 0;
   activeTakenLoans = 0;
+  remainingGiven = 0;
+  remainingTaken = 0;
+  remainingGivenPercentage = 0;
+  remainingTakenPercentage = 0;
 
   constructor(
     private loanService: LoanService,
-    private chartService: ChartService
+    private chartService: ChartService,
+    private translationService: TranslationService
   ) {}
 
   async ngOnInit() {
@@ -110,13 +141,25 @@ export class LoanChartsComponent implements OnInit {
     this.updateStats(givenLoans, takenLoans);
     this.createOverviewChart(givenLoans, takenLoans);
     this.createActivityChart(givenLoans, takenLoans);
+    this.createRepaymentChart(givenLoans, takenLoans);
   }
 
   private updateStats(givenLoans: any[], takenLoans: any[]) {
+    // Total amounts
     this.totalGiven = givenLoans.reduce((sum, loan) => sum + loan.status.totalAmount, 0);
     this.totalTaken = takenLoans.reduce((sum, loan) => sum + loan.status.totalAmount, 0);
+    
+    // Active loans count
     this.activeGivenLoans = givenLoans.filter(loan => !loan.status.isCompleted).length;
     this.activeTakenLoans = takenLoans.filter(loan => !loan.status.isCompleted).length;
+    
+    // Remaining amounts
+    this.remainingGiven = givenLoans.reduce((sum, loan) => sum + loan.status.remainingAmount, 0);
+    this.remainingTaken = takenLoans.reduce((sum, loan) => sum + loan.status.remainingAmount, 0);
+    
+    // Calculate percentages
+    this.remainingGivenPercentage = this.totalGiven ? (this.remainingGiven / this.totalGiven) * 100 : 0;
+    this.remainingTakenPercentage = this.totalTaken ? (this.remainingTaken / this.totalTaken) * 100 : 0;
   }
 
   private createOverviewChart(givenLoans: any[], takenLoans: any[]) {
@@ -131,10 +174,10 @@ export class LoanChartsComponent implements OnInit {
     this.chartService.createDonutChart(
       overviewCanvas.getContext('2d')!,
       [
-        { category: 'Active Given', amount: activeGiven },
-        { category: 'Active Taken', amount: activeTaken }
+        { category: 'loan.stats.remainingGivenLoans', amount: activeGiven },
+        { category: 'loan.stats.remainingTakenLoans', amount: activeTaken }
       ],
-      ['#4caf50', '#f44336']
+      ['#4CAF50', '#f44336']
     );
   }
 
@@ -142,16 +185,33 @@ export class LoanChartsComponent implements OnInit {
     const activityCanvas = document.querySelector('#activityChart') as HTMLCanvasElement;
     if (!activityCanvas) return;
 
-    // Create monthly activity data
+    const tdp = new TranslateDatePipe(this.translationService);
     const monthlyData = this.getMonthlyActivity([...givenLoans, ...takenLoans]);
 
     this.chartService.createLineChart(
       activityCanvas,
       {
-        labels: monthlyData.map(d => d.month),
+        labels: monthlyData.map(d => tdp.transform(new Date(d.month), 'MMM d')),
         values: monthlyData.map(d => d.amount)
       },
-      '#2196f3'
+      '#2196F3'
+    );
+  }
+
+  private createRepaymentChart(givenLoans: any[], takenLoans: any[]) {
+    const repaymentCanvas = document.querySelector('#repaymentChart') as HTMLCanvasElement;
+    if (!repaymentCanvas) return;
+
+    const tdp = new TranslateDatePipe(this.translationService);
+    const repaymentData = this.getRepaymentTrend([...givenLoans, ...takenLoans]);
+
+    this.chartService.createLineChart(
+      repaymentCanvas,
+      {
+        labels: repaymentData.map(d => tdp.transform(new Date(d.date), 'MMM d')),
+        values: repaymentData.map(d => d.amount)
+      },
+      '#FF9800'
     );
   }
 
@@ -168,5 +228,22 @@ export class LoanChartsComponent implements OnInit {
     return Array.from(monthlyMap.entries())
       .map(([month, amount]) => ({ month, amount }))
       .sort((a, b) => a.month.localeCompare(b.month));
+  }
+
+  private getRepaymentTrend(loans: any[]) {
+    const repayments: { date: string; amount: number }[] = [];
+
+    loans.forEach(loan => {
+      loan.transactions
+        .filter((tx: any) => tx.subType === 'repaid')
+        .forEach((tx: any) => {
+          repayments.push({
+            date: tx.date.toISOString().slice(0, 10),
+            amount: tx.amount
+          });
+        });
+    });
+
+    return repayments.sort((a, b) => a.date.localeCompare(b.date));
   }
 }

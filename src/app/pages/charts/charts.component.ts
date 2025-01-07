@@ -155,7 +155,7 @@ type ChartType = 'all' | 'income' | 'expense';
                                 {{ tx.personName || ('common.noName' | translate) }} | 
                                 {{ tx.memo || ('common.noMemo' | translate) }} 
                                 {{ 'charts.dueDate' | translate }}: {{ tx.dueDate ? (tx.dueDate | translateDate) : 'N/A' }} |
-                                {{ 'loan.'+(tx.status || 'remaining')  | translate  }} 
+                                {{ 'loan.status.'+(tx.status || 'remaining')  | translate  }} 
                               </span>
                             }
 
@@ -171,7 +171,7 @@ type ChartType = 'all' | 'income' | 'expense';
                                       ? (parentLoan.dueDate | translateDate) 
                                       : 'N/A'
                                   }} |
-                                  {{ 'loan.'+(parentLoan.status || 'remaining') | translate }}
+                                  {{ 'loan.status.'+(parentLoan.status || 'remaining') | translate }}
                                 </ng-container>
                               </span>
                             }
@@ -268,18 +268,23 @@ type ChartType = 'all' | 'income' | 'expense';
 
   .chart-wrapper {
     flex: 1;
-    max-width: 300px;
-    height: 300px;
+    max-width: 35%;
+    // max-height: 300px;
+    padding: 1rem;
   }
 
   @media (max-width: 768px) {
     .chart-container {
-      flex-direction: column;
+      flex-direction: row;
       align-items: normal;
     }
 
     .chart-wrapper {
-      max-width: none;
+      max-width: 35%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem;
     }
   }
 
@@ -288,6 +293,7 @@ type ChartType = 'all' | 'income' | 'expense';
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    min-width: 280px;
   }
 
   .legend-item {
@@ -326,6 +332,32 @@ type ChartType = 'all' | 'income' | 'expense';
     min-width: 48px;
     text-align: right;
     font-weight: 500;
+  }
+
+  @media (max-width: 768px) {
+    .legend {
+      justify-content: center;
+      min-width: 175px;
+    }
+
+    .legend-item {
+      padding: 0;
+    }
+
+    .legend-color {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+    }
+
+    .category-name,
+    .percentage {
+      font-size: 0.675rem;
+    }
+
+    .category-name .material-symbols-rounded {
+      display: none;
+    }
   }
 
   .category-details {
@@ -566,7 +598,7 @@ export class ChartsComponent implements OnInit, AfterViewInit {
 
     this.chartService.createDonutChart(
       ctx,
-      this.categoryStats,
+      this.categoryStats.slice(0, 5),
       this.categoryStats.map((stat) => stat.color)
     );
   }

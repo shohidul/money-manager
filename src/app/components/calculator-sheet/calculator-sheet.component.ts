@@ -30,6 +30,7 @@ import { TranslateNumberPipe } from '../shared/translate-number.pipe';
       @if (showDatePicker) {
         <div class="date-picker">
           <input 
+            class="date-input"
             type="datetime-local" 
             [ngModel]="selectedDate | date:'yyyy-MM-ddTHH:mm:ss'"
             (ngModelChange)="onDateChange($event)"
@@ -253,7 +254,7 @@ export class CalculatorSheetComponent implements OnInit, OnDestroy, OnChanges {
 
   onGlobalKeyDown(event: KeyboardEvent) {
     const activeElement = document.activeElement as HTMLElement;
-    if (activeElement && activeElement.classList.contains('memo-input')) {
+    if (activeElement && activeElement.classList.contains('memo-input') || activeElement.classList.contains('date-input')) {
       return;
     }
 
@@ -470,7 +471,7 @@ private handleDecimalPoint() {
       : event;
     
     this.selectedDate = dateValue;
-    this.showDatePicker = false;
+    // this.showDatePicker = false;
 
     const dateInput = document.querySelector(
       '.date-picker'

@@ -398,7 +398,8 @@
     "borrowedFrom": "ঋণ দিয়েছে",
     "charts": {
       "overview": "ঋণ সংক্ষিপ্ত বিবরণ",
-      "monthlyActivity": "মাসিক ঋণ কার্যক্রম"
+      "monthlyActivity": "মাসিক ঋণ কার্যক্রম",
+      "repaymentTrend": "পরিশোধ চক্র"
     },
     "stats": {
       "totalGiven": "মোট ঋণ দেওয়া",

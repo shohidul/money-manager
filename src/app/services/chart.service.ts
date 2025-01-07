@@ -19,75 +19,93 @@ export class ChartService {
     );
   }
 
-  createDonutChart(ctx: CanvasRenderingContext2D, data: any[], colors: string[]) {
-    const existingChart = Chart.getChart(ctx);
-    if (existingChart) {
-      existingChart.destroy();
-    }
 
-    const chart = new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: data.map(item => item.category),
-        datasets: [{
-          data: data.map(item => item.amount),
-          backgroundColor: colors,
-          borderWidth: 0
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: false
-          }
-        },
-        cutout: '70%'
-      }
-    });
-
-    return chart;
+createDonutChart(ctx: CanvasRenderingContext2D, data: any[], colors: string[]) {
+  const existingChart = Chart.getChart(ctx);
+  if (existingChart) {
+    existingChart.destroy();
   }
 
-  createLineChart(ctx: HTMLCanvasElement, data: any, color: string) {
-    const existingChart = this.charts.get(ctx.id);
-    if (existingChart) {
-      existingChart.destroy();
-    }
-
-    const chart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: data.labels,
-        datasets: [{
-          label: 'Amount',
-          data: data.values,
-          borderColor: color,
-          tension: 0.4,
-          fill: false
-        }]
+  const chart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: data.map(item => item.category),
+      datasets: [{
+        data: data.map(item => item.amount),
+        backgroundColor: colors,
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      aspectRatio: 1, // This ensures circular shape
+      plugins: {
+        legend: {
+          display: false
+        }
       },
-      options: {
-        responsive: true,
-        locale: this.translationService.getCurrentLanguage(),
-        maintainAspectRatio: true,
-        plugins: {
-          legend: {
-            display: false
+      cutout: '70%'
+    }
+  });
+
+  return chart;
+}
+
+createLineChart(ctx: HTMLCanvasElement, data: any, color: string) {
+  const existingChart = this.charts.get(ctx.id);
+  if (existingChart) {
+    existingChart.destroy();
+  }
+
+  const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: data.labels,
+      datasets: [{
+        label: 'Amount',
+        data: data.values,
+        borderColor: color,
+        tension: 0.4,
+        fill: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      aspectRatio: 2,
+      locale: this.translationService.getCurrentLanguage(),
+      plugins: {
+        legend: {
+          display: false
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            font: {
+              size: 11 // Smaller font size for better responsiveness
+            }
           }
         },
-        scales: {
-          y: {
-            beginAtZero: true
+        x: {
+          ticks: {
+            font: {
+              size: 11
+            },
+            maxRotation: 45, // Angle the labels to prevent overlap
+            minRotation: 0
           }
         }
       }
-    });
+    }
+  });
 
-    this.charts.set(ctx.id, chart);
-    return chart;
-  }
+  this.charts.set(ctx.id, chart);
+  return chart;
+}
+
 
   destroyChart(chartId: string) {
     const chart = this.charts.get(chartId);
