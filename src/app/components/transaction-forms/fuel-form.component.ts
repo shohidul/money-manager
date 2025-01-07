@@ -23,7 +23,6 @@ import { TranslationService } from '../../services/translation.service';
           placeholder="{{ '00.0' | translateNumber }}"
         />
       </div>
-      
       <div class="form-group">
         <label for="fuelQuantity">{{ 'fuel.fuelQuantity' | translate }}</label>
         <input
@@ -86,6 +85,7 @@ export class FuelFormComponent {
   }
 
   getOdometerReading(): string {
+    this.transaction.odometerReading = this.transaction.odometerReading || 0;
     return this.transaction.odometerReading.toString() || '';
   }
 
@@ -104,6 +104,7 @@ export class FuelFormComponent {
   }
 
   getFuelQuantity(): string {
+    this.transaction.fuelQuantity = this.transaction.fuelQuantity || 0;
     return this.transaction.fuelQuantity.toString() || '';
   }
 

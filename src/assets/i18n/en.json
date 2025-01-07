@@ -361,7 +361,33 @@
   "asset": {
     "name": "Asset Name",
     "transactionDate": "Transaction Date",
-    "currentValue": "Current Value"
+    "currentValue": "Current Value",
+    "quantity": "Quantity",
+    "measurementUnit": "Measurement Unit",
+    "units": {
+      "gram": "Gram",
+      "kg": "Kilogram",
+      "ton": "Ton",
+      "carats": "Carats",
+      "tola": "Tola",
+      "ounce": "Ounce",
+      "acre": "Acre",
+      "hectare": "Hectare",
+      "squareMeter": "Square Meter",
+      "sqft": "Square Foot",
+      "sqyd": "Square Yard",
+      "plot": "Plot",
+      "katha": "Katha",
+      "bigha": "Bigha",
+      "shares": "Shares",      
+      "piece": "Piece",
+      "unit": "Unit",
+      "liters": "Liters",
+      "ml": "Milliliters",
+      "gallon": "Gallon",
+      "meter": "Meter",
+      "barrel": "Barrel"
+    }
   },
   "loan": {
     "parentLoan": "Parent Loan",

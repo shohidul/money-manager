@@ -144,7 +144,8 @@ type ChartType = 'all' | 'income' | 'expense';
                           @if (isAdvancedMode) {
                             @if (isAssetTransaction(tx)) {
                               <span class="small-text">
-                                {{ tx.assetName || ('common.noName' | translate) }} |
+                                {{ tx.assetName || ('common.noName' | translate) }} 
+                                {{ tx.quantity | translateNumber:'1.0-3' }} {{ tx.measurementUnit | translate }} |
                                 {{ tx.memo || ('common.noMemo' | translate) }} 
                               </span>
                             }

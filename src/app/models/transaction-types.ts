@@ -23,7 +23,8 @@ export interface LoanTransactionBase extends BaseTransaction {
 export interface AssetTransaction extends BaseTransaction {
   assetName: string;
   transactionDate: Date;  // Date of purchase or sale
-  currentValue: number;
+  quantity: number;
+  measurementUnit: string;
 }
 
 export interface FuelTransaction extends BaseTransaction {

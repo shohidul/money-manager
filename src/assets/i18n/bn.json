@@ -361,7 +361,33 @@
   "asset": {
     "name": "সম্পদের নাম",
     "transactionDate": "লেনদেনের তারিখ",
-    "currentValue": "বর্তমান মূল্য"
+    "currentValue": "বর্তমান মূল্য",
+    "quantity": "পরিমাণ",
+    "measurementUnit": "পরিমাপের একক",
+    "units": {
+      "gram": "গ্রাম",
+      "kg": "কিলোগ্রাম",
+      "ton": "টন",
+      "carats": "ক্যারেট",
+      "tola": "তোলা",
+      "ounce": "আউন্স",
+      "acre": "একর",
+      "hectare": "হেক্টর",
+      "squareMeter": "বর্গ মিটার",
+      "sqft": "বর্গফুট",
+      "sqyd": "বর্গগজ",
+      "plot": "প্লট",
+      "katha": "কাঠা",
+      "bigha": "বিঘা",
+      "shares": "শেয়ার",
+      "piece": "টুকরা",
+      "unit": "ইউনিট",
+      "liters": "লিটার",
+      "ml": "মিলিলিটার",
+      "gallon": "গ্যালন",
+      "meter": "মিটার",
+      "barrel": "ব্যারেল"
+    }
   },
   "loan": {
     "parentLoan": "মূল ঋণ",
