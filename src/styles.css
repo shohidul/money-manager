@@ -89,7 +89,10 @@ body {
 }
 
 button {
+  all: unset;
   line-height: inherit;
+  box-sizing: border-box;
+  color: var(--text-primary);
 }
 
 .card {

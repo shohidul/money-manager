@@ -169,7 +169,7 @@ import { DOCUMENT } from '@angular/common';
     justify-content: space-between;
     margin-bottom: 1rem;
     position: sticky;
-    top: -16px;
+    top: 0;
     z-index: 100;
   }
 
