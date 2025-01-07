@@ -3,35 +3,37 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '../shared/translate.pipe';
 import { FuelTransaction } from '../../models/transaction-types';
+import { TranslateNumberPipe } from "../shared/translate-number.pipe";
+import { TranslationService } from '../../services/translation.service';
 
 @Component({
   selector: 'app-fuel-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe],
+  imports: [CommonModule, FormsModule, TranslatePipe, TranslateNumberPipe],
   template: `
     <div class="form-fields">
       <div class="form-group">
         <label for="odometerReading">{{ 'fuel.odometerReading' | translate }}</label>
         <input
-          type="number"
           id="odometerReading"
-          [(ngModel)]="transaction.odometerReading"
-          (ngModelChange)="onChange()"
+          type="text"
           class="form-input"
-          required
-        >
+          [ngModel]="getOdometerReading() | translateNumber"
+          (input)="onOdometerReadingInput($event)"
+          placeholder="{{ '00.0' | translateNumber }}"
+        />
       </div>
       
       <div class="form-group">
         <label for="fuelQuantity">{{ 'fuel.fuelQuantity' | translate }}</label>
         <input
-          type="number"
           id="fuelQuantity"
-          [(ngModel)]="transaction.fuelQuantity"
-          (ngModelChange)="onChange()"
+          type="text"
           class="form-input"
-          required
-        >
+          [ngModel]="getFuelQuantity() | translateNumber"
+          (input)="onFuelQuantityInput($event)"
+          placeholder="{{ '00.0' | translateNumber }}"
+        />
       </div>
 
       <div class="form-group">
@@ -77,7 +79,45 @@ export class FuelFormComponent {
   @Input() transaction!: FuelTransaction;
   @Output() transactionChange = new EventEmitter<FuelTransaction>();
 
+  constructor(private translationService: TranslationService) {}
+
   onChange() {
+    this.transactionChange.emit(this.transaction);
+  }
+
+  getOdometerReading(): string {
+    return this.transaction.odometerReading.toString() || '';
+  }
+
+  onOdometerReadingInput(event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    const rawInput = inputElement?.value || '';
+  
+    // Remove commas to make it a parseable string
+    const parseableString = rawInput.replace(/,/g, '');
+  
+    // Convert to english numbers before saving
+    const result = new TranslateNumberPipe(this.translationService).transformByLocale(parseableString, 'en');
+  
+    this.transaction.odometerReading = parseFloat(result) || 0;
+    this.transactionChange.emit(this.transaction);
+  }
+
+  getFuelQuantity(): string {
+    return this.transaction.fuelQuantity.toString() || '';
+  }
+
+  onFuelQuantityInput(event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    const rawInput = inputElement?.value || '';
+  
+    // Remove commas to make it a parseable string
+    const parseableString = rawInput.replace(/,/g, '');
+  
+    // Convert to english numbers before saving
+    const result = new TranslateNumberPipe(this.translationService).transformByLocale(parseableString, 'en');
+  
+    this.transaction.fuelQuantity = parseFloat(result) || 0;
     this.transactionChange.emit(this.transaction);
   }
 }
