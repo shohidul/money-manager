@@ -13,6 +13,7 @@
     "required": "Required",
     "add": "Add",
     "noMemo": "No memo",
+    "noName": "Unnamed",
     "total": "Total"
   },
   "calculator": {

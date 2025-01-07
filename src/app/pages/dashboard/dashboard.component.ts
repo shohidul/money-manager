@@ -85,27 +85,30 @@ import { DOCUMENT } from '@angular/common';
               </span>
               <div class="transaction-details">
                 <span class="small-text">{{ tx.date | translateDate: 'shortTime' }}</span>
-                <span class="memo">{{ tx.memo ? tx.memo : getCategoryName(tx.categoryId) | translate }}</span>
+                <span class="memo">{{ getCategoryName(tx.categoryId) | translate }}</span>
 
               @if (isAdvancedMode) {
                 @if (isAssetTransaction(tx)) {
                   <span class="small-text">
-                    {{ tx.assetName || 'N/A' }}
+                    {{ tx.assetName || ('common.noName' | translate) }} |
+                    {{ tx.memo || ('common.noMemo' | translate) }} 
                   </span>
                 }
 
-                @if (isLoanTransaction(tx)) {
+                @else if (isLoanTransaction(tx)) {
                   <span class="small-text">
-                    {{ tx.personName || 'Unnamed' }} | 
+                    {{ tx.personName || ('common.noName' | translate) }} | 
+                    {{ tx.memo || ('common.noMemo' | translate) }} |
                     {{ 'loan.dueDate' | translate }}: {{ tx.dueDate ? (tx.dueDate | translateDate) : 'N/A' }} |
                     {{ 'loan.'+(tx.status || 'pending')  | translate  }} 
                   </span>
                 }
 
-                @if (isRepaidTransaction(tx)) {
+                @else if (isRepaidTransaction(tx)) {
                   <span class="small-text">
                     <ng-container *ngIf="getParentLoan(tx.parentId) as parentLoan">
-                      {{ (tx.type === 'income' ? 'loan.lentTo' : 'loan.borrowedFrom') | translate }} {{ parentLoan?.personName ?? 'Unnamed' }} | 
+                      {{ (tx.type === 'income' ? 'loan.lentTo' : 'loan.borrowedFrom') | translate }} {{ parentLoan?.personName ?? ('common.noName' | translate) }} | 
+                      {{ tx.memo || ('common.noMemo' | translate) }} |
                       {{ parentLoan?.amount ?? 0 | translateNumber }} | 
                       {{ 'loan.dueDate' | translate }}: 
                       {{
@@ -118,19 +121,35 @@ import { DOCUMENT } from '@angular/common';
                   </span>
                 }
 
-                @if (isFuelTransaction(tx)) {
+                @else if (isFuelTransaction(tx)) {
                   <span class="small-text">
                     {{ tx.fuelType === undefined 
                       ? ('categories.subTypes.fuel' | translate) 
                       : ('fuel.types.' + tx.fuelType | lowercase | translate) }}
                     {{ tx.fuelQuantity || 0 | translateNumber:'1.1-1' }} {{ 'fuel.L' | translate }} | 
-                    {{ 'fuel.odo' | translate }} {{ (tx.odometerReading || 0) | translateNumber:'1.0-0' }} {{ 'fuel.km' | translate }} | 
-                    {{ 'fuel.mileage' | translate }} {{ (getMileage(tx) || 0) | translateNumber:'1.1-1' }} {{ 'fuel.kmPerLiter' | translate }} |
-                    {{ 'fuel.price' | translate }} {{ tx.amount / tx.fuelQuantity || 0 | translateNumber:'1.1-1' }}  
+                    {{ (tx.odometerReading || 0) | translateNumber:'1.0-0' }} {{ 'fuel.km' | translate }} | 
+                    {{ (getMileage(tx) || 0) | translateNumber:'1.1-1' }} {{ 'fuel.kmPerLiter' | translate }} |
+                    {{ tx.amount / tx.fuelQuantity || 0 | translateNumber:'1.1-1' }}/- |
+                    {{ tx.memo || ('common.noMemo' | translate) }}
+                  </span>
+                }
+
+                @else {
+                  @if(tx.memo) {
+                    <span class="small-text">
+                      {{ tx.memo || ('common.noMemo' | translate) }}
+                    </span>
+                  }
+                }
+              }
+              @else {
+                @if(tx.memo) {
+                  <span class="small-text">
+                    {{ tx.memo || ('common.noMemo' | translate) }}
                   </span>
                 }
               }
-              </div>
+            </div>
               <span class="amount">
                 {{ tx.type === 'income' ? '' : '-' }}{{ tx.amount | translateNumber:'1.0-2' }}
               </span>

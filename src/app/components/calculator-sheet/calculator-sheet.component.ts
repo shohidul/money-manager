@@ -42,15 +42,17 @@ import { TranslateNumberPipe } from '../shared/translate-number.pipe';
         <div class="sheet-body">
           <div class="keypad-number">
             @for (key of numericKeys; track key) {
-              <button (click)="onKeyPress(key)" class="key">{{ key | translateNumber }}</button>
+              <button (click)="onKeyPress(key)" 
+              class="key key{{key === '.' ? 'dot' : key}}" 
+              >{{ key | translateNumber }}</button>
             }
           </div>
           <div class="keypad-function">
             <button (click)="onKeyPress('date')" class="key" style="padding: .9rem;">
               <span [innerHTML]="formattedDateIcon"></span>
             </button>
-            <button (click)="onKeyPress('+')" class="key operator-key">+</button>
-            <button (click)="onKeyPress('-')" class="key operator-key">−</button>
+            <button (click)="onKeyPress('+')" class="key operator-key plus-key">+</button>
+            <button (click)="onKeyPress('-')" class="key operator-key minus-key">−</button>
             <button (click)="onKeyPress('=')" class="key equals-key">
               <span class="material-symbols-rounded">{{ isCalculating ? '=' : 'check_circle' }}</span>
             </button>
@@ -224,6 +226,7 @@ export class CalculatorSheetComponent implements OnInit, OnDestroy, OnChanges {
   today = new Date();
 
   private _memoizedDateIcon: { date: Date; html: SafeHtml } | null = null;
+  isTypingMemo = false;
 
   constructor(
     private domSanitizer: DomSanitizer,
@@ -260,38 +263,56 @@ export class CalculatorSheetComponent implements OnInit, OnDestroy, OnChanges {
     // Backspace key
     if (key === 'Backspace') {
       event.preventDefault();
-      // If amount is 0, remove last character from memo
-      // if (this.amount === '0') {
-        if (this.memo.length > 0) {
-          this.memo = this.memo.slice(0, -1);
-          this.onMemoChange(this.memo);
-        }
-      // } else {
-      //   // Otherwise, use calculator's backspace
-      //   this.onKeyPress('⌫');
-      // }
+      // If amount is 0 or typing memo, remove last character from memo
+      if (this.isTypingMemo && this.memo.length > 0 || this.amount === '0') {
+        this.memo = this.memo.slice(0, -1);
+        this.onMemoChange(this.memo);
+      } else {
+        // Otherwise, use calculator's backspace
+        this.triggerClick('key⌫');
+      }
       return;
     }
 
     // Numeric and operator keys
     if (/^[0-9+\-.]$/.test(key)) {
       event.preventDefault();
-      this.onKeyPress(key);
+      this.triggerClick(key);
       return;
     }
 
     // Enter key acts like '='
-    if (key === 'Enter') {
+    if (key === 'Enter' || key === '=') {
       event.preventDefault();
-      this.onKeyPress('=');
+      this.triggerClick('equals-key');
       return;
     }
 
     // If it's a letter, assume it's for memo
     if (/^[a-zA-Z\s]$/.test(key)) {
+      event.preventDefault();
       // Focus on memo input or update memo
-      this.onMemoChange(this.memo + key);
+      this.onMemoChange(this.memo += key);
     }
+  }
+
+  private triggerClick(key: string) {
+    let className = '';
+    if(key === '+'){
+      className = 'plus-key';
+    }else if(key === '-'){
+      className = 'minus-key';
+    }else if(key === '.'){
+      className = 'keydot';
+    }else if(key === 'equals-key'){
+      className = 'equals-key';
+    }else if(key === 'key⌫'){
+      className = 'key⌫';
+    }else{
+      className = 'key'+key;
+    }
+    const buttonElement = document.querySelector('.'+className) as HTMLButtonElement;
+    buttonElement.click();
   }
 
   private resetCalculator() {
@@ -330,6 +351,8 @@ export class CalculatorSheetComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   onKeyPress(key: string) {
+    this.isTypingMemo = false;
+
     try {
       const MAX_DIGITS = 8;
       const numericPart = this.amount.replace(/[^0-9]/g, '');
@@ -386,16 +409,26 @@ export class CalculatorSheetComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
-  private handleDecimalPoint() {
-    const lastOperatorIndex = Math.max(
-      this.amount.lastIndexOf('+'),
-      this.amount.lastIndexOf('-')
-    );
+private handleDecimalPoint() {
+  const lastOperatorIndex = Math.max(
+    this.amount.lastIndexOf('+'),
+    this.amount.lastIndexOf('-')
+  );
+
+  // If an operator exists
+  if (lastOperatorIndex !== -1) {
+    if (!this.amount.includes('.')) {
+      // Add '0.' after the operator
+      this.amount += '0.';
+    }
+  } else {
+    // If no operator exists, check the current segment
     const afterOperator = this.amount.slice(lastOperatorIndex + 1);
     if (!afterOperator.includes('.')) {
       this.amount += '.';
     }
   }
+}
 
   private handleEquals() {
     if (this.amount === '0') {
@@ -425,6 +458,8 @@ export class CalculatorSheetComponent implements OnInit, OnDestroy, OnChanges {
       this.operator = '';
     } else {
       this.amountChange.emit(Number(this.amount.replace(/[^0-9.]/g, '')));
+      this.memoChange.emit(this.memo);
+      this.dateChange.emit(this.selectedDate);
       this.save.emit();
     }
   }
@@ -435,11 +470,19 @@ export class CalculatorSheetComponent implements OnInit, OnDestroy, OnChanges {
       : event;
     
     this.selectedDate = dateValue;
-    this.dateChange.emit(this.selectedDate);
     this.showDatePicker = false;
+
+    const dateInput = document.querySelector(
+      '.date-picker'
+    ) as HTMLInputElement;
+    dateInput.value = this.selectedDate.toISOString();
   }
 
   onMemoChange(value: string) {
-    this.memoChange.emit(value);
+    const memoInput = document.querySelector(
+      '.memo-input'
+    ) as HTMLInputElement;
+    memoInput.value = value;
+    this.isTypingMemo = true;
   }
 }

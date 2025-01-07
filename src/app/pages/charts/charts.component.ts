@@ -20,6 +20,7 @@ import {
   isLoanTransaction,
   isAssetTransaction,
   FuelTransaction,
+  isRepaidTransaction,
 } from '../../models/transaction-types';
 import { calculateMileage } from '../../utils/fuel.utils';
 import { TranslatePipe } from '../../components/shared/translate.pipe';
@@ -27,6 +28,8 @@ import { TranslateDatePipe } from "../../components/shared/translate-date.pipe";
 import { TranslateNumberPipe } from "../../components/shared/translate-number.pipe";
 import { FeatureFlagService } from '../../services/feature-flag.service';
 import { TranslationService } from '../../services/translation.service';
+import { LoanTransaction } from '../../models/loan.model';
+import { LoanService } from '../../services/loan.service';
 
 type ChartType = 'all' | 'income' | 'expense';
 
@@ -135,31 +138,67 @@ type ChartType = 'all' | 'income' | 'expense';
                         <div class="transaction-details">
                           <span class="small-text">{{ tx.date | translateDate: 'short' }}</span>
                           <span class="memo">
-                            {{ tx.memo ? tx.memo : (stat.category | translate) }}
+                            {{ (stat.category | translate) }}
                             <span class="percentage text-sm ml-4 text-muted">{{ (tx.amount / stat.amount) * 100 | translateNumber:'1.1-1' }}%</span>
                           </span>
                           @if (isAdvancedMode) {
                             @if (isAssetTransaction(tx)) {
                               <span class="small-text">
-                                {{ tx.assetName || 'N/A' }}
+                                {{ tx.assetName || ('common.noName' | translate) }} |
+                                {{ tx.memo || ('common.noMemo' | translate) }} 
                               </span>
                             }
 
-                            @if (isLoanTransaction(tx)) {
+                            @else if (isLoanTransaction(tx)) {
                               <span class="small-text">
-                                {{ tx.personName || 'Unnamed' }} | {{ 'charts.dueDate' | translate }}: {{ tx.dueDate ? (tx.dueDate | translateDate) : 'N/A' }}
+                                {{ tx.personName || ('common.noName' | translate) }} | 
+                                {{ tx.memo || ('common.noMemo' | translate) }} 
+                                {{ 'charts.dueDate' | translate }}: {{ tx.dueDate ? (tx.dueDate | translateDate) : 'N/A' }} |
+                                {{ 'loan.'+(tx.status || 'pending')  | translate  }} 
                               </span>
                             }
 
-                            @if (isFuelTransaction(tx)) {
+                            @else if (isRepaidTransaction(tx)) {
+                              <span class="small-text">
+                                <ng-container *ngIf="getParentLoan(tx.parentId) as parentLoan">
+                                  {{ (tx.type === 'income' ? 'loan.lentTo' : 'loan.borrowedFrom') | translate }} {{ parentLoan?.personName ?? ('common.noName' | translate) }} | 
+                                  {{ tx.memo || ('common.noMemo' | translate) }} |
+                                  {{ parentLoan?.amount ?? 0 | translateNumber }} | 
+                                  {{ 'loan.dueDate' | translate }}: 
+                                  {{
+                                    parentLoan.dueDate 
+                                      ? (parentLoan.dueDate | translateDate) 
+                                      : 'N/A'
+                                  }} |
+                                  {{ 'loan.'+(parentLoan.status || 'pending') | translate }}
+                                </ng-container>
+                              </span>
+                            }
+
+                            @else if (isFuelTransaction(tx)) {
                               <span class="small-text">
                                 {{ tx.fuelType === undefined
                                   ? ('categories.subTypes.fuel' | translate)
                                   : ('fuel.types.' + tx.fuelType | lowercase | translate) }}
                                 {{ tx.fuelQuantity || 0 | translateNumber:'1.1-1' }} {{ 'fuel.L' | translate }} | 
-                                {{ 'fuel.odo' | translate }} {{ tx.odometerReading || 0 | translateNumber:'1.0-0' }} {{ 'fuel.km' | translate }} | 
-                                {{ 'fuel.mileage' | translate }} {{ getMileage(tx) || 0 | translateNumber:'1.1-1' }} {{ 'fuel.kmPerLiter' | translate }} |
-                                {{ 'fuel.price' | translate }} {{ tx.amount / tx.fuelQuantity || 0 | translateNumber:'1.1-1' }}   
+                                {{ tx.odometerReading || 0 | translateNumber:'1.0-0' }} {{ 'fuel.km' | translate }} | 
+                                {{ getMileage(tx) || 0 | translateNumber:'1.1-1' }} {{ 'fuel.kmPerLiter' | translate }} |
+                                {{ tx.amount / tx.fuelQuantity || 0 | translateNumber:'1.1-1' }}/- | 
+                                {{ tx.memo || ('common.noMemo' | translate) }}
+                              </span>
+                            }
+                            @else {
+                              @if(tx.memo) {
+                                <span class="small-text">
+                                  {{ tx.memo || ('common.noMemo' | translate) }}
+                                </span>
+                              }
+                            }
+                          }
+                          @else {
+                            @if(tx.memo) {
+                              <span class="small-text">
+                                {{ tx.memo || ('common.noMemo' | translate) }}
                               </span>
                             }
                           }
@@ -354,7 +393,7 @@ type ChartType = 'all' | 'income' | 'expense';
 
   .progress-bar {
     height: 100%;
-    background: #4CAF50;
+    background: var(--text-success);
     transition: width 0.3s ease;
   }
   
@@ -382,8 +421,10 @@ export class ChartsComponent implements OnInit, AfterViewInit {
 
   isFuelTransaction = isFuelTransaction;
   isLoanTransaction = isLoanTransaction;
+  isRepaidTransaction = isRepaidTransaction;
   isAssetTransaction = isAssetTransaction;
   calculateMileage = calculateMileage;
+  parentLoanTransactions: LoanTransaction[] = [];
 
   currentMonth = format(new Date(), 'yyyy-MM');
   selectedType: ChartType = 'all';
@@ -417,6 +458,7 @@ export class ChartsComponent implements OnInit, AfterViewInit {
     private chartService: ChartService,
     private router: Router,
     private cdr: ChangeDetectorRef,
+    private loanService: LoanService, 
     private featureFlagService: FeatureFlagService,
     private translationService: TranslationService
   ) {}
@@ -428,10 +470,28 @@ export class ChartsComponent implements OnInit, AfterViewInit {
 
     await this.loadData();
     await this.loadCategoryBudgets();
+
+    this.parentLoanTransactions = await this.loanService.getLoanTransactions();
   }
 
   ngAfterViewInit() {
     this.createDonutChart();
+  }
+
+  getParentLoan(id: number | undefined): LoanTransaction | null {
+    try {
+      const transactions = this.parentLoanTransactions;
+      const parentLoan = transactions.find(tx => tx.id === id);
+      
+      if (!parentLoan) {
+        return null;
+      }
+      
+      return parentLoan;
+    } catch (error) {
+      console.error('Error fetching parent loan:', error);
+      throw error;
+    }
   }
 
   async loadData() {

@@ -20,14 +20,16 @@ interface DueStatus {
   template: `
     @if (group) {
       <div class="loan-item" [class.completed]="group.status.isCompleted">
-        <div class="parent-transaction-item ">
+        <div class="transaction-item ">
           <span class="material-symbols-rounded" [class]="group.parent.type">
             {{ getCategoryIcon(group.parent.categoryId) }}
           </span>
-          <div class="parent-transaction-details">
+          <div class="transaction-details">
             <span class="small-text">{{ group.parent.date | translateDate }}, {{ group.parent.date | translateDate: 'shortTime' }}</span>
-            <span class="memo">{{ group.parent.memo ? group.parent.memo : getCategoryName(group.parent.categoryId) | translate }}</span>
+            <span class="memo">{{ getCategoryName(group.parent.categoryId) | translate }}</span>
             <span class="small-text">
+              {{ group.parent.personName || ('common.noName' | translate) }} | 
+              {{ group.parent.memo || ('common.noMemo' | translate) }} |
               {{ 'loan.dueDate' | translate }}: {{ group.parent.dueDate ? (group.parent.dueDate | translateDate) : 'N/A' }} |
               {{ 'loan.'+(group.parent.status || 'pending')  | translate  }} 
             </span>
@@ -36,45 +38,22 @@ interface DueStatus {
             {{ group.parent.amount | translateNumber:'1.0-2' }}
           </span>
         </div>
-
-
-
-
-        <div class="loan-header">
-          <!-- <div class="person-info">
-            <span class="material-symbols-rounded">person</span>
-            <div class="person-details">
-              <span class="person-name">{{ group.personName }}</span>
-              @if (dueStatus) {
-                <span class="due-tag" [class]="dueStatus.class">
-                  {{ dueStatus.text | translate }}
-                </span>
-              }
-            </div>
-          </div> -->
-          <div class="loan-amount">
-            <!-- <div class="total">{{ group.status.totalAmount | translateNumber:'1.0-2' }}</div> -->
-            <!-- @if (!group.status.isCompleted) { -->
-              <!-- <div class="remaining">
-                {{ 'loan.remaining' | translate }}: {{ group.status.remainingAmount | translateNumber:'1.0-2' }}
-              </div> -->
-            <!-- } @else {
-              <div class="completed-tag">{{ 'loan.completed' | translate }}</div>
-            } -->
-          </div>
-        </div>
         
         <div class="transactions">
           @for (tx of group.transactions; track tx.id) {
-            <div class="transaction" [class.repayment]="tx.parentId">
-              <div class="tx-info">
-                <div class="tx-header">
-                  <span class="date">{{ tx.date | translateDate:'short' }}</span>
-                  <span class="memo">{{ tx.memo }}</span>
-                </div>
+            <div class="transaction-item" [class.repayment]="tx.parentId">
+              <span class="material-symbols-rounded" [class]="tx.type">
+                {{ getCategoryIcon(tx.categoryId) }}
+              </span>
+              <div class="transaction-details">
+                <span class="small-text">{{ tx.date | translateDate }}, {{ tx.date | translateDate: 'shortTime' }}</span>
+                <span class="memo">{{ getCategoryName(tx.categoryId) | translate }}</span>
+                <span class="small-text">
+                {{ tx.memo || ('common.noMemo' | translate) }}
+                </span>
               </div>
-              <span class="" [class.payment]="tx.parentId">
-                {{ tx.parentId ? '+' : '' }}{{ tx.amount | translateNumber:'1.0-2' }}
+              <span class="amount">
+              {{ tx.parentId ? '+' : '' }}{{ tx.amount | translateNumber:'1.0-2' }}
               </span>
             </div>
           }
@@ -99,7 +78,7 @@ interface DueStatus {
       background-color: var(--surface-color);
       box-shadow: 0 2px 4px var(--box-shadow-color-light);
     }
-    .parent-transaction-item {
+    .transaction-item {
       display: flex;
       align-items: center;
       gap: 1rem;
@@ -110,15 +89,15 @@ interface DueStatus {
       font-size: 0.875rem;
     }
 
-    .parent-transaction-item:hover {
+    .transaction-item:hover {
       background-color: var(--background-color-hover);
     }
 
-    .parent-transaction-details {
+    .transaction-details {
       flex: 1;
     }
 
-    .parent-transaction-details .small-text {
+    .transaction-details .small-text {
       display: block;
       font-size: 0.65rem;
       color: #999;
@@ -128,13 +107,6 @@ interface DueStatus {
     .memo {
       display: block;
       font-weight: 500;
-    }
-
-    .loan-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 1rem;
     }
 
     .person-info {
@@ -170,10 +142,6 @@ interface DueStatus {
       background-color: var(--color-warning-bg);
     }
 
-    .loan-amount {
-      text-align: right;
-    }
-
     .total {
       font-size: 1.25rem;
       font-weight: 500;
@@ -198,7 +166,7 @@ interface DueStatus {
 
     .progress {
       height: 100%;
-      background-color: #4CAF50;
+      background-color: var(--text-success);
       border-radius: 2px;
       transition: width 0.3s ease;
     }

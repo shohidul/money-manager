@@ -384,9 +384,9 @@ import { TranslationService } from '../../../services/translation.service';
     }
 
     .reset-order.dirty {
-      background-color: #f44336 !important;
+      background-color: var(--text-danger) !important;
       color: white !important;
-      border-color: #f44336 !important;
+      border-color: var(--text-danger) !important;
     }
 
     .budget-info {

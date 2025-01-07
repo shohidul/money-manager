@@ -61,14 +61,14 @@ import { format } from 'date-fns';
       padding: 0.75rem 1rem;
       border: none;
       border-radius: 4px;
-      background-color: #f44336;
+      background-color: var(--text-danger);
       color: white;
       cursor: pointer;
       flex-grow: 1;
     }
 
     .restore-button {
-      background-color: #4caf50;
+      background-color: var(--text-success);
     }
   `,
   ],

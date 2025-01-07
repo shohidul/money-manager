@@ -10,11 +10,11 @@ import { LoanStatus } from '../../../models/loan.model';
     <div class="loan-summary">
       <div class="summary-item card">
         <span class="label">Remaining Given Loans</span>
-        <span class="amount">{{ totalGiven }}</span>
+        <span class="amount positive">{{ totalGiven }}</span>
       </div>
       <div class="summary-item card">
         <span class="label">Remaining Taken Loans</span>
-        <span class="amount">{{ totalTaken }}</span>
+        <span class="amount negative">{{ totalTaken }}</span>
       </div>
     </div>
   `,
@@ -42,8 +42,8 @@ import { LoanStatus } from '../../../models/loan.model';
       font-weight: 500;
     }
 
-    .positive { color: #4caf50; }
-    .negative { color: #f44336; }
+    .positive { color: var(--text-success); }
+    .negative { color: var(--text-danger); }
   `]
 })
 export class LoanSummaryComponent {

@@ -51,6 +51,7 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
                       <div class="category-details">
                         <span class="label">{{ 'transaction.types.' + editedTransaction.type | translate }}</span>
                         <span class="category-name">{{ category.name | translate }}</span>
+                        <span class="meta-info">{{ editedTransaction.memo || ('common.noMemo' | translate) }}</span>
                       </div>
                     </div>
                   </div>
@@ -203,7 +204,7 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
       padding: 0.75rem 1rem;
       border: none;
       border-radius: 4px;
-      background: #f44336;
+      background: var(--text-danger);
       color: white;
       cursor: pointer;
     }

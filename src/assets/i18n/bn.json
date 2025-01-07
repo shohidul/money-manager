@@ -12,7 +12,8 @@
     "type": "ধরন",
     "required": "আবশ্যক",
     "add": "যোগ করুন",
-    "noMemo": "কোন মেমো নেই",
+    "noMemo": "মেমো নেই",
+    "noName": "নাম নেই",
     "total": "মোট"
   },
   "calculator": {
