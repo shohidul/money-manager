@@ -34,10 +34,10 @@ import { Category } from '../../services/db.service';
       </div>
       <div class="status-filter" *ngIf="showStatus">
         <select [(ngModel)]="statusFilter" (ngModelChange)="onStatusChange()">
-          <option value="all">All</option>
-          <option value="pending">Pending</option>
-          <option value="partial">Partial</option>
-          <option value="completed">Completed</option>
+          <option value="all">{{'loan.status.all' | translate}}</option>
+          <option value="remaining">{{'loan.status.remaining' | translate}}</option>
+          <option value="partial">{{'loan.status.partial' | translate}}</option>
+          <option value="completed">{{'loan.status.completed' | translate}}</option>
         </select>
       </div>
     </div>
@@ -84,7 +84,7 @@ import { Category } from '../../services/db.service';
 export class FilterBarComponent implements OnInit {
   
   @Input() filters: FilterOptions = { status: 'all' };
-  statusFilter: 'pending' | 'partial' | 'completed' | 'all' = 'all';
+  statusFilter: 'remaining' | 'partial' | 'completed' | 'all' = 'all';
   fuelCategoryFilter: string = 'all';
   @Input() fuelCategories: Category[] = [];
   @Input() showStatus = false;

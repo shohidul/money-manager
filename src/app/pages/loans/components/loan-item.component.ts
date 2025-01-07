@@ -31,7 +31,7 @@ interface DueStatus {
               {{ group.parent.personName || ('common.noName' | translate) }} | 
               {{ group.parent.memo || ('common.noMemo' | translate) }} |
               {{ 'loan.dueDate' | translate }}: {{ group.parent.dueDate ? (group.parent.dueDate | translateDate) : 'N/A' }} |
-              {{ 'loan.'+(group.parent.status || 'pending')  | translate  }} 
+              {{ 'loan.status.'+(group.parent.status || 'remaining')  | translate  }} 
             </span>
           </div>
           <span class="amount">
@@ -66,7 +66,7 @@ interface DueStatus {
           ></div>
         </div>
         <div class="remaining amount">
-          {{ 'loan.remaining' | translate }}: {{ group.status.remainingAmount | translateNumber:'1.0-2' }}
+          {{ 'loan.status.remaining' | translate }}: {{ group.status.remainingAmount | translateNumber:'1.0-2' }}
         </div>
       </div>
     }

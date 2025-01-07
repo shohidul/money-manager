@@ -1,20 +1,22 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LoanStatus } from '../../../models/loan.model';
+import { TranslatePipe } from '../../../components/shared/translate.pipe';
+import { TranslateNumberPipe } from '../../../components/shared/translate-number.pipe';
 
 @Component({
   selector: 'app-loan-summary',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe, TranslateNumberPipe],
   template: `
     <div class="loan-summary">
       <div class="summary-item card">
-        <span class="label">Remaining Given Loans</span>
-        <span class="amount positive">{{ totalGiven }}</span>
+        <span class="label">{{'loan.stats.remainingGivenLoans' | translate}}</span>
+        <span class="amount positive">{{ totalGiven | translateNumber }}</span>
       </div>
       <div class="summary-item card">
-        <span class="label">Remaining Taken Loans</span>
-        <span class="amount negative">{{ totalTaken }}</span>
+        <span class="label">{{'loan.stats.remainingTakenLoans' | translate}}</span>
+        <span class="amount negative">{{ totalTaken | translateNumber }}</span>
       </div>
     </div>
   `,

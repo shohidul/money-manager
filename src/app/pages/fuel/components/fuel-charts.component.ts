@@ -66,6 +66,9 @@ import { TranslationService } from '../../../services/translation.service';
   `,
   styles: [
     `
+    .fuel-analytics h3{
+      font-weight: 500;
+    }
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -87,7 +90,7 @@ import { TranslationService } from '../../../services/translation.service';
     }
 
     .stat-item .value {
-      font-size: 1.25rem;
+      font-size: 1.1rem;
       font-weight: 500;
       color: var(--text-primary);
     }
@@ -99,6 +102,7 @@ import { TranslationService } from '../../../services/translation.service';
     .chart-container h4 {
       margin-bottom: 1rem;
       color: var(--text-secondary);
+      font-weight: 500;
     }
   `,
   ],

@@ -56,7 +56,7 @@ export function calculateFuelStats(transactions: Transaction[]): FuelStats {
   // Get the last fuel transaction's price per liter
   if (fuelTransactions.length > 0) {
     const lastTransaction = fuelTransactions[fuelTransactions.length - 1];
-    lastFuelPrice = lastTransaction.amount / lastTransaction.fuelQuantity;
+    lastFuelPrice = lastTransaction.fuelQuantity ? lastTransaction.amount / lastTransaction.fuelQuantity : 0;
     lastOdoReading = lastTransaction.odometerReading;
     totalFuelQuantity = fuelTransactions.reduce((sum, tx) => sum + tx.fuelQuantity, 0);
     totalFuelCost = fuelTransactions.reduce((sum, tx) => sum + tx.amount, 0);

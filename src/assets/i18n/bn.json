@@ -390,6 +390,8 @@
     }
   },
   "loan": {
+    "loans": "ঋণ",
+    "analytics": "বিশ্লেষণ",
     "parentLoan": "মূল ঋণ",
     "noParentLoan": "কোন মূল ঋণ নেই",
     "lentTo": "ঋণ নিয়েছে",
@@ -401,10 +403,15 @@
     "stats": {
       "totalGiven": "মোট ঋণ দেওয়া",
       "totalTaken": "মোট ঋণ নেওয়া", 
-      "activeLoans": "সক্রিয় ঋণ"
+      "activeLoans": "সক্রিয় ঋণ",
+      "remainingGivenLoans": "অবশিষ্ট দেওয়া ঋণ",
+      "remainingTakenLoans": "অবশিষ্ট নেওয়া ঋণ"
     },
     "status": {
-      "dueSoon": "শীঘ্রই প্রদানযোগ্য"
+      "all": "সব",
+      "remaining": "অবশিষ্ট",
+      "partial": "অংশিক",
+      "completed": "সম্পন্ন"
     },
     "loansGiven": "ঋণ দেওয়া",
     "loansTaken": "ঋণ নেওয়া",
@@ -412,11 +419,7 @@
     "noLoansTaken": "এখনও কোনো ঋণ নেওয়া হয়নি",
     "personName": "ব্যক্তি/সংস্থার নাম",
     "loanDate": "ঋণের তারিখ",
-    "dueDate": "প্রদানের তারিখ",
-    "remaining": "অবশিষ্ট",
-    "pending": "অবশিষ্ট",
-    "partial": "অংশিক",
-    "completed": "সম্পন্ন"
+    "dueDate": "প্রদানের তারিখ"
   },
   "fuel": {
     "price": "মূল্য",

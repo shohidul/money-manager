@@ -101,7 +101,7 @@ import { DOCUMENT } from '@angular/common';
                     {{ tx.personName || ('common.noName' | translate) }} | 
                     {{ tx.memo || ('common.noMemo' | translate) }} |
                     {{ 'loan.dueDate' | translate }}: {{ tx.dueDate ? (tx.dueDate | translateDate) : 'N/A' }} |
-                    {{ 'loan.'+(tx.status || 'pending')  | translate  }} 
+                    {{ 'loan.status.'+(tx.status || 'remaining')  | translate  }} 
                   </span>
                 }
 
@@ -117,7 +117,7 @@ import { DOCUMENT } from '@angular/common';
                           ? (parentLoan.dueDate | translateDate) 
                           : 'N/A'
                       }} |
-                      {{ 'loan.'+(parentLoan.status || 'pending') | translate }}
+                      {{ 'loan.'+(parentLoan.status || 'remaining') | translate }}
                     </ng-container>
                   </span>
                 }
@@ -130,7 +130,7 @@ import { DOCUMENT } from '@angular/common';
                     {{ tx.fuelQuantity || 0 | translateNumber:'1.1-1' }} {{ 'fuel.L' | translate }} | 
                     {{ (tx.odometerReading || 0) | translateNumber:'1.0-0' }} {{ 'fuel.km' | translate }} | 
                     {{ (getMileage(tx) || 0) | translateNumber:'1.1-1' }} {{ 'fuel.kmPerLiter' | translate }} |
-                    {{ tx.amount / tx.fuelQuantity || 0 | translateNumber:'1.1-1' }}/- |
+                    {{ tx.fuelQuantity ? (tx.amount / tx.fuelQuantity) : 0 | translateNumber:'1.1-1' }}/- |
                     {{ tx.memo || ('common.noMemo' | translate) }}
                   </span>
                 }

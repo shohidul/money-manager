@@ -390,6 +390,8 @@
     }
   },
   "loan": {
+    "loans": "Loans",
+    "analytics": "Analytics",
     "parentLoan": "Parent Loan",
     "noParentLoan": "No Parent Loan",
     "lentTo": "Lent to",
@@ -401,10 +403,15 @@
     "stats": {
       "totalGiven": "Total Loans Given",
       "totalTaken": "Total Loans Taken", 
-      "activeLoans": "Active Loans"
+      "activeLoans": "Active Loans",
+      "remainingGivenLoans": "Remaining Given Loans",
+      "remainingTakenLoans": "Remaining Taken Loans"
     },
     "status": {
-      "dueSoon": "Due Soon"
+      "all": "All",
+      "remaining": "Remaining",
+      "partial": "Partial",
+      "completed": "Completed"
     },
     "loansGiven": "Loans Given",
     "loansTaken": "Loans Taken",
@@ -412,11 +419,7 @@
     "noLoansTaken": "No loans taken yet",
     "personName": "Person Name",
     "loanDate": "Loan Date",
-    "dueDate": "Due Date",
-    "remaining": "Remaining",
-    "pending": "Pending",
-    "partial": "Partial",
-    "completed": "Completed"
+    "dueDate": "Due Date"
   },
   "fuel": {
     "price": "Price",

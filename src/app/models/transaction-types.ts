@@ -17,7 +17,7 @@ export interface LoanTransactionBase extends BaseTransaction {
   loanDate: Date;
   dueDate?: Date;
   parentId?: number;
-  status?: 'pending' | 'partial' | 'completed';
+  status?: 'remaining' | 'partial' | 'completed';
 }
 
 export interface AssetTransaction extends BaseTransaction {

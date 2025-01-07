@@ -6,7 +6,7 @@ export interface FilterOptions {
   month?: string;
   type?: string;
   subType?: string;
-  status?: 'pending' | 'partial' | 'completed' | 'all';
+  status?: 'remaining' | 'partial' | 'completed' | 'all';
   category?: string;
 }
 

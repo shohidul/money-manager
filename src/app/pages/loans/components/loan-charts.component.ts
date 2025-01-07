@@ -20,7 +20,7 @@ import { TranslateNumberPipe } from '../../../components/shared/translate-number
           <h4>{{ 'loan.stats.totalGiven' | translate }}</h4>
           <div class="stat-value">{{ totalGiven | translateNumber:'1.0-2' }}</div>
           <div class="stat-detail">
-            {{ 'loan.stats.activeLoans' | translate }}: {{ activeGivenLoans }}
+            {{ 'loan.stats.activeLoans' | translate }}: {{ activeGivenLoans | translateNumber:'1.0-0' }}
           </div>
         </div>
 
@@ -28,7 +28,7 @@ import { TranslateNumberPipe } from '../../../components/shared/translate-number
           <h4>{{ 'loan.stats.totalTaken' | translate }}</h4>
           <div class="stat-value">{{ totalTaken | translateNumber:'1.0-2' }}</div>
           <div class="stat-detail">
-            {{ 'loan.stats.activeLoans' | translate }}: {{ activeTakenLoans }}
+            {{ 'loan.stats.activeLoans' | translate }}: {{ activeTakenLoans | translateNumber:'1.0-0' }}
           </div>
         </div>
       </div>
@@ -51,6 +51,8 @@ import { TranslateNumberPipe } from '../../../components/shared/translate-number
     .chart-container h3 {
       margin-bottom: 1rem;
       color: var(--text-secondary);
+      font-size: 1.1rem;
+      font-weight: 500;
     }
 
     canvas {
@@ -68,8 +70,12 @@ import { TranslateNumberPipe } from '../../../components/shared/translate-number
       text-align: center;
     }
 
+    .stat-card h4 {
+      font-weight: 500;
+    }
+
     .stat-value {
-      font-size: 1.5rem;
+      font-size: 1.1rem;
       font-weight: 500;
       margin: 0.5rem 0;
     }

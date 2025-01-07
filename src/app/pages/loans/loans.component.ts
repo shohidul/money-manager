@@ -8,11 +8,13 @@ import { LoanTransaction, LoanGroup, LoanStatus } from '../../models/loan.model'
 import { differenceInDays } from 'date-fns';
 import { FilterOptions } from '../../utils/transaction-filters';
 import { LoanService } from '../../services/loan.service';
+import { TranslatePipe } from '../../components/shared/translate.pipe';
+import { TranslateNumberPipe } from '../../components/shared/translate-number.pipe';
 
 @Component({
   selector: 'app-loans',
   standalone: true,
-  imports: [CommonModule, MobileHeaderComponent, LoanListComponent, LoanChartsComponent, FilterBarComponent],
+  imports: [CommonModule, MobileHeaderComponent, LoanListComponent, LoanChartsComponent, FilterBarComponent, TranslatePipe, TranslateNumberPipe],
   template: `
     <div class="loans">
       <app-mobile-header
@@ -31,8 +33,8 @@ import { LoanService } from '../../services/loan.service';
         />
 
         <div class="tabs">
-          <button [class.active]="activeTab === 'list'" (click)="activeTab = 'list'">Loans</button>
-          <button [class.active]="activeTab === 'charts'" (click)="activeTab = 'charts'">Analytics</button>
+          <button [class.active]="activeTab === 'list'" (click)="activeTab = 'list'">{{'loan.loans' | translate}}</button>
+          <button [class.active]="activeTab === 'charts'" (click)="activeTab = 'charts'">{{'loan.analytics' | translate}}</button>
         </div>
         
         @if (activeTab === 'list') {
@@ -129,7 +131,7 @@ export class LoansComponent {
         
         return loans.filter(loan => {
           switch (this.filters.status) {
-            case 'pending': 
+            case 'remaining': 
               return loan.status.remainingAmount === loan.status.totalAmount;
             case 'partial': 
               return loan.status.remainingAmount > 0 && 
