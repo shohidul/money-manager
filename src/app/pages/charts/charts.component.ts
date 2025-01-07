@@ -269,7 +269,6 @@ type ChartType = 'all' | 'income' | 'expense';
   .chart-wrapper {
     flex: 1;
     max-width: 35%;
-    // max-height: 300px;
     padding: 1rem;
   }
 

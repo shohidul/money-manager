@@ -22,8 +22,8 @@ import { TranslateNumberPipe } from '../../../components/shared/translate-number
   template: `
     <div class="loan-list">
       <app-loan-summary
-        [totalGiven]="totalGiven"
-        [totalTaken]="totalTaken"
+        [remainingGiven]="remainingGiven"
+        [remainingTaken]="remainingTaken"
       />
 
       <div class="loan-groups">
@@ -100,8 +100,8 @@ export class LoanListComponent implements OnInit {
 
   @Input() givenLoans: LoanGroup[] = [];
   @Input() takenLoans: LoanGroup[] = [];
-  @Input() totalGiven: number = 0;
-  @Input() totalTaken: number = 0;
+  @Input() remainingGiven: number = 0;
+  @Input() remainingTaken: number = 0;
 
   constructor(private loanService: LoanService) {}
 

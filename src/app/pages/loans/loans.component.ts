@@ -41,11 +41,15 @@ import { TranslateNumberPipe } from '../../components/shared/translate-number.pi
           <app-loan-list 
             [givenLoans]="givenLoans" 
             [takenLoans]="takenLoans" 
+            [remainingGiven]="remainingGiven" 
+            [remainingTaken]="remainingTaken" 
+          />
+        } @else {
+          <app-loan-charts 
+            [filters]="filters"
             [totalGiven]="totalGiven" 
             [totalTaken]="totalTaken" 
           />
-        } @else {
-          <app-loan-charts />
         }
       </div>
     </div>
@@ -88,6 +92,8 @@ export class LoansComponent {
   takenLoans: LoanGroup[] = [];
   totalGiven: number = 0;
   totalTaken: number = 0;
+  remainingGiven: number = 0;
+  remainingTaken: number = 0;
 
   constructor(private loanService: LoanService) {}
 
@@ -148,8 +154,12 @@ export class LoansComponent {
       this.takenLoans = filterByStatus(this.takenLoans);
 
       // Calculate totals
-      this.totalGiven = this.givenLoans.reduce((sum, group) => sum + group.status.remainingAmount, 0);
-      this.totalTaken = this.takenLoans.reduce((sum, group) => sum + group.status.remainingAmount, 0);
+      this.totalGiven = this.givenLoans.reduce((sum, group) => sum + group.status.totalAmount, 0);
+      this.totalTaken = this.takenLoans.reduce((sum, group) => sum + group.status.totalAmount, 0);
+
+      // Calculate remaining amounts
+      this.remainingGiven = this.givenLoans.reduce((sum, group) => sum + group.status.remainingAmount, 0);
+      this.remainingTaken = this.takenLoans.reduce((sum, group) => sum + group.status.remainingAmount, 0);
     } catch (error) {
       console.error('Error loading loans:', error);
     }

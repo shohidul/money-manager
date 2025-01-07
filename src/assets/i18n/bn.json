@@ -404,9 +404,11 @@
     "stats": {
       "totalGiven": "মোট ঋণ দেওয়া",
       "totalTaken": "মোট ঋণ নেওয়া", 
+      "totalRepaidToMe": "মোট ঋণ ফেরত পাওয়া",
+      "totalRepaidByMe": "মোট ঋণ পরিশোধ করা",
       "activeLoans": "সক্রিয় ঋণ",
-      "remainingGivenLoans": "অবশিষ্ট দেওয়া ঋণ",
-      "remainingTakenLoans": "অবশিষ্ট নেওয়া ঋণ"
+      "remainingToGet": "অবশিষ্ট ফেরত পাবো",
+      "remainingToPay": "অবশিষ্ট পরিশোধ করবো"
     },
     "status": {
       "all": "সব",

@@ -404,9 +404,11 @@
     "stats": {
       "totalGiven": "Total Loans Given",
       "totalTaken": "Total Loans Taken", 
+      "totalRepaidToMe": "Total Repaid to Me",
+      "totalRepaidByMe": "Total Repaid by Me",
       "activeLoans": "Active Loans",
-      "remainingGivenLoans": "Remaining Given Loans",
-      "remainingTakenLoans": "Remaining Taken Loans"
+      "remainingToGet": "Remaining To Get",
+      "remainingToPay": "Remaining To Pay"
     },
     "status": {
       "all": "All",

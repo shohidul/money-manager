@@ -11,12 +11,12 @@ import { TranslateNumberPipe } from '../../../components/shared/translate-number
   template: `
     <div class="loan-summary">
       <div class="summary-item card">
-        <span class="label">{{'loan.stats.remainingGivenLoans' | translate}}</span>
-        <span class="amount positive">{{ totalGiven | translateNumber }}</span>
+        <span class="label">{{'loan.stats.remainingToGet' | translate}}</span>
+        <span class="amount positive">{{ remainingGiven | translateNumber }}</span>
       </div>
       <div class="summary-item card">
-        <span class="label">{{'loan.stats.remainingTakenLoans' | translate}}</span>
-        <span class="amount negative">{{ totalTaken | translateNumber }}</span>
+        <span class="label">{{'loan.stats.remainingToPay' | translate}}</span>
+        <span class="amount negative">{{ remainingTaken | translateNumber }}</span>
       </div>
     </div>
   `,
@@ -49,6 +49,6 @@ import { TranslateNumberPipe } from '../../../components/shared/translate-number
   `]
 })
 export class LoanSummaryComponent {
-  @Input() totalGiven = 0;
-  @Input() totalTaken = 0;
+  @Input() remainingGiven = 0;
+  @Input() remainingTaken = 0;
 }

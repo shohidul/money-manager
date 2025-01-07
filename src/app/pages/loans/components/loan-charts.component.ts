@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LoanService } from '../../../services/loan.service';
 import { ChartService } from '../../../services/chart.service';
@@ -6,6 +6,9 @@ import { TranslatePipe } from '../../../components/shared/translate.pipe';
 import { TranslateNumberPipe } from '../../../components/shared/translate-number.pipe';
 import { TranslateDatePipe } from '../../../components/shared/translate-date.pipe';
 import { TranslationService } from '../../../services/translation.service';
+import { FilterOptions } from '../../../utils/transaction-filters';
+import { isLoanTransaction, isRepaidTransaction, Transaction } from '../../../models/transaction-types';
+import { DbService } from '../../../services/db.service';
 
 @Component({
   selector: 'app-loan-charts',
@@ -35,7 +38,7 @@ import { TranslationService } from '../../../services/translation.service';
         </div>
 
         <div class="stat-card card">
-          <h4>{{ 'loan.stats.remainingGivenLoans' | translate }}</h4>
+          <h4>{{ 'loan.stats.totalRepaidToMe' | translate }}</h4>
           <div class="stat-value">{{ remainingGiven | translateNumber:'1.0-2' }}</div>
           <div class="stat-detail">
             {{ (remainingGivenPercentage | translateNumber:'1.0-0') }}% {{ 'loan.status.remaining' | translate }}
@@ -43,11 +46,30 @@ import { TranslationService } from '../../../services/translation.service';
         </div>
 
         <div class="stat-card card">
-          <h4>{{ 'loan.stats.remainingTakenLoans' | translate }}</h4>
+          <h4>{{ 'loan.stats.totalRepaidByMe' | translate }}</h4>
           <div class="stat-value">{{ remainingTaken | translateNumber:'1.0-2' }}</div>
           <div class="stat-detail">
             {{ (remainingTakenPercentage | translateNumber:'1.0-0') }}% {{ 'loan.status.remaining' | translate }}
           </div>
+        </div>
+      </div>
+      <div class="chart-container card">
+          <div class="chart-wrapper">
+            <canvas #donutChart></canvas>
+          </div>
+          <div class="legend">
+          @for (stat of categoryStats.slice(0, 5); track stat.categoryId) {
+            <div class="legend-item">
+              <div class="legend-color" [style.background-color]="stat.color"></div>
+              <div class="legend-info">
+                <span class="category-name">
+                  <span class="material-symbols-rounded">{{ getCategoryIcon(stat.categoryId) }}</span>
+                  {{ stat.category  | translate }}
+                </span>
+              </div>
+              <span class="percentage">{{stat.amount | translateNumber:'1.0-2'}} ({{ stat.percentage | translateNumber:'1.1-1' }}%)</span>
+            </div>
+          }
         </div>
       </div>
 
@@ -93,28 +115,128 @@ import { TranslationService } from '../../../services/translation.service';
       font-size: 0.875rem;
       color: var(--text-secondary);
     }
-
     .chart-container {
-      margin-bottom: 1rem;
-      position: relative;
-      width: 100%;
-      padding-bottom: 1rem;
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  .chart-wrapper {
+    flex: 1;
+    max-width: 35%;
+    padding: 1rem;
+  }
+
+  @media (max-width: 768px) {
+    .chart-container {
+      flex-direction: row;
+      align-items: normal;
     }
 
-    canvas {
-      max-height: 400px !important; 
+    .chart-wrapper {
+      max-width: 35%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem;
+    }
+  }
+
+  .legend {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 280px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+  }
+
+  .legend-item:hover {
+    background-color: var(--background-color-hover);
+  }
+
+  .legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+  }
+
+  .legend-info {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .category-name {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .percentage {
+    min-width: 48px;
+    text-align: right;
+    font-weight: 500;
+  }
+
+  @media (max-width: 768px) {
+    .legend {
+      justify-content: center;
+      min-width: 175px;
     }
 
-    @media (max-width: 768px) {
-      canvas {
-        max-height: 300px !important;
-      }
+    .legend-item {
+      padding: 0;
     }
+
+    .legend-color {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+    }
+
+    .category-name,
+    .percentage {
+      font-size: 0.675rem;
+    }
+
+    .category-name .material-symbols-rounded {
+      display: none;
+    }
+  }    
+
   `]
 })
 export class LoanChartsComponent implements OnInit {
-  totalGiven = 0;
-  totalTaken = 0;
+  @ViewChild('donutChart', { static: false })
+  private donutChartRef!: ElementRef;
+
+  @Input() filters: FilterOptions = {};
+  @Input() totalGiven: number = 0;
+  @Input() totalTaken: number = 0;
+  transactions: Transaction[] = [];
+  categories: any[] = [];
+  categoryStats: any[] = [];
+  chartColors = [
+    '#FF6384',
+    '#36A2EB',
+    '#FFCE56',
+    '#4BC0C0',
+    '#9966FF',
+    '#FF9F40',
+    '#FF6384',
+    '#36A2EB',
+  ];
+
   activeGivenLoans = 0;
   activeTakenLoans = 0;
   remainingGiven = 0;
@@ -123,13 +245,94 @@ export class LoanChartsComponent implements OnInit {
   remainingTakenPercentage = 0;
 
   constructor(
+    private dbService: DbService,
     private loanService: LoanService,
     private chartService: ChartService,
     private translationService: TranslationService
   ) {}
 
   async ngOnInit() {
-    await this.loadCharts();
+    await this.loadData();
+    // await this.loadCharts();
+  }
+
+  async loadData() {
+    let startDate: Date;
+    let endDate: Date;
+
+    // Determine date range for filtering
+    if (this.filters.startDate) {
+      startDate = this.filters.startDate;
+    } else {
+      // Default to start of current year
+      startDate = new Date(new Date().getFullYear(), 0, 1);
+    }
+
+    if (this.filters.endDate) {
+      endDate = this.filters.endDate;
+    } else {
+      // Default to current date
+      endDate = new Date();
+    }
+
+    this.transactions = await this.dbService.getTransactions(
+      startDate,
+      endDate
+    );
+    this.categories = await this.dbService.getCategories();
+    this.calculateStats();
+    this.createDonutChart();
+  }
+
+  calculateStats() {
+    const stats = new Map<number, any>();
+    let totalAmount = 0;
+
+    const filteredTransactions = this.transactions.filter(
+      (tx) =>  isLoanTransaction(tx) || isRepaidTransaction(tx)
+    );
+
+    filteredTransactions.forEach((tx) => {
+      if (!stats.has(tx.categoryId)) {
+        const category = this.categories.find((c) => c.id === tx.categoryId);
+        stats.set(tx.categoryId, {
+          categoryId: tx.categoryId,
+          category: category?.name || 'Unknown',
+          type: category.type,
+          amount: 0,
+          color: this.chartColors[stats.size % this.chartColors.length],
+        });
+      }
+
+      const stat = stats.get(tx.categoryId);
+      stat.amount += tx.amount;
+      totalAmount += tx.amount;
+    });
+
+    this.categoryStats = Array.from(stats.values())
+      .map((stat) => ({
+        ...stat,
+        percentage: (stat.amount / totalAmount) * 100,
+      }))
+      .sort((a, b) => b.amount - a.amount);
+  }
+
+  private createDonutChart() {
+    if (!this.donutChartRef) return;
+
+    const canvas = this.donutChartRef.nativeElement as HTMLCanvasElement;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    this.chartService.createDonutChart(
+      ctx,
+      this.categoryStats.slice(0, 5),
+      this.categoryStats.map((stat) => stat.color)
+    );
+  }
+
+  getCategoryIcon(categoryId: number): string {
+    return this.categories.find((c) => c.id === categoryId)?.icon || 'help';
   }
 
   private async loadCharts() {
@@ -137,6 +340,9 @@ export class LoanChartsComponent implements OnInit {
       this.loanService.getLoansGiven(),
       this.loanService.getLoansTaken()
     ]);
+
+    console.log(givenLoans);
+    console.log(takenLoans);
 
     this.updateStats(givenLoans, takenLoans);
     this.createOverviewChart(givenLoans, takenLoans);
