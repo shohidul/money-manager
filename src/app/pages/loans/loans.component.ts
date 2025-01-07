@@ -118,7 +118,7 @@ export class LoansComponent {
         this.loanService.getLoansGiven(startDate, endDate),
         this.loanService.getLoansTaken(startDate, endDate)
       ]);
-console.log(givenLoans);
+
       // Assign grouped loans directly since they're already grouped by the service
       this.givenLoans = givenLoans;
       this.takenLoans = takenLoans;

@@ -10,15 +10,16 @@ import { startOfMonth, endOfMonth, format, parseISO } from 'date-fns';
 import { calculateMileage } from '../../utils/fuel.utils';
 import { FilterBarComponent } from '../../components/filter-bar/filter-bar.component';
 import { CategoryService } from '../../services/category.service';
+import { TranslatePipe} from '../../components/shared/translate.pipe';
 
 @Component({
   selector: 'app-fuel',
   standalone: true,
-  imports: [CommonModule, MobileHeaderComponent, FuelListComponent, FuelChartsComponent, FilterBarComponent],
+  imports: [CommonModule, MobileHeaderComponent, FuelListComponent, FuelChartsComponent, FilterBarComponent, TranslatePipe],
   template: `
     <div class="fuel">
       <app-mobile-header
-        title="Fuel Logs"
+        title="{{ 'fuel.fuelLogs' | translate }}"
         [showBackButton]="true"
         (back)="goBack()"
       />
@@ -33,8 +34,8 @@ import { CategoryService } from '../../services/category.service';
           (endDateChange)="onEndDateChange($event)"
         />
         <div class="tabs">
-          <button [class.active]="activeTab === 'list'" (click)="activeTab = 'list'">Logs</button>
-          <button [class.active]="activeTab === 'charts'" (click)="activeTab = 'charts'">Analytics</button>
+          <button [class.active]="activeTab === 'list'" (click)="activeTab = 'list'">{{ 'fuel.logs' | translate }}</button>
+          <button [class.active]="activeTab === 'charts'" (click)="activeTab = 'charts'">{{ 'fuel.analytics' | translate }}</button>
         </div>
 
         @if (activeTab === 'list') {
@@ -113,14 +114,14 @@ export class FuelComponent implements OnInit {
   async getMostUsedCategories() {
     try {
       const transactions = await this.dbService.getTransactionsBySubType('fuel');
-  
+
       // Count occurrences of categoryId
       const categoryCounts = transactions.reduce((acc, transaction) => {
         const categoryId = transaction.categoryId;
         acc[categoryId] = (acc[categoryId] || 0) + 1;
         return acc;
       }, {} as Record<number, number>);
-  
+
       // Convert to an array and sort by count (descending)
       const sortedCategories = Object.entries(categoryCounts)
         .map(([categoryId, count]) => ({
@@ -128,15 +129,13 @@ export class FuelComponent implements OnInit {
           count,
         }))
         .sort((a, b) => b.count - a.count);
-  
+
       return sortedCategories;
     } catch (error) {
       console.error('Error getting most used categories:', error);
       return [];
     }
   }
-  
-    
 
   async extractFuelCategories() {
     // Find fuel categories

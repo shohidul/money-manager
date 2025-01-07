@@ -17,7 +17,7 @@
     "total": "মোট"
   },
   "calculator": {
-    "add_memo": "মেমো যোগ করুন",
+    "addMemo": "মেমো যোগ করুন",
     "today": "আজ"
   },
   "menu": {
@@ -400,7 +400,6 @@
     "mileage": "মাইলেজ",
     "kmPerLiter": "কিমি/লি",
     "odometerReading": "ওডোমিটার রিডিং",
-    "fuelQuantity": "জ্বালানির পরিমাণ",
     "fuelType": "জ্বালানির ধরন",
     "types": {
       "octen": "অকটেন",
@@ -408,7 +407,20 @@
       "diesel": "ডিজেল",
       "electric": "বিদ্যুৎ",
       "other": "অন্যান্য"
-    }
+    },
+    "fuelLogs": "জ্বালানি লগ",
+    "logs": "লগ",
+    "analytics": "বিশ্লেষণ",
+    "fuelAnalytics": "জ্বালানি বিশ্লেষণ",
+    "mileageDistance": "মাইলেজ দূরত্ব",
+    "fuelQuantity": "জ্বালানির পরিমাণ",
+    "lastOdometer": "শেষ ওডোমিটার",
+    "averageMileage": "গড় মাইলেজ",
+    "fuelCost": "জ্বালানির খরচ",
+    "lastFuelPrice": "শেষ জ্বালানি মূল্য",
+    "mileageTrend": "মাইলেজ প্রবণতা",
+    "priceTrend": "জ্বালানি মূল্য প্রবণতা",
+    "odoReading": "ওডোমিটার পড়া"
   },
   "charts": {
     "title": "বিশ্লেষণ",

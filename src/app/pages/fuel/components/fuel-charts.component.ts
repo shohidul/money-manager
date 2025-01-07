@@ -8,54 +8,58 @@ import {
 } from '../../../utils/fuel.utils';
 import { ChartService } from '../../../services/chart.service';
 import { Category, DbService } from '../../../services/db.service';
+import { TranslatePipe } from '../../../components/shared/translate.pipe';
+import { TranslateNumberPipe } from "../../../components/shared/translate-number.pipe";
+import { TranslateDatePipe } from '../../../components/shared/translate-date.pipe';
+import { TranslationService } from '../../../services/translation.service';
 
 @Component({
   selector: 'app-fuel-charts',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe, TranslateNumberPipe],
   template: `
     <div class="fuel-analytics card">
-      <h3>Fuel Analytics</h3>
+      <h3>{{ 'fuel.fuelAnalytics' | translate }}</h3>
       
       <div class="stats-grid">
         <div class="stat-item">
-          <span class="label">Mileage Distance</span>
-          <span class="value">{{ stats.totalMileageDistance | number:'1.0-0' }} km</span>
+          <span class="label">{{ 'fuel.mileageDistance' | translate }}</span>
+          <span class="value">{{ stats.totalMileageDistance | translateNumber:'1.0-0' }} {{ 'fuel.km' | translate }}</span>
         </div>
         <div class="stat-item">
-          <span class="label">Fuel Quantity</span>
-          <span class="value">{{ stats.totalFuelQuantity | number:'1.1-1' }} L</span>
+          <span class="label">{{ 'fuel.fuelQuantity' | translate }}</span>
+          <span class="value">{{ stats.totalFuelQuantity | translateNumber:'1.1-1' }} {{ 'fuel.L' | translate }}</span>
         </div>
         <div class="stat-item">
-          <span class="label">Last Odometer</span>
-          <span class="value">{{ stats.lastOdoReading | number:'1.0-0' }} km</span>
+          <span class="label">{{ 'fuel.lastOdometer' | translate }}</span>
+          <span class="value">{{ stats.lastOdoReading | translateNumber:'1.0-0' }} {{ 'fuel.km' | translate }}</span>
         </div>
         <div class="stat-item">
-          <span class="label">Average Mileage</span>
-          <span class="value">{{ stats.mileage | number:'1.1-1' }} km/L</span>
+          <span class="label">{{ 'fuel.averageMileage' | translate }}</span>
+          <span class="value">{{ stats.mileage | translateNumber:'1.1-1' }} {{ 'fuel.kmPerLiter' | translate }}</span>
         </div>
         <div class="stat-item">
-          <span class="label">Fuel Cost</span>
-          <span class="value">{{ stats.totalFuelCost | number:'1.2-2' }}</span>
+          <span class="label">{{ 'fuel.fuelCost' | translate }}</span>
+          <span class="value">{{ stats.totalFuelCost | translateNumber:'1.2-2' }}</span>
         </div>
         <div class="stat-item">
-          <span class="label">Last Fuel Price</span>
-          <span class="value">{{ stats.lastFuelPrice | number:'1.2-2' }}/L</span>
+          <span class="label">{{ 'fuel.lastFuelPrice' | translate }}</span>
+          <span class="value">{{ stats.lastFuelPrice | translateNumber:'1.2-2' }}/{{ 'fuel.L' | translate }}</span>
         </div>
       </div>
 
       <div class="chart-container">
-        <h4>Mileage Trend</h4>
+        <h4>{{ 'fuel.mileageTrend' | translate }}</h4>
         <canvas id="mileageChart"></canvas>
       </div>
 
       <div class="chart-container">
-        <h4>Fuel Price Trend</h4>
+        <h4>{{ 'fuel.priceTrend' | translate }}</h4>
         <canvas id="priceChart"></canvas>
       </div>
 
       <div class="chart-container">
-        <h4>Odometer Reading</h4>
+        <h4>{{ 'fuel.odoReading' | translate }}</h4>
         <canvas id="odoChart"></canvas>
       </div>
     </div>
@@ -125,7 +129,7 @@ export class FuelChartsComponent implements OnChanges {
     totalFuelQuantity: 0,
   };
 
-  constructor(private chartService: ChartService, private dbService: DbService) {
+  constructor(private chartService: ChartService, private dbService: DbService,  private translationService: TranslationService) {
     this.updateCharts();
   }
 
@@ -147,6 +151,8 @@ export class FuelChartsComponent implements OnChanges {
       this.fuelTransactions
     );
 
+    const tdp = new TranslateDatePipe(this.translationService);
+
     // Update mileage chart
     const mileageCanvas = document.querySelector(
       '#mileageChart'
@@ -155,7 +161,7 @@ export class FuelChartsComponent implements OnChanges {
       this.chartService.createLineChart(
         mileageCanvas,
         {
-          labels: mileageData.map((d) => d.date),
+          labels: mileageData.map((d) => tdp.transform(d.date)),
           values: mileageData.map((d) => d.value),
         },
         '#4CAF50'
@@ -170,7 +176,7 @@ export class FuelChartsComponent implements OnChanges {
       this.chartService.createLineChart(
         priceCanvas,
         {
-          labels: costData.map((d) => d.date),
+          labels: costData.map((d) => tdp.transform(d.date)),
           values: costData.map((d) => d.value),
         },
         '#F44336'
@@ -183,7 +189,7 @@ export class FuelChartsComponent implements OnChanges {
       this.chartService.createLineChart(
         odoCanvas,
         {
-          labels: odoData.map((d) => d.date),
+          labels: odoData.map((d) => tdp.transform(d.date)),
           values: odoData.map((d) => d.value),
         },
         '#2196F3'

@@ -20,7 +20,7 @@ import { TranslateNumberPipe } from '../shared/translate-number.pipe';
             type="text" 
             [(ngModel)]="memo" 
             (ngModelChange)="onMemoChange($event)"
-            [placeholder]="'calculator.add_memo' | translate"
+            [placeholder]="'calculator.addMemo' | translate"
             class="memo-input"
           >
         </div>

@@ -17,7 +17,7 @@
     "total": "Total"
   },
   "calculator": {
-    "add_memo": "Add memo",
+    "addMemo": "Add memo",
     "today": "Today"
   },
   "menu": {
@@ -400,7 +400,6 @@
     "mileage": "Mileage",
     "kmPerLiter": "km/L",
     "odometerReading": "Odometer Reading",
-    "fuelQuantity": "Fuel Quantity",
     "fuelType": "Fuel Type",
     "types": {
       "octen": "Octen",
@@ -408,7 +407,20 @@
       "diesel": "Diesel",
       "electric": "Electric",
       "other": "Other"
-    }
+    },
+    "fuelLogs": "Fuel Logs",
+    "logs": "Logs",
+    "analytics": "Analytics",
+    "fuelAnalytics": "Fuel Analytics",
+    "mileageDistance": "Mileage Distance",
+    "fuelQuantity": "Fuel Quantity",
+    "lastOdometer": "Last Odometer",
+    "averageMileage": "Average Mileage",
+    "fuelCost": "Fuel Cost",
+    "lastFuelPrice": "Last Fuel Price",
+    "mileageTrend": "Mileage Trend",
+    "priceTrend": "Fuel Price Trend",
+    "odoReading": "Odometer Reading"
   },
   "dashboard": {
     "title": "Dashboard",
