@@ -11,11 +11,11 @@ import { TranslateNumberPipe } from '../../../components/shared/translate-number
   template: `
     <div class="loan-summary">
       <div class="summary-item card">
-        <span class="label">{{'loan.stats.remainingToGet' | translate}}</span>
+        <span class="label">{{'loan.stats.remainingToGet' | translate}} <span class="text-muted text-sm">({{ activeGivenLoans | translateNumber:'1.0-2' }})</span></span>
         <span class="amount positive">{{ remainingGiven | translateNumber }}</span>
       </div>
       <div class="summary-item card">
-        <span class="label">{{'loan.stats.remainingToPay' | translate}}</span>
+        <span class="label">{{'loan.stats.remainingToPay' | translate}} <span class="text-muted text-sm">({{ activeTakenLoans | translateNumber:'1.0-2' }})</span></span>
         <span class="amount negative">{{ remainingTaken | translateNumber }}</span>
       </div>
     </div>
@@ -37,10 +37,14 @@ import { TranslateNumberPipe } from '../../../components/shared/translate-number
     .label {
       color: var(--text-secondary);
       font-size: 0.875rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      column-gap: .3rem;
     }
 
     .amount {
-      font-size: 1.25rem;
+      font-size: 1.1rem;
       font-weight: 500;
     }
 
@@ -51,4 +55,6 @@ import { TranslateNumberPipe } from '../../../components/shared/translate-number
 export class LoanSummaryComponent {
   @Input() remainingGiven = 0;
   @Input() remainingTaken = 0;
+  @Input() activeGivenLoans = 0;
+  @Input() activeTakenLoans = 0;
 }

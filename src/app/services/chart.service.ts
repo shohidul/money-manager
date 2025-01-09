@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Chart, CategoryScale, ChartConfiguration, DoughnutController, ArcElement, LineController, LineElement, PointElement, LinearScale, Title, Tooltip, Legend } from 'chart.js';
 import { TranslationService } from './translation.service';
+import { TranslateNumberPipe } from '../components/shared/translate-number.pipe';
 
 @Injectable({
   providedIn: 'root'
@@ -84,6 +85,60 @@ createLineChart(ctx: HTMLCanvasElement, data: any, color: string) {
         y: {
           beginAtZero: true,
           ticks: {
+            callback: (value) => {
+              return new TranslateNumberPipe(this.translationService).transform(value);
+            },
+            font: {
+              size: 11 // Smaller font size for better responsiveness
+            }
+          }
+        },
+        x: {
+          ticks: {
+            font: {
+              size: 11
+            },
+            maxRotation: 45, // Angle the labels to prevent overlap
+            minRotation: 0
+          }
+        }
+      }
+    }
+  });
+
+  this.charts.set(ctx.id, chart);
+  return chart;
+}
+
+createLineChart2(ctx: HTMLCanvasElement, data: any, color: string) {
+  const existingChart = this.charts.get(ctx.id);
+  if (existingChart) {
+    existingChart.destroy();
+  }
+
+  const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: data.labels,
+      datasets: data.datasets
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      aspectRatio: 2,
+      locale: this.translationService.getCurrentLanguage(),
+      plugins: {
+        legend: {
+          display: true
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: (value) => {
+              return new TranslateNumberPipe(this.translationService).transform(value);
+            },
             font: {
               size: 11 // Smaller font size for better responsiveness
             }

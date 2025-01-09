@@ -398,7 +398,7 @@
     "borrowedFrom": "Borrowed from",
     "charts": {
       "overview": "Loan Overview",
-      "monthlyActivity": "Monthly Loan Activity",
+      "loanTrends": "Loan Trends",
       "repaymentTrend": "Repayment Trend"
     },
     "stats": {

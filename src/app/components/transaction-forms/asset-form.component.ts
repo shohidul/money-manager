@@ -95,6 +95,7 @@ import { TranslationService } from '../../services/translation.service';
 
     .form-inline {
       display: flex;
+      flex-wrap: wrap;
       gap: 16px;
     }
 

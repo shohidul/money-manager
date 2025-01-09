@@ -22,38 +22,26 @@ import { DbService } from '../../../services/db.service';
     <div class="loan-analytics">
       <div class="stats-grid">
         <div class="stat-card card">
-          <h4>{{ 'loan.stats.totalGiven' | translate }}</h4>
-          <div class="stat-value">{{ totalGiven | translateNumber:'1.0-2' }}</div>
-          <div class="stat-detail">
-            {{ 'loan.stats.activeLoans' | translate }}: {{ activeGivenLoans | translateNumber:'1.0-0' }}
-          </div>
+          <span class="label">{{ 'loan.stats.totalGiven' | translate }} <span class="text-muted text-sm">({{ totalGiven.count | translateNumber:'1.0-2' }})</span></span>
+          <div class="stat-value">{{ totalGiven.value | translateNumber:'1.0-2' }}</div>
         </div>
 
         <div class="stat-card card">
-          <h4>{{ 'loan.stats.totalTaken' | translate }}</h4>
-          <div class="stat-value">{{ totalTaken | translateNumber:'1.0-2' }}</div>
-          <div class="stat-detail">
-            {{ 'loan.stats.activeLoans' | translate }}: {{ activeTakenLoans | translateNumber:'1.0-0' }}
-          </div>
+          <span class="label">{{ 'loan.stats.totalTaken' | translate }} <span class="text-muted text-sm">({{ totalTaken.count | translateNumber:'1.0-2' }})</span></span>
+          <div class="stat-value">{{ totalTaken.value | translateNumber:'1.0-2' }}</div>
         </div>
 
         <div class="stat-card card">
-          <h4>{{ 'loan.stats.totalRepaidToMe' | translate }}</h4>
-          <div class="stat-value">{{ remainingGiven | translateNumber:'1.0-2' }}</div>
-          <div class="stat-detail">
-            {{ (remainingGivenPercentage | translateNumber:'1.0-0') }}% {{ 'loan.status.remaining' | translate }}
-          </div>
+          <span class="label">{{ 'loan.stats.totalRepaidToMe' | translate }} <span class="text-muted text-sm">({{ totalRepaidToMe.count | translateNumber:'1.0-2' }})</span></span>
+          <div class="stat-value">{{ totalRepaidToMe.value | translateNumber:'1.0-2' }}</div>
         </div>
 
         <div class="stat-card card">
-          <h4>{{ 'loan.stats.totalRepaidByMe' | translate }}</h4>
-          <div class="stat-value">{{ remainingTaken | translateNumber:'1.0-2' }}</div>
-          <div class="stat-detail">
-            {{ (remainingTakenPercentage | translateNumber:'1.0-0') }}% {{ 'loan.status.remaining' | translate }}
-          </div>
+          <span class="label">{{ 'loan.stats.totalRepaidByMe' | translate }} <span class="text-muted text-sm">({{ totalRepaidByMe.count | translateNumber:'1.0-2' }})</span></span>
+          <div class="stat-value">{{ totalRepaidByMe.value | translateNumber:'1.0-2' }}</div>
         </div>
       </div>
-      <div class="chart-container card">
+      <div class="chart-container donut-chart card">
           <div class="chart-wrapper">
             <canvas #donutChart></canvas>
           </div>
@@ -64,27 +52,22 @@ import { DbService } from '../../../services/db.service';
               <div class="legend-info">
                 <span class="category-name">
                   <span class="material-symbols-rounded">{{ getCategoryIcon(stat.categoryId) }}</span>
-                  {{ stat.category  | translate }}
+                  {{ stat.category  | translate }} <span class="percentage text-muted text-sm">{{ stat.percentage | translateNumber:'1.1-1' }}%</span>
                 </span>
               </div>
-              <span class="percentage">{{stat.amount | translateNumber:'1.0-2'}} ({{ stat.percentage | translateNumber:'1.1-1' }}%)</span>
+              <span class="percentage">{{stat.amount | translateNumber:'1.0-2'}}</span>
             </div>
           }
         </div>
       </div>
 
       <div class="chart-container card">
-        <h3>{{ 'loan.charts.overview' | translate }}</h3>
-        <canvas id="overviewChart"></canvas>
+        <h4>{{ 'loan.charts.loanTrends' | translate }}</h4>
+        <canvas id="loanChart"></canvas>
       </div>
 
       <div class="chart-container card">
-        <h3>{{ 'loan.charts.monthlyActivity' | translate }}</h3>
-        <canvas id="activityChart"></canvas>
-      </div>
-
-      <div class="chart-container card">
-        <h3>{{ 'loan.charts.repaymentTrend' | translate }}</h3>
+        <h4>{{ 'loan.charts.repaymentTrend' | translate }}</h4>
         <canvas id="repaymentChart"></canvas>
       </div>
     </div>
@@ -93,16 +76,21 @@ import { DbService } from '../../../services/db.service';
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
-      margin-bottom: 1rem;
+      column-gap: 1rem;
+      margin-bottom: 0.5rem;
     }
 
     .stat-card {
       text-align: center;
     }
 
-    .stat-card h4 {
-      font-weight: 500;
+    .label {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      column-gap: .3rem;
     }
 
     .stat-value {
@@ -111,15 +99,17 @@ import { DbService } from '../../../services/db.service';
       margin: 0.5rem 0;
     }
 
-    .stat-detail {
-      font-size: 0.875rem;
-      color: var(--text-secondary);
+    .donut-chart{
+      display: flex;
+      gap: 2rem;
+      align-items: center;
     }
-    .chart-container {
-    display: flex;
-    gap: 2rem;
-    align-items: center;
-  }
+
+    .chart-container h4 {
+      margin-bottom: 1rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    } 
 
   .chart-wrapper {
     flex: 1;
@@ -221,8 +211,26 @@ export class LoanChartsComponent implements OnInit {
   private donutChartRef!: ElementRef;
 
   @Input() filters: FilterOptions = {};
-  @Input() totalGiven: number = 0;
-  @Input() totalTaken: number = 0;
+  totalGiven: any = {
+    value: 0,
+    count: 0,
+    chartData: []
+  }
+  totalTaken: any = {
+    value: 0,
+    count: 0,
+    chartData: []
+  };
+  totalRepaidToMe: any = {
+    value: 0,
+    count: 0,
+    chartData: []
+  };
+  totalRepaidByMe: any = {
+    value: 0,
+    count: 0,
+    chartData: []
+  };
   transactions: Transaction[] = [];
   categories: any[] = [];
   categoryStats: any[] = [];
@@ -236,13 +244,6 @@ export class LoanChartsComponent implements OnInit {
     '#FF6384',
     '#36A2EB',
   ];
-
-  activeGivenLoans = 0;
-  activeTakenLoans = 0;
-  remainingGiven = 0;
-  remainingTaken = 0;
-  remainingGivenPercentage = 0;
-  remainingTakenPercentage = 0;
 
   constructor(
     private dbService: DbService,
@@ -282,6 +283,8 @@ export class LoanChartsComponent implements OnInit {
     this.categories = await this.dbService.getCategories();
     this.calculateStats();
     this.createDonutChart();
+    this.createLoanChart();
+    this.createRepaymentChart();
   }
 
   calculateStats() {
@@ -307,6 +310,25 @@ export class LoanChartsComponent implements OnInit {
       const stat = stats.get(tx.categoryId);
       stat.amount += tx.amount;
       totalAmount += tx.amount;
+
+      // top stats
+      if (isRepaidTransaction(tx) && tx.type === 'income') {
+        this.totalRepaidToMe.value += tx.amount;
+        this.totalRepaidToMe.count += 1;
+        this.totalRepaidToMe.chartData.push({ date: tx.date, amount: tx.amount });
+      } else  if (isRepaidTransaction(tx) && tx.type === 'expense') {
+        this.totalRepaidByMe.value += tx.amount;
+        this.totalRepaidByMe.count += 1;
+        this.totalRepaidByMe.chartData.push({ date: tx.date, amount: tx.amount });
+      } else if (isLoanTransaction(tx) && tx.type === 'income') {
+        this.totalTaken.value += tx.amount;
+        this.totalTaken.count += 1;
+        this.totalTaken.chartData.push({ date: tx.date, amount: tx.amount });
+      } else if (isLoanTransaction(tx) && tx.type === 'expense') {
+        this.totalGiven.value += tx.amount;
+        this.totalGiven.count += 1;
+        this.totalGiven.chartData.push({ date: tx.date, amount: tx.amount });
+      }
     });
 
     this.categoryStats = Array.from(stats.values())
@@ -335,121 +357,97 @@ export class LoanChartsComponent implements OnInit {
     return this.categories.find((c) => c.id === categoryId)?.icon || 'help';
   }
 
-  private async loadCharts() {
-    const [givenLoans, takenLoans] = await Promise.all([
-      this.loanService.getLoansGiven(),
-      this.loanService.getLoansTaken()
-    ]);
-
-    console.log(givenLoans);
-    console.log(takenLoans);
-
-    this.updateStats(givenLoans, takenLoans);
-    this.createOverviewChart(givenLoans, takenLoans);
-    this.createActivityChart(givenLoans, takenLoans);
-    this.createRepaymentChart(givenLoans, takenLoans);
-  }
-
-  private updateStats(givenLoans: any[], takenLoans: any[]) {
-    // Total amounts
-    this.totalGiven = givenLoans.reduce((sum, loan) => sum + loan.status.totalAmount, 0);
-    this.totalTaken = takenLoans.reduce((sum, loan) => sum + loan.status.totalAmount, 0);
-    
-    // Active loans count
-    this.activeGivenLoans = givenLoans.filter(loan => !loan.status.isCompleted).length;
-    this.activeTakenLoans = takenLoans.filter(loan => !loan.status.isCompleted).length;
-    
-    // Remaining amounts
-    this.remainingGiven = givenLoans.reduce((sum, loan) => sum + loan.status.remainingAmount, 0);
-    this.remainingTaken = takenLoans.reduce((sum, loan) => sum + loan.status.remainingAmount, 0);
-    
-    // Calculate percentages
-    this.remainingGivenPercentage = this.totalGiven ? (this.remainingGiven / this.totalGiven) * 100 : 0;
-    this.remainingTakenPercentage = this.totalTaken ? (this.remainingTaken / this.totalTaken) * 100 : 0;
-  }
-
-  private createOverviewChart(givenLoans: any[], takenLoans: any[]) {
-    const overviewCanvas = document.querySelector('#overviewChart') as HTMLCanvasElement;
-    if (!overviewCanvas) return;
-
-    const activeGiven = givenLoans.reduce((sum, loan) => 
-      sum + (loan.status.isCompleted ? 0 : loan.status.remainingAmount), 0);
-    const activeTaken = takenLoans.reduce((sum, loan) => 
-      sum + (loan.status.isCompleted ? 0 : loan.status.remainingAmount), 0);
-
-    this.chartService.createDonutChart(
-      overviewCanvas.getContext('2d')!,
-      [
-        { category: 'loan.stats.remainingGivenLoans', amount: activeGiven },
-        { category: 'loan.stats.remainingTakenLoans', amount: activeTaken }
-      ],
-      ['#4CAF50', '#f44336']
-    );
-  }
-
-  private createActivityChart(givenLoans: any[], takenLoans: any[]) {
-    const activityCanvas = document.querySelector('#activityChart') as HTMLCanvasElement;
-    if (!activityCanvas) return;
+  private createLoanChart() {
+    const loanCanvas = document.querySelector('#loanChart') as HTMLCanvasElement;
+    if (!loanCanvas) return;
 
     const tdp = new TranslateDatePipe(this.translationService);
-    const monthlyData = this.getMonthlyActivity([...givenLoans, ...takenLoans]);
+    interface ChartData {
+      date: string;
+      amount: number;
+    }
 
-    this.chartService.createLineChart(
-      activityCanvas,
+    const combinedChartData = [
+      ...this.totalGiven.chartData,
+      ...this.totalTaken.chartData
+    ];
+
+    const uniqueDates = Array.from(
+        new Set(
+            combinedChartData
+                .map(d => new Date(d.date).setHours(6, 0, 0, 0)) // Set time to 0
+                .sort((a, b) => a - b) // Sort based on date only
+        )
+    ).map(d => tdp.transform(new Date(d), 'MMM d'));
+    
+    this.chartService.createLineChart2(
+      loanCanvas,
       {
-        labels: monthlyData.map(d => tdp.transform(new Date(d.month), 'MMM d')),
-        values: monthlyData.map(d => d.amount)
-      },
-      '#2196F3'
-    );
-  }
-
-  private createRepaymentChart(givenLoans: any[], takenLoans: any[]) {
-    const repaymentCanvas = document.querySelector('#repaymentChart') as HTMLCanvasElement;
-    if (!repaymentCanvas) return;
-
-    const tdp = new TranslateDatePipe(this.translationService);
-    const repaymentData = this.getRepaymentTrend([...givenLoans, ...takenLoans]);
-
-    this.chartService.createLineChart(
-      repaymentCanvas,
-      {
-        labels: repaymentData.map(d => tdp.transform(new Date(d.date), 'MMM d')),
-        values: repaymentData.map(d => d.amount)
+        labels: uniqueDates,
+        datasets: [{
+          label: 'Repaid To Me',
+          data: this.totalGiven.chartData.map((d: ChartData) => d.amount),
+          borderColor: '#4CAF50',
+          tension: 0.4,
+          fill: false
+        },
+        {
+          label: 'Repaid By Me',
+          data: this.totalTaken.chartData.map((d: ChartData) => d.amount),
+          borderColor: '#f44336',
+          tension: 0.4,
+          fill: false
+        }
+      ]
       },
       '#FF9800'
     );
   }
 
-  private getMonthlyActivity(loans: any[]) {
-    const monthlyMap = new Map<string, number>();
+  private createRepaymentChart() {
+    const repaymentCanvas = document.querySelector('#repaymentChart') as HTMLCanvasElement;
+    if (!repaymentCanvas) return;
 
-    loans.forEach(loan => {
-      loan.transactions.forEach((tx: any) => {
-        const month = tx.date.toISOString().slice(0, 7);
-        monthlyMap.set(month, (monthlyMap.get(month) || 0) + tx.amount);
-      });
-    });
+    const tdp = new TranslateDatePipe(this.translationService);
+    interface ChartData {
+      date: string;
+      amount: number;
+    }
 
-    return Array.from(monthlyMap.entries())
-      .map(([month, amount]) => ({ month, amount }))
-      .sort((a, b) => a.month.localeCompare(b.month));
-  }
+    const combinedChartData = [
+      ...this.totalRepaidToMe.chartData,
+      ...this.totalRepaidByMe.chartData
+    ];
 
-  private getRepaymentTrend(loans: any[]) {
-    const repayments: { date: string; amount: number }[] = [];
+    const uniqueDates = Array.from(
+        new Set(
+            combinedChartData
+                .map(d => new Date(d.date).setHours(6, 0, 0, 0)) // Set time to 0
+                .sort((a, b) => a - b) // Sort based on date only
+        )
+    ).map(d => tdp.transform(new Date(d), 'MMM d'));
 
-    loans.forEach(loan => {
-      loan.transactions
-        .filter((tx: any) => tx.subType === 'repaid')
-        .forEach((tx: any) => {
-          repayments.push({
-            date: tx.date.toISOString().slice(0, 10),
-            amount: tx.amount
-          });
-        });
-    });
-
-    return repayments.sort((a, b) => a.date.localeCompare(b.date));
+     this.chartService.createLineChart2(
+      repaymentCanvas,
+      {
+        labels: uniqueDates,
+        datasets: [{
+          label: 'Repaid To Me',
+          data: this.totalRepaidToMe.chartData.map((d: ChartData) => d.amount),
+          borderColor: '#4CAF50',
+          tension: 0.4,
+          fill: false
+        },
+        {
+          label: 'Repaid By Me',
+          data: this.totalRepaidByMe.chartData.map((d: ChartData) => d.amount),
+          borderColor: '#f44336',
+          tension: 0.4,
+          fill: false
+        }
+      ]
+      },
+      '#FF9800'
+    );
   }
 }

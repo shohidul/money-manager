@@ -169,6 +169,7 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
         height: 100%;
         max-width: 100%;
         max-height: 100vh;
+        padding: 2.5rem 1.2rem;
       }
     }    
 

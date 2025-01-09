@@ -26,7 +26,7 @@ import { TranslateNumberPipe } from '../../components/shared/translate-number.pi
       <div class="content">
         <app-filter-bar
         [filters]="filters"
-        [showStatus]="true"
+        [showStatus]="activeTab === 'list'"
         (filtersChange)="onFiltersChange($event)"
         (startDateChange)="onStartDateChange($event)"
         (endDateChange)="onEndDateChange($event)"
@@ -43,12 +43,12 @@ import { TranslateNumberPipe } from '../../components/shared/translate-number.pi
             [takenLoans]="takenLoans" 
             [remainingGiven]="remainingGiven" 
             [remainingTaken]="remainingTaken" 
+            [activeGivenLoans]="activeGivenLoans" 
+            [activeTakenLoans]="activeTakenLoans"
           />
         } @else {
           <app-loan-charts 
             [filters]="filters"
-            [totalGiven]="totalGiven" 
-            [totalTaken]="totalTaken" 
           />
         }
       </div>
@@ -90,8 +90,8 @@ export class LoansComponent {
   filters: FilterOptions = {};
   givenLoans: LoanGroup[] = [];
   takenLoans: LoanGroup[] = [];
-  totalGiven: number = 0;
-  totalTaken: number = 0;
+  activeGivenLoans = 0;
+  activeTakenLoans = 0;
   remainingGiven: number = 0;
   remainingTaken: number = 0;
 
@@ -153,9 +153,13 @@ export class LoansComponent {
       this.givenLoans = filterByStatus(this.givenLoans);
       this.takenLoans = filterByStatus(this.takenLoans);
 
+      // Active loans count
+      this.activeGivenLoans = this.givenLoans.filter(loan => !loan.status.isCompleted).length;
+      this.activeTakenLoans = this.takenLoans.filter(loan => !loan.status.isCompleted).length;
+
       // Calculate totals
-      this.totalGiven = this.givenLoans.reduce((sum, group) => sum + group.status.totalAmount, 0);
-      this.totalTaken = this.takenLoans.reduce((sum, group) => sum + group.status.totalAmount, 0);
+      // this.totalGiven = this.givenLoans.reduce((sum, group) => sum + group.status.totalAmount, 0);
+      // this.totalTaken = this.takenLoans.reduce((sum, group) => sum + group.status.totalAmount, 0);
 
       // Calculate remaining amounts
       this.remainingGiven = this.givenLoans.reduce((sum, group) => sum + group.status.remainingAmount, 0);
