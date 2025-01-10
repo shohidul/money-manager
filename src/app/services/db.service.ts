@@ -44,7 +44,7 @@ export interface BudgetHistory {
 export class DbService {
   private db!: IDBPDatabase<MoneyManagerDB>;
   private readonly DB_NAME = 'money-manager-db';
-  private readonly VERSION = 1;
+  private readonly VERSION = 2;
 
   async initializeDB() {
     this.db = await openDB<MoneyManagerDB>(this.DB_NAME, this.VERSION, {
