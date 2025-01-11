@@ -4,3 +4,4 @@ node_modules/
 .bolt/
 .DS_store
 out/
+.vscode/

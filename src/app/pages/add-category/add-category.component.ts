@@ -7,9 +7,10 @@ import { DbService } from '../../services/db.service';
 import { MobileHeaderComponent } from '../../components/mobile-header/mobile-header.component';
 import { Location } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
-import { TransactionSubType } from '../../models/transaction-types';
+import { TransactionSubType, TransactionType } from '../../models/transaction-types';
 import { TranslatePipe } from '../../components/shared/translate.pipe';
 import { TranslationService } from '../../services/translation.service';
+import { CategoryService } from '../../services/category.service';
 
 @Component({
   selector: 'app-add-category',
@@ -192,7 +193,7 @@ import { TranslationService } from '../../services/translation.service';
   ],
 })
 export class AddCategoryComponent implements OnInit {
-  type: 'income' | 'expense' | null = null;
+  type: TransactionType = 'expense';
   subType: TransactionSubType = 'none';
   categoryGroups = categoryGroups;
   categoryName = '';
@@ -206,6 +207,7 @@ export class AddCategoryComponent implements OnInit {
     private router: Router,
     private location: Location,
     private route: ActivatedRoute,
+    private categoryService: CategoryService,
     private translationService: TranslationService
   ) {
     this.translationService.currentLang$.subscribe(() => {
@@ -219,7 +221,7 @@ export class AddCategoryComponent implements OnInit {
 
   ngOnInit(): void {
     const typeFromQuery = this.route.snapshot.queryParamMap.get('type');
-    this.type = typeFromQuery as 'income' | 'expense' | null;
+    this.type = typeFromQuery as TransactionType;
 
     const subTypeFromQuery = this.route.snapshot.queryParamMap.get('subType');
     if (subTypeFromQuery) {

@@ -1,9 +1,26 @@
+import { TransactionSubType, TransactionType } from "../models/transaction-types";
+
 export interface DefaultCategories {
   name: string;
   icon: string;
-  type: 'expense' | 'income' ;
-  subType: 'none' | 'loan' | 'repaid' | 'asset' | 'fuel';
+  type: TransactionType;
+  subType: TransactionSubType;
+  version?: number;     // Version when category was added
+  order?: number;       // Default position in list
 }
+
+// Current version of categories
+export const CATEGORIES_VERSION = 1;
+
+// If you want to add between order 15 (car) and 16 (carFuel):
+// { 
+//   name: 'categories.defaults.expense.newCategory',
+//   icon: 'new_icon',
+//   type: 'expense',
+//   subType: 'none',
+//   version: 2,    // New version
+//   order: 15.5    // Between 15 and 16
+// }
 
 export interface CategoryGroup {
   name: string;
@@ -242,69 +259,71 @@ export const categoryGroups: CategoryGroup[] = [
 
 export const defaultCategories: DefaultCategories[] = [
   // Expense categories
-  { name: 'categories.defaults.expense.home', icon: 'home', type: 'expense', subType: 'none' },
-  { name: 'categories.defaults.expense.family', icon: 'family_restroom', type: 'expense', subType: 'none' },
-  { name: 'categories.defaults.expense.food', icon: 'restaurant', type: 'expense', subType: 'none' },
-  { name: 'categories.defaults.expense.grocery', icon: 'shopping_basket', type: 'expense', subType: 'none' },
-  { name: 'categories.defaults.expense.transportation', icon: 'directions_bus', type: 'expense', subType: 'none' },
-  { name: 'categories.defaults.expense.shopping', icon: 'shopping_bag', type: 'expense', subType: 'none' },
-  { name: 'categories.defaults.expense.entertainment', icon: 'sports_esports', type: 'expense', subType: 'none' },
-  { name: 'categories.defaults.expense.bills', icon: 'bolt', type: 'expense', subType: 'none' },
-  { name: 'categories.defaults.expense.health', icon: 'health_and_safety', type: 'expense', subType: 'none' },
-  { name: 'categories.defaults.expense.others', icon: 'category', type: 'expense', subType: 'none' },
-  { name: 'categories.defaults.expense.utilities', icon: 'build', type: 'expense', subType: 'none' },
-  { name: 'categories.defaults.expense.clothing', icon: 'checkroom', type: 'expense', subType: 'none' },
-  { name: 'categories.defaults.expense.snacks', icon: 'icecream', type: 'expense', subType: 'none' },
-  { name: 'categories.defaults.expense.fruits', icon: 'nutrition', type: 'expense', subType: 'none' },
-  { name: 'categories.defaults.expense.car', icon: 'directions_car', type: 'expense', subType: 'none' },
-  { name: 'categories.defaults.fuel.carFuel', icon: 'directions_car', type: 'expense', subType: 'fuel' },
-  { name: 'categories.defaults.expense.motorcycle', icon: 'two_wheeler', type: 'expense', subType: 'none' },
-  { name: 'categories.defaults.fuel.motorcycleFuel', icon: 'two_wheeler', type: 'expense', subType: 'fuel' },
-  { name: 'categories.defaults.expense.fuel', icon: 'local_gas_station', type: 'expense', subType: 'none' },
-  { name: 'categories.defaults.fuel.evCharging', icon: 'ev_station', type: 'expense', subType: 'fuel' },
-  { name: 'categories.defaults.expense.beauty', icon: 'health_and_beauty', type: 'expense', subType: 'none' },
-  { name: 'categories.defaults.expense.phoneRecharge', icon: 'phone_iphone', type: 'expense', subType: 'none' },
-  { name: 'categories.defaults.expense.internet', icon: 'wifi', type: 'expense', subType: 'none' },
-  { name: 'categories.defaults.expense.fitness', icon: 'fitness_center', type: 'expense', subType: 'none' },
-  { name: 'categories.defaults.expense.travel', icon: 'flight_takeoff', type: 'expense', subType: 'none' },
-  { name: 'categories.defaults.expense.baby', icon: 'child_care', type: 'expense', subType: 'none' },
-  { name: 'categories.defaults.expense.donation', icon: 'payments', type: 'expense', subType: 'none' },
-  { name: 'categories.defaults.expense.insurance', icon: 'verified_user', type: 'expense', subType: 'none' },
-  { name: 'categories.defaults.expense.tax', icon: 'description', type: 'expense', subType: 'none' },
-  { name: 'categories.defaults.expense.telephone', icon: 'phone_in_talk', type: 'expense', subType: 'none' },
-  { name: 'categories.defaults.expense.cigarette', icon: 'smoking_rooms', type: 'expense', subType: 'none' },
-  { name: 'categories.defaults.expense.sport', icon: 'sports_and_outdoors', type: 'expense', subType: 'none' },
-  { name: 'categories.defaults.expense.pet', icon: 'pets', type: 'expense', subType: 'none' },
-  { name: 'categories.defaults.expense.electronics', icon: 'devices_other', type: 'expense', subType: 'none' },
-  { name: 'categories.defaults.expense.wine', icon: 'liquor', type: 'expense', subType: 'none' },
-  { name: 'categories.defaults.expense.gift', icon: 'featured_seasonal_and_gifts', type: 'expense', subType: 'none' },
-  { name: 'categories.defaults.expense.social', icon: 'group', type: 'expense', subType: 'none' },
-  { name: 'categories.defaults.expense.book', icon: 'book_5', type: 'expense', subType: 'none' },
-  { name: 'categories.defaults.expense.office', icon: 'attach_file', type: 'expense', subType: 'none' },
-  { name: 'categories.defaults.expense.furniture', icon: 'king_bed', type: 'expense', subType: 'none' },
-  { name: 'categories.defaults.expense.charity', icon: 'volunteer_activism', type: 'expense', subType: 'none' },
-  { name: 'categories.defaults.expense.hobbies', icon: 'palette', type: 'expense', subType: 'none' },
+  { version: 1, order: 1, name: 'categories.defaults.expense.home', icon: 'home', type: 'expense', subType: 'none' },
+  { version: 1, order: 2, name: 'categories.defaults.expense.family', icon: 'family_restroom', type: 'expense', subType: 'none' },
+  { version: 1, order: 3, name: 'categories.defaults.expense.food', icon: 'restaurant', type: 'expense', subType: 'none' },
+  { version: 1, order: 4, name: 'categories.defaults.expense.grocery', icon: 'shopping_basket', type: 'expense', subType: 'none' },
+  { version: 1, order: 5, name: 'categories.defaults.expense.transportation', icon: 'directions_bus', type: 'expense', subType: 'none' },
+  { version: 1, order: 6, name: 'categories.defaults.expense.shopping', icon: 'shopping_bag', type: 'expense', subType: 'none' },
+  { version: 1, order: 7, name: 'categories.defaults.expense.entertainment', icon: 'sports_esports', type: 'expense', subType: 'none' },
+  { version: 1, order: 8, name: 'categories.defaults.expense.bills', icon: 'bolt', type: 'expense', subType: 'none' },
+  { version: 1, order: 9, name: 'categories.defaults.expense.health', icon: 'health_and_safety', type: 'expense', subType: 'none' },
+  { version: 1, order: 10, name: 'categories.defaults.expense.others', icon: 'category', type: 'expense', subType: 'none' },
+  { version: 1, order: 11, name: 'categories.defaults.expense.utilities', icon: 'build', type: 'expense', subType: 'none' },
+  { version: 1, order: 12, name: 'categories.defaults.expense.clothing', icon: 'checkroom', type: 'expense', subType: 'none' },
+  { version: 1, order: 13, name: 'categories.defaults.expense.snacks', icon: 'icecream', type: 'expense', subType: 'none' },
+  { version: 1, order: 14, name: 'categories.defaults.expense.fruits', icon: 'nutrition', type: 'expense', subType: 'none' },
+  { version: 1, order: 15, name: 'categories.defaults.expense.car', icon: 'directions_car', type: 'expense', subType: 'none' },
+  { version: 1, order: 16, name: 'categories.defaults.fuel.carFuel', icon: 'directions_car', type: 'expense', subType: 'fuel' },
+  { version: 1, order: 17, name: 'categories.defaults.expense.motorcycle', icon: 'two_wheeler', type: 'expense', subType: 'none' },
+  { version: 1, order: 18, name: 'categories.defaults.fuel.motorcycleFuel', icon: 'two_wheeler', type: 'expense', subType: 'fuel' },
+  { version: 1, order: 19, name: 'categories.defaults.expense.fuel', icon: 'local_gas_station', type: 'expense', subType: 'none' },
+  { version: 1, order: 20, name: 'categories.defaults.fuel.evCharging', icon: 'ev_station', type: 'expense', subType: 'fuel' },
+  { version: 1, order: 21, name: 'categories.defaults.expense.beauty', icon: 'health_and_beauty', type: 'expense', subType: 'none' },
+  { version: 1, order: 22, name: 'categories.defaults.expense.phoneRecharge', icon: 'phone_iphone', type: 'expense', subType: 'none' },
+  { version: 1, order: 23, name: 'categories.defaults.expense.internet', icon: 'wifi', type: 'expense', subType: 'none' },
+  { version: 1, order: 24, name: 'categories.defaults.expense.fitness', icon: 'fitness_center', type: 'expense', subType: 'none' },
+  { version: 1, order: 25, name: 'categories.defaults.expense.travel', icon: 'flight_takeoff', type: 'expense', subType: 'none' },
+  { version: 1, order: 26, name: 'categories.defaults.expense.baby', icon: 'child_care', type: 'expense', subType: 'none' },
+  { version: 1, order: 27, name: 'categories.defaults.expense.donation', icon: 'payments', type: 'expense', subType: 'none' },
+  { version: 1, order: 28, name: 'categories.defaults.expense.insurance', icon: 'verified_user', type: 'expense', subType: 'none' },
+  { version: 1, order: 29, name: 'categories.defaults.expense.tax', icon: 'description', type: 'expense', subType: 'none' },
+  { version: 1, order: 30, name: 'categories.defaults.expense.telephone', icon: 'phone_in_talk', type: 'expense', subType: 'none' },
+  { version: 1, order: 31, name: 'categories.defaults.expense.cigarette', icon: 'smoking_rooms', type: 'expense', subType: 'none' },
+  { version: 1, order: 32, name: 'categories.defaults.expense.sport', icon: 'sports_and_outdoors', type: 'expense', subType: 'none' },
+  { version: 1, order: 33, name: 'categories.defaults.expense.pet', icon: 'pets', type: 'expense', subType: 'none' },
+  { version: 1, order: 34, name: 'categories.defaults.expense.electronics', icon: 'devices_other', type: 'expense', subType: 'none' },
+  { version: 1, order: 35, name: 'categories.defaults.expense.wine', icon: 'liquor', type: 'expense', subType: 'none' },
+  { version: 1, order: 36, name: 'categories.defaults.expense.gift', icon: 'featured_seasonal_and_gifts', type: 'expense', subType: 'none' },
+  { version: 1, order: 37, name: 'categories.defaults.expense.social', icon: 'group', type: 'expense', subType: 'none' },
+  { version: 1, order: 38, name: 'categories.defaults.expense.book', icon: 'book_5', type: 'expense', subType: 'none' },
+  { version: 1, order: 39, name: 'categories.defaults.expense.office', icon: 'attach_file', type: 'expense', subType: 'none' },
+  { version: 1, order: 40, name: 'categories.defaults.expense.furniture', icon: 'king_bed', type: 'expense', subType: 'none' },
+  { version: 1, order: 41, name: 'categories.defaults.expense.charity', icon: 'volunteer_activism', type: 'expense', subType: 'none' },
+  { version: 1, order: 42, name: 'categories.defaults.expense.hobbies', icon: 'palette', type: 'expense', subType: 'none' },
   
-  { name: 'categories.defaults.loan.personalLoanGiven', icon: 'person', type: 'expense', subType: 'loan' },
-  { name: 'categories.defaults.loan.loanPayment', icon: 'person_outline', type: 'expense', subType: 'repaid' },
-  { name: 'categories.defaults.loan.businessLoanGiven', icon: 'business', type: 'expense', subType: 'loan' },
-  { name: 'categories.defaults.loan.loan', icon: 'account_balance_wallet', type: 'expense', subType: 'loan' },
-  
-  { name: 'categories.defaults.asset.savings', icon: 'savings', type: 'expense', subType: 'asset' },
-  { name: 'categories.defaults.asset.purchaseAsset', icon: 'apartment', type: 'expense', subType: 'asset' },
+  { version: 1, order: 43, name: 'categories.defaults.loan.personalLoanGiven', icon: 'person', type: 'expense', subType: 'loan' },
+  { version: 1, order: 44, name: 'categories.defaults.loan.loanPayment', icon: 'person_outline', type: 'expense', subType: 'repaid' },
+  { version: 1, order: 45, name: 'categories.defaults.loan.businessLoanGiven', icon: 'business', type: 'expense', subType: 'loan' },
+  { version: 1, order: 46, name: 'categories.defaults.loan.loan', icon: 'account_balance_wallet', type: 'expense', subType: 'loan' },
+  { version: 2, order: 46.1, name: 'categories.defaults.loan.loanCost', icon: 'payments', type: 'expense', subType: 'loanCost' },
+  { version: 1, order: 47, name: 'categories.defaults.asset.savings', icon: 'savings', type: 'expense', subType: 'asset' },
+  { version: 1, order: 48, name: 'categories.defaults.asset.purchaseAsset', icon: 'apartment', type: 'expense', subType: 'asset' },
+  { version: 2, order: 48.1, name: 'categories.defaults.asset.assetCost', icon: 'payments', type: 'expense', subType: 'assetCost' },
   
   // Income categories
-  { name: 'categories.defaults.income.salary', icon: 'payments', type: 'income', subType: 'none' },
-  { name: 'categories.defaults.income.business', icon: 'store', type: 'income', subType: 'none' },
-  { name: 'categories.defaults.income.investment', icon: 'trending_up', type: 'income', subType: 'none' },
-  { name: 'categories.defaults.income.otherIncome', icon: 'account_balance_wallet', type: 'income', subType: 'none' },
-  { name: 'categories.defaults.income.freelance', icon: 'computer', type: 'income', subType: 'none' },
-  { name: 'categories.defaults.loan.loanRepaidToMe', icon: 'person_outline', type: 'income', subType: 'repaid' },
-  { name: 'categories.defaults.loan.personalLoanTaken', icon: 'person', type: 'income', subType: 'loan' },
-  { name: 'categories.defaults.loan.bankLoanTaken', icon: 'account_balance', type: 'income', subType: 'loan' },
-  { name: 'categories.defaults.asset.sellAsset', icon: 'apartment', type: 'income', subType: 'asset' },
-  { name: 'categories.defaults.income.rental', icon: 'apartment', type: 'income', subType: 'none' },
-  { name: 'categories.defaults.income.gift', icon: 'redeem', type: 'income', subType: 'none' },
-  { name: 'categories.defaults.income.interest', icon: 'savings', type: 'income', subType: 'none' },
-  { name: 'categories.defaults.income.bonus', icon: 'stars', type: 'income', subType: 'none' }
-];
+  { version: 1, order: 49, name: 'categories.defaults.income.salary', icon: 'payments', type: 'income', subType: 'none' },
+  { version: 1, order: 50, name: 'categories.defaults.income.business', icon: 'store', type: 'income', subType: 'none' },
+  { version: 1, order: 51, name: 'categories.defaults.income.investment', icon: 'trending_up', type: 'income', subType: 'none' },
+  { version: 1, order: 52, name: 'categories.defaults.income.otherIncome', icon: 'account_balance_wallet', type: 'income', subType: 'none' },
+  { version: 1, order: 53, name: 'categories.defaults.income.freelance', icon: 'computer', type: 'income', subType: 'none' },
+  { version: 1, order: 54, name: 'categories.defaults.loan.loanRepaidToMe', icon: 'person_outline', type: 'income', subType: 'repaid' },
+  { version: 1, order: 55, name: 'categories.defaults.loan.personalLoanTaken', icon: 'person', type: 'income', subType: 'loan' },
+  { version: 1, order: 56, name: 'categories.defaults.loan.bankLoanTaken', icon: 'account_balance', type: 'income', subType: 'loan' },
+  { version: 1, order: 57, name: 'categories.defaults.asset.sellAsset', icon: 'apartment', type: 'income', subType: 'asset' },
+  { version: 2, order: 57.1, name: 'categories.defaults.asset.assetIncome', icon: 'payments', type: 'income', subType: 'assetIncome' },
+  { version: 1, order: 58, name: 'categories.defaults.income.rental', icon: 'apartment', type: 'income', subType: 'none' },
+  { version: 1, order: 59, name: 'categories.defaults.income.gift', icon: 'redeem', type: 'income', subType: 'none' },
+  { version: 1, order: 60, name: 'categories.defaults.income.interest', icon: 'savings', type: 'income', subType: 'none' },
+  { version: 1, order: 61, name: 'categories.defaults.income.bonus', icon: 'stars', type: 'income', subType: 'none' }
+ ];

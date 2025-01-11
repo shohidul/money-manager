@@ -118,8 +118,11 @@ import { TranslationService } from '../../../services/translation.service';
                     >
                       <option value="none">{{ 'categories.subTypes.none' | translate }}</option>
                       <option value="asset">{{ 'categories.subTypes.asset' | translate }}</option>
+                      <option value="assetCost">{{ 'categories.subTypes.assetCost' | translate }}</option>
+                      <option value="assetIncome">{{ 'categories.subTypes.assetIncome' | translate }}</option>
                       <option value="loan">{{ 'categories.subTypes.loan' | translate }}</option>
                       <option value="repaid">{{ 'categories.subTypes.repaid' | translate }}</option>
+                      <option value="loanCost">{{ 'categories.subTypes.loanCost' | translate }}</option>
                       <option value="fuel">{{ 'categories.subTypes.fuel' | translate }}</option>
                     </select>
                   </div>

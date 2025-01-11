@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Category, DbService } from './db.service';
-import { defaultCategories } from '../data/category-icons';
+import { defaultCategories, CATEGORIES_VERSION} from '../data/category-icons';
 
 @Injectable({ providedIn: 'root' })
 export class CategoryService {
@@ -11,15 +11,23 @@ export class CategoryService {
   async initializeDefaultCategories() {
     const existingCategories = await this.dbService.getCategories();
 
-    const defaultCategoriesWithDetails = defaultCategories.map((category, index) => ({
-      id: index + 1, // Start IDs from 1
+    const defaultCategoriesWithDetails = defaultCategories
+    .filter(category => category.version! <= CATEGORIES_VERSION)
+    .map((category) => ({
+      id: category.order,  // Use order as ID
       name: category.name,
       icon: category.icon,
       type: category.type,
       subType: category.subType,
       isCustom: false,
-      order: index + 1
+      order: category.order,
+      version: category.version
     }));
+
+    // Sort by order to maintain proper sequence
+    defaultCategoriesWithDetails.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+    let isNewAdded = false;
 
     for (const category of defaultCategoriesWithDetails) {
       const exists = existingCategories.some(
@@ -28,11 +36,17 @@ export class CategoryService {
 
       if (!exists) {
         await this.dbService.addCategory(category);
+        isNewAdded = true;
       }
     }
 
     // Clear cache to force reload
     this.clearCategoriesCache();
+
+    if (isNewAdded) {
+      // Save the updated order to the database
+      await this.updateCategoryOrder(defaultCategoriesWithDetails);
+    }
   }
 
   async getAllCategories() {
@@ -73,5 +87,9 @@ export class CategoryService {
   // Add a method to explicitly clear the cache
   clearCategoriesCache() {
     this.categoriesCache = null;
+  }
+
+  async updateCategoryOrder(categories: Category[]) {
+    return this.dbService.updateCategoryOrder(categories);
   }
 }

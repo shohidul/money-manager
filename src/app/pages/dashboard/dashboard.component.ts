@@ -307,7 +307,7 @@ import { DOCUMENT } from '@angular/common';
 export class DashboardComponent implements OnInit {
   currentMonth = format(new Date(), 'yyyy-MM');
   transactions: Transaction[] = [];
-  categories: any[] = [];
+  categories: Category[] = [];
   transactionGroups: any[] = [];
   totalIncome = 0;
   totalExpense = 0;

@@ -43,8 +43,11 @@
     "subTypes": {
       "none": "Regular",
       "loan": "Loan",
-      "repaid": "Repaid",
+      "repaid": "Loan Repaid",
+      "loanCost": "Loan Cost",
       "asset": "Asset",
+      "assetCost": "Asset Cost",
+      "assetIncome": "Asset Income",
       "fuel": "Fuel"
     },
     "filters": {
@@ -312,9 +315,12 @@
         "personalLoanTaken": "Personal Loan Taken",
         "bankLoanTaken": "Bank Loan Taken",
         "loanPayment": "Loan Payment",
-        "loan": "Loan"
+        "loan": "Loan",
+        "loanCost": "Loan Cost"
       },
       "asset": {
+        "assetCost": "Asset Cost",
+        "assetIncome": "Asset Income",
         "purchaseAsset": "Purchase Asset",
         "sellAsset": "Sell Asset",
         "savings": "Savings"

@@ -43,8 +43,11 @@
     "subTypes": {
       "none": "সাধারণ",
       "loan": "ঋণ",
-      "repaid": "ফেরত",
+      "repaid": "ঋণ ফেরত",
+      "loanCost": "ঋণ খরচ",
       "asset": "সম্পদ",
+      "assetCost": "সম্পদ খরচ",
+      "assetIncome": "সম্পদ আয়",
       "fuel": "জ্বালানি"
     },
     "filters": {

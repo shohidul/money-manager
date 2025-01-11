@@ -1,5 +1,5 @@
 export type TransactionType = 'income' | 'expense';
-export type TransactionSubType = 'none' | 'loan' | 'repaid' | 'asset' | 'fuel';
+export type TransactionSubType = 'none' | 'loan' | 'repaid' | 'loanCost' | 'asset' | 'assetCost' | 'assetIncome' | 'fuel';
 
 export interface BaseTransaction {
   id?: number;
@@ -50,16 +50,3 @@ export function isAssetTransaction(tx: Transaction): tx is AssetTransaction {
 export function isFuelTransaction(tx: Transaction): tx is FuelTransaction {
   return tx.subType === 'fuel';
 }
-
-export const transactionTypeLabels: Record<TransactionType, string> = {
-  income: 'Income',
-  expense: 'Expense'
-};
-
-export const transactionSubTypeLabels: Record<TransactionSubType, string> = {
-  none: 'None',
-  loan: 'Loan',
-  repaid: 'Repaid',
-  asset: 'Asset',
-  fuel: 'Fuel'
-};

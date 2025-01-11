@@ -130,13 +130,17 @@ export class DbService {
   async addCategory(category: Omit<Category, 'id'>) {
     const categories = await this.getCategories();
     
-    // Filter categories by the same type
-    const typeCategories = categories.filter(c => c.type === category.type);
+    // If order is not provided, calculate it
+    if (category.order === undefined) {
+      // Filter categories by the same type
+      const typeCategories = categories.filter(c => c.type === category.type);
+      
+      // Find the maximum order for the specific type
+      const maxOrder = Math.max(...typeCategories.map((c) => c.order || 0), 0);
+      category.order = maxOrder + 1;
+    }
     
-    // Find the maximum order for the specific type
-    const maxOrder = Math.max(...typeCategories.map((c) => c.order || 0), 0);
-    
-    return this.db.add('categories', { ...category, order: maxOrder + 1 });
+    return this.db.add('categories', category);
   }
 
   async getCategoryById(id: string | number | undefined) {
