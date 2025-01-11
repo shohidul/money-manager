@@ -13,43 +13,44 @@ import { TranslatePipe } from '../../components/shared/translate.pipe';
   standalone: true,
   imports: [CommonModule, CalculatorSheetComponent, RouterLink, MobileHeaderComponent, TranslatePipe],
   template: `
-    <div class="add-transaction">
-      <app-mobile-header
-        [title]="isEditMode ? ('transaction.title.edit' | translate) : ('transaction.title.add' | translate)"
-        [showBackButton]="true"
-        [showOnDesktop]="true" 
-        (back)="goBack()"
-      />
-      
-      <div class="type-tabs">
-        <button 
-          *ngFor="let type of types" 
-          [class.active]="selectedType === type"
-          (click)="onTypeChange(type)"
-          class="type-tab"
-        >
-          {{ 'transaction.types.' + type | translate }}
-        </button>
-      </div>
-
-      <div class="categories-grid" #categoriesGrid>
-        @for (category of filteredGroups; track category.name) {
+    <div class="add-transaction" [class.space-between]="showCalculator">
+      <div class="overflow-auto">
+        <app-mobile-header
+          [title]="isEditMode ? ('transaction.title.edit' | translate) : ('transaction.title.add' | translate)"
+          [showBackButton]="true"
+          [showOnDesktop]="true" 
+          (back)="goBack()"
+        />
+        
+        <div class="type-tabs">
           <button 
-            class="category-item"
-            [class.selected]="selectedIcon?.icon === category.icon && selectedIcon?.name === category.name"
-            (click)="selectCategory(category)"
-            #categoryButton
+            *ngFor="let type of types" 
+            [class.active]="selectedType === type"
+            (click)="onTypeChange(type)"
+            class="type-tab"
           >
-            <span class="material-symbols-rounded">{{ category.icon }}</span>
-            <span class="category-name">{{ category.name | translate }}</span>
+            {{ 'transaction.types.' + type | translate }}
           </button>
-        }
-        <a [routerLink]="'/add-category'" [queryParams]="{ type: selectedType, referer: currentRoute }" class="category-item add-category">
-          <span class="material-icons">add</span>
-          <span class="category-name">{{ 'common.add' | translate }}</span>
-        </a>
-      </div>
+        </div>
 
+        <div class="categories-grid" #categoriesGrid>
+          @for (category of filteredGroups; track category.name) {
+            <button 
+              class="category-item"
+              [class.selected]="selectedIcon?.icon === category.icon && selectedIcon?.name === category.name"
+              (click)="selectCategory(category)"
+              #categoryButton
+            >
+              <span class="material-symbols-rounded">{{ category.icon }}</span>
+              <span class="category-name">{{ category.name | translate }}</span>
+            </button>
+          }
+          <a [routerLink]="'/add-category'" [queryParams]="{ type: selectedType, referer: currentRoute }" class="category-item add-category">
+            <span class="material-icons">add</span>
+            <span class="category-name">{{ 'common.add' | translate }}</span>
+          </a>
+        </div>
+      </div>
       @if (selectedIcon) {
         <app-calculator-sheet
           [isVisible]="showCalculator"
@@ -75,6 +76,14 @@ import { TranslatePipe } from '../../components/shared/translate.pipe';
       position: relative;
     }
 
+    .space-between {
+      justify-content: space-between;
+    }
+
+    .overflow-auto {
+      overflow: auto;
+    }
+
     .categories-header {
       position: sticky;
       top: 0;
@@ -93,6 +102,9 @@ import { TranslatePipe } from '../../components/shared/translate.pipe';
       display: flex;
       padding: 1rem;
       gap: 1rem;
+      position: sticky;
+      top: 77px;
+      background: var(--background-color);
     }
 
     .type-tab {

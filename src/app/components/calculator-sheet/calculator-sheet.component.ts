@@ -121,7 +121,6 @@ import { TranslateNumberPipe } from '../shared/translate-number.pipe';
     .sheet-body {
       display: grid;
       grid-template-columns: 75% 25%;
-      gap: 1px;
       background-color: var(--background-color);
     }
     
@@ -139,6 +138,7 @@ import { TranslateNumberPipe } from '../shared/translate-number.pipe';
       grid-auto-rows: 55px;
       gap: 1px;
       background: var(--background-color);
+      border-left: 1px solid var(--background-color);
     }
 
     .key {
