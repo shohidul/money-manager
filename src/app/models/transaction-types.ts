@@ -43,8 +43,20 @@ export function isRepaidTransaction(tx: Transaction): tx is LoanTransactionBase 
   return tx.subType === 'repaid';
 }
 
+export function isLoanCostTransaction(tx: Transaction): tx is LoanTransactionBase {
+  return tx.subType === 'loanCost';
+}
+
 export function isAssetTransaction(tx: Transaction): tx is AssetTransaction {
   return tx.subType === 'asset';
+}
+
+export function isAssetCostTransaction(tx: Transaction): tx is AssetTransaction {
+  return tx.subType === 'assetCost';
+}
+
+export function isAssetIncomeTransaction(tx: Transaction): tx is AssetTransaction {
+  return tx.subType === 'assetIncome';
 }
 
 export function isFuelTransaction(tx: Transaction): tx is FuelTransaction {

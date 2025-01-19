@@ -10,7 +10,7 @@ export interface DefaultCategories {
 }
 
 // Current version of categories
-export const CATEGORIES_VERSION = 1;
+export const CATEGORIES_VERSION = 2;
 
 // If you want to add between order 15 (car) and 16 (carFuel):
 // { 

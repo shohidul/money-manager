@@ -2,7 +2,7 @@ import { Component, Inject, Input, Output, EventEmitter, OnInit, NgModule } from
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Transaction, isLoanTransaction, isRepaidTransaction, isAssetTransaction, isFuelTransaction } from '../../models/transaction-types';
+import { Transaction, isLoanTransaction, isRepaidTransaction, isAssetTransaction, isFuelTransaction, isLoanCostTransaction } from '../../models/transaction-types';
 import { AssetFormComponent } from '../transaction-forms/asset-form.component';
 import { LoanFormComponent } from '../transaction-forms/loan-form.component';
 import { FuelFormComponent } from '../transaction-forms/fuel-form.component';
@@ -92,7 +92,7 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
                   </div>
 
                   <div class="form-content">
-                    @if (isLoanTransaction(editedTransaction) || isRepaidTransaction(editedTransaction)) {
+                    @if (isLoanTransaction(editedTransaction) || isRepaidTransaction(editedTransaction) || isLoanCostTransaction(editedTransaction)) {
                       <app-loan-form
                         [transaction]="editedTransaction"
                         (transactionChange)="onTransactionChange($event)"
@@ -420,6 +420,7 @@ export class TransactionEditDialogComponent implements OnInit {
   editedTransaction!: Transaction;
   isLoanTransaction = isLoanTransaction;
   isRepaidTransaction = isRepaidTransaction;
+  isLoanCostTransaction = isLoanCostTransaction;
   isAssetTransaction = isAssetTransaction;
   isFuelTransaction = isFuelTransaction;
   show = true;

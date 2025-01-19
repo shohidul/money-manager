@@ -7,7 +7,7 @@ import { PersonService } from '../../services/person.service';
 import { LoanService } from '../../services/loan.service';
 import { CategoryService } from '../../services/category.service';
 import { AutocompleteInputComponent } from '../shared/autocomplete-input.component';
-import { isLoanTransaction, isRepaidTransaction } from '../../models/transaction-types';
+import { isLoanTransaction, isRepaidTransaction, isLoanCostTransaction } from '../../models/transaction-types';
 
 
 @Component({
@@ -31,23 +31,38 @@ import { isLoanTransaction, isRepaidTransaction } from '../../models/transaction
         </div>
       }
 
-      @if (isRepaidTransaction(transaction)) {
+      @if (isRepaidTransaction(transaction) || isLoanCostTransaction(transaction)) {
         <div class="form-group">
-          <label for="parentLoan">{{ 'loan.parentLoan' | translate }}</label>
+          <label for="parentLoan">{{ (isLoanCostTransaction(transaction) ? 'loan.parent' :'loan.parentLoan') | translate }}</label>
           <select 
             id="parentLoan" 
             [(ngModel)]="transaction.parentId" 
             class="form-input"
           >
+          @if (isRepaidTransaction(transaction)) {
             <option [ngValue]="null">{{ 'loan.noParentLoan' | translate }}</option>
             <option 
               *ngFor="let loan of parentLoans" 
               [ngValue]="loan.id"
             >
-              {{ loan.personName }} • {{ 'transaction.types.' + loan.type | translate | titlecase }} • 
+              {{ 'transaction.types.' + loan.type | translate | titlecase }} | {{'transaction.subTypes.' + loan.subType | translate | titlecase}} • 
+              {{ loan.personName }} • 
               {{ getCategoryName(loan.categoryId) | translate | titlecase }} • 
               {{ loan.amount | currency:'USD':'symbol':'1.0-0' }}
             </option>
+          }
+          @else if (isLoanCostTransaction(transaction)) {
+            <option [ngValue]="null">{{ 'loan.noParent' | translate }}</option>
+            <option 
+              *ngFor="let loan of costParents" 
+              [ngValue]="loan.id"
+            >
+              {{ 'transaction.types.' + loan.type | translate | titlecase }} | {{'transaction.subTypes.' + loan.subType | translate | titlecase}} • 
+              {{ loan.parentId ? getPersonNameByParentLoanId(loan.parentId) ?? ('Unnamed' | translate) : loan.personName }} • 
+              {{ getCategoryName(loan.categoryId) | translate | titlecase }} • 
+              {{ loan.amount | currency:'USD':'symbol':'1.0-0' }}
+            </option>
+          }
           </select>
         </div>
       }
@@ -122,10 +137,12 @@ export class LoanFormComponent implements OnInit {
 
   isLoanTransaction = isLoanTransaction;
   isRepaidTransaction = isRepaidTransaction;
+  isLoanCostTransaction = isLoanCostTransaction;
 
   suggestions: string[] = [];
   private lastQuery = '';
   parentLoans: LoanTransaction[] = [];
+  costParents: LoanTransaction[] = [];
   private categories: { [key: number]: string } = {};
 
   constructor(private personService: PersonService, private loanService: LoanService, private categoryService: CategoryService) {}
@@ -136,9 +153,14 @@ export class LoanFormComponent implements OnInit {
     this.categories = Object.fromEntries(
       allCategories.map(cat => [cat.id, cat.name])
     );
-    
+
     // Then load parent loans
     this.parentLoans = await this.loanService.getParentLoansByType(this.transaction.type === 'income' ? 'expense' : 'income');
+    this.costParents = await this.loanService.getCostParents();
+  }
+
+  getPersonNameByParentLoanId(id: number) {
+    return this.costParents.find(loan => loan.id === id)?.personName || undefined;
   }
 
   async onPersonNameChange(value: string) {

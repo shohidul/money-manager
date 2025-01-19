@@ -349,7 +349,10 @@
       "none": "সাধারণ",
       "loan": "ঋণ",
       "repaid": "ফেরত",
+      "loanCost": "ঋণ খরচ",
       "asset": "সম্পদ",
+      "assetCost": "সম্পদ খরচ",
+      "assetIncome": "সম্পদ আয়",
       "fuel": "জ্বালানি"
     },
     "title": {
@@ -395,7 +398,9 @@
   "loan": {
     "loans": "ঋণ",
     "analytics": "বিশ্লেষণ",
+    "parent": "মূল",
     "parentLoan": "মূল ঋণ",
+    "noParent": "কোন মূল নেই",
     "noParentLoan": "কোন মূল ঋণ নেই",
     "lentTo": "ঋণ নিয়েছে",
     "borrowedFrom": "ঋণ দিয়েছে",

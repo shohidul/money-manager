@@ -352,7 +352,10 @@
       "none": "Regular",
       "loan": "Loan",
       "repaid": "Repaid",
+      "loanCost": "Loan Cost",
       "asset": "Asset",
+      "assetCost": "Asset Cost",
+      "assetIncome": "Asset Income",
       "fuel": "Fuel"
     },
     "title": {
@@ -398,7 +401,9 @@
   "loan": {
     "loans": "Loans",
     "analytics": "Analytics",
+    "parent": "Parent",
     "parentLoan": "Parent Loan",
+    "noParent": "No Parent",
     "noParentLoan": "No Parent Loan",
     "lentTo": "Lent to",
     "borrowedFrom": "Borrowed from",

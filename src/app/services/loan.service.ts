@@ -38,7 +38,7 @@ export class LoanService {
     }
   }
 
-  async getChildrenLoansByType(type: TransactionType, startDate?: Date, endDate?: Date): Promise<LoanTransaction[]> {
+  async getRepaidTransactionsByType(type: TransactionType, startDate?: Date, endDate?: Date): Promise<LoanTransaction[]> {
     try {
       // Get all loan transactions that can be potential parents
       const transactions = await this.getRepaidTransactions(startDate, endDate);
@@ -64,10 +64,10 @@ export class LoanService {
       const parentLoans = await this.getParentLoansByType('expense', startDate, endDate);
 
       // Get children loans (income type repayments)
-      const childrenLoans = await this.getChildrenLoansByType('income', startDate, endDate);
+      const repaidTranx = await this.getRepaidTransactionsByType('income', startDate, endDate);
 
       // Combine parent and children loans, ensuring they are LoanTransaction[]
-      const transactions: LoanTransaction[] = [...parentLoans, ...childrenLoans];
+      const transactions: LoanTransaction[] = [...parentLoans, ...repaidTranx];
       
       // Group transactions
       const givenLoans = groupLoanTransactions(
@@ -89,10 +89,10 @@ export class LoanService {
       const parentLoans = await this.getParentLoansByType('income', startDate, endDate);
       
       // Get children loans (expense type repayments)
-      const childrenLoans = await this.getChildrenLoansByType('expense', startDate, endDate);
+      const repaidTranx = await this.getRepaidTransactionsByType('expense', startDate, endDate);
       
       // Combine parent and children loans, ensuring they are LoanTransaction[]
-      const transactions: LoanTransaction[] = [...parentLoans, ...childrenLoans];
+      const transactions: LoanTransaction[] = [...parentLoans, ...repaidTranx];
       
       // Group transactions
       const takenLoans = groupLoanTransactions(
@@ -152,6 +152,19 @@ export class LoanService {
       return loanTransactions;
     } catch (error) {
       console.error('Error fetching loan transactions:', error);
+      throw error;
+    }
+  }
+
+  async getCostParents(startDate?: Date, endDate?: Date): Promise<LoanTransaction[]> {
+    try {
+      // Get all transactions that can be potential parents
+      const parentLoans = await this.getLoanTransactions(startDate, endDate);
+      const repaidTranx = await this.getRepaidTransactions(startDate, endDate);
+      const transactions: LoanTransaction[] = [...parentLoans, ...repaidTranx];
+      return transactions;
+    } catch (error) {
+      console.error('Error fetching parent loans:', error);
       throw error;
     }
   }
