@@ -25,6 +25,7 @@ import { CategoryService } from '../../services/category.service';
 import { DOCUMENT } from '@angular/common';
 import { VoiceCommandService } from '../../services/voice-command.service';
 import { TranslationService } from '../../services/translation.service';
+import { VoiceCommandOverlayComponent } from '../../components/voice-command-overlay/voice-command-overlay.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -36,7 +37,8 @@ import { TranslationService } from '../../services/translation.service';
     TransactionEditDialogComponent,
     TranslatePipe,
     TranslateDatePipe,
-    TranslateNumberPipe
+    TranslateNumberPipe,
+    VoiceCommandOverlayComponent
   ],
   template: `
     <div class="dashboard">
@@ -162,7 +164,7 @@ import { TranslationService } from '../../services/translation.service';
       </div>
 
       <a 
-        class="fab"
+        class="fab voice-btn"
         (mousedown)="startVoiceCommand($event)"
         (mouseup)="stopVoiceCommand($event)"
         (mouseleave)="stopVoiceCommand($event)"
@@ -170,6 +172,12 @@ import { TranslationService } from '../../services/translation.service';
       >
         <span class="material-icons">add</span>
       </a>
+
+      <app-voice-command-overlay
+        [isActive]="voiceCommandState.isActive"
+        [isListening]="voiceCommandState.isListening"
+        [transcript]="voiceCommandState.transcript"
+      />
 
       @if (selectedTransaction) {
         <app-transaction-edit-dialog
@@ -330,6 +338,11 @@ export class DashboardComponent implements OnInit {
   isAdvancedMode: boolean = false;
   private longPressTimeout: any;
   private isLongPress = false;
+  voiceCommandState: { isActive: boolean; isListening: boolean; transcript: string; } = {
+    isActive: false,
+    isListening: false,
+    transcript: ''
+  };
 
   constructor(
     private router: Router, 
@@ -343,6 +356,9 @@ export class DashboardComponent implements OnInit {
     @Inject(DOCUMENT) private document: Document
   ) {
     this.setupVoiceCommandListener();
+    this.voiceCommandService.commandState.subscribe(state => {
+      this.voiceCommandState = state;
+    });
   }
 
   reloadPage() {
@@ -350,6 +366,11 @@ export class DashboardComponent implements OnInit {
   }
 
   async ngOnInit() {
+    document.addEventListener('touchstart', (e: any) => {
+      if (e.target.classList.contains('voice-btn')) {
+        e.preventDefault();
+      }
+    }, { passive: false });
 
     this.featureFlagService.getAppMode().subscribe(
       isAdvanced => this.isAdvancedMode = isAdvanced
@@ -502,6 +523,7 @@ export class DashboardComponent implements OnInit {
   private setupVoiceCommandListener() {
     this.voiceCommandService.commandResult.subscribe((result) => {
       if (result) {
+        console.log('Voice command result:', result);
         // Create a new transaction based on voice command
         const transaction: Transaction = {
           type: result.type,
@@ -515,25 +537,32 @@ export class DashboardComponent implements OnInit {
         };
         
         // Save the transaction
-        this.dbService.addTransaction(transaction).then(() => {
-          this.loadTransactions();
-          const message = this.document.documentElement.lang === 'bn' 
-            ? `লেনদেন তৈরি করা হয়েছে: ${result.category} ${result.amount}টাকা ${result.quantity || ''}`
-            : `Transaction created: ${result.category} ${result.amount}tk ${result.quantity || ''}`;
-          alert(message);
-        });
+        if (transaction.categoryId > 0) {
+          this.dbService.addTransaction(transaction).then(() => {
+            this.loadTransactions();
+            const message = this.document.documentElement.lang === 'bn' 
+              ? `লেনদেন তৈরি করা হয়েছে: ${result.category} ${result.amount} টাকা`
+              : `Transaction created: ${result.category} ${result.amount} tk`;
+            alert(message);
+          });
+        }else {
+          alert('Category not found');
+        }
       }
     });
   }
 
   private findCategoryKeyInTranslations(categoryName: string): string | null {
     const searchValue = categoryName.toLowerCase();
+    console.log(searchValue);
     const translations = this.translationService.getTranslations();
+    console.log(translations);
     
     // Helper function to search through nested objects
     const searchInObject = (obj: any, parentKey: string = ''): string | null => {
       for (const [key, value] of Object.entries(obj)) {
         const currentKey = parentKey ? `${parentKey}.${key}` : key;
+        console.log(currentKey + ':' + value);
         
         if (typeof value === 'string' && value.toLowerCase() === searchValue) {
           return currentKey;
@@ -545,7 +574,14 @@ export class DashboardComponent implements OnInit {
       return null;
     };
 
-    // Search in categories section
+    // Search in defaults categories section
+    const categoryDefaults = translations?.categories?.defaults;
+    if (categoryDefaults) {
+      const key = searchInObject(categoryDefaults, 'categories.defaults');
+      if (key) return key;
+    }
+
+    // Search in groups categories section
     const categoryGroups = translations?.categories?.groups?.icons;
     if (categoryGroups) {
       const key = searchInObject(categoryGroups, 'categories.groups.icons');
@@ -556,15 +592,16 @@ export class DashboardComponent implements OnInit {
   }
 
   private getCategoryIdByName(categoryName: string): number {
-    let id;
     // First try to find the category key in translations
     const translationKey = this.findCategoryKeyInTranslations(categoryName);
-    
+    console.log('Translation key:', translationKey);
     if (translationKey) {
       // Find category by translation key
+      console.log(this.categories);
       const category = this.categories.find(c => c.name === translationKey);
+      console.log(category);
       if (category) {
-        id = category.id || 0;
+        return category.id || 0;
       }
     }
 
@@ -575,9 +612,7 @@ export class DashboardComponent implements OnInit {
              (c.name.toLowerCase().includes(categoryName.toLowerCase()));
     });
 
-    id = category?.id || 0; // Return default category id if not found
-
-    return id;
+    return category?.id || 0; // Return default category id if not found
   }
 
   startVoiceCommand(event: Event) {

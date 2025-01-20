@@ -591,7 +591,8 @@
   "voice": {
     "holdToSpeak": "Hold to Speak",
     "listening": "Listening...",
-    "processingCommand": "Processing command...",
-    "error": "Error processing voice command"
+    "processing": "Processing...",
+    "error": "Error occurred",
+    "success": "Transaction added"
   }
 }
