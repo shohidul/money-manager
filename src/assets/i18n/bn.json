@@ -315,9 +315,12 @@
         "personalLoanTaken": "ব্যক্তিগত ঋণ নেওয়া",
         "bankLoanTaken": "ব্যাংক ঋণ নেওয়া",
         "loanPayment": "ঋণ পরিশোধ",
-        "loan": "ঋণ"
+        "loan": "ঋণ",
+        "loanCost": "ঋণ খরচ"
       },
       "asset": {
+        "assetCost": "সম্পদ খরচ",
+        "assetIncome": "সম্পদ আয়",
         "purchaseAsset": "সম্পদ ক্রয়",
         "sellAsset": "সম্পদ বিক্রয়",
         "savings": "সঞ্চয়"
@@ -591,5 +594,4 @@
     "processingCommand": "কমান্ড প্রক্রিয়া করা হচ্ছে",
     "error": "কমান্ড প্রক্রিয়া করার সময় ত্রুটি"
   }
-
 }
