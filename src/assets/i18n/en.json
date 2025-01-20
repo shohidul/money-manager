@@ -587,5 +587,11 @@
       "disablePinConfirm": "Are you sure you want to disable PIN lock? This will remove your PIN.",
       "pinSetSuccess": "PIN has been set successfully"
     }
+  },
+  "voice": {
+    "holdToSpeak": "Hold to Speak",
+    "listening": "Listening...",
+    "processingCommand": "Processing command...",
+    "error": "Error processing voice command"
   }
 }

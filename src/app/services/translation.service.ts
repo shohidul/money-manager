@@ -67,4 +67,8 @@ export class TranslationService {
 
     return typeof value === 'string' ? value : '';
   }
+
+  getTranslations() {
+    return this.translations[this.getCurrentLanguage()] || {};
+  }
 }

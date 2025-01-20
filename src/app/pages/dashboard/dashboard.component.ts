@@ -23,6 +23,8 @@ import { LoanTransaction } from '../../models/loan.model';
 import { FeatureFlagService } from '../../services/feature-flag.service';
 import { CategoryService } from '../../services/category.service';
 import { DOCUMENT } from '@angular/common';
+import { VoiceCommandService } from '../../services/voice-command.service';
+import { TranslationService } from '../../services/translation.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -159,7 +161,13 @@ import { DOCUMENT } from '@angular/common';
         </div>
       </div>
 
-      <a routerLink="/add-transaction" class="fab">
+      <a 
+        class="fab"
+        (mousedown)="startVoiceCommand($event)"
+        (mouseup)="stopVoiceCommand($event)"
+        (mouseleave)="stopVoiceCommand($event)"
+        (click)="handleFabClick($event)"
+      >
         <span class="material-icons">add</span>
       </a>
 
@@ -320,6 +328,8 @@ export class DashboardComponent implements OnInit {
   isAssetTransaction = isAssetTransaction;
   parentLoanTransactions: LoanTransaction[] = [];
   isAdvancedMode: boolean = false;
+  private longPressTimeout: any;
+  private isLongPress = false;
 
   constructor(
     private router: Router, 
@@ -328,8 +338,12 @@ export class DashboardComponent implements OnInit {
     private loanService: LoanService, 
     private featureFlagService: FeatureFlagService, 
     private categoryService: CategoryService,
+    private voiceCommandService: VoiceCommandService,
+    private translationService: TranslationService,
     @Inject(DOCUMENT) private document: Document
-  ) {}
+  ) {
+    this.setupVoiceCommandListener();
+  }
 
   reloadPage() {
     this.document.defaultView?.location.reload();
@@ -483,6 +497,110 @@ export class DashboardComponent implements OnInit {
 
   toggleMenu() {
     this.menuService.toggleMenu();
+  }
+
+  private setupVoiceCommandListener() {
+    this.voiceCommandService.commandResult.subscribe((result) => {
+      if (result) {
+        // Create a new transaction based on voice command
+        const transaction: Transaction = {
+          type: result.type,
+          amount: result.amount,
+          categoryId: this.getCategoryIdByName(result.category),
+          date: new Date(),
+          quantity: result.quantity || 0,
+          subType: 'none',
+          memo: '',
+          transactionDate: new Date(),
+        };
+        
+        // Save the transaction
+        this.dbService.addTransaction(transaction).then(() => {
+          this.loadTransactions();
+          const message = this.document.documentElement.lang === 'bn' 
+            ? `লেনদেন তৈরি করা হয়েছে: ${result.category} ${result.amount}টাকা ${result.quantity || ''}`
+            : `Transaction created: ${result.category} ${result.amount}tk ${result.quantity || ''}`;
+          alert(message);
+        });
+      }
+    });
+  }
+
+  private findCategoryKeyInTranslations(categoryName: string): string | null {
+    const searchValue = categoryName.toLowerCase();
+    const translations = this.translationService.getTranslations();
+    
+    // Helper function to search through nested objects
+    const searchInObject = (obj: any, parentKey: string = ''): string | null => {
+      for (const [key, value] of Object.entries(obj)) {
+        const currentKey = parentKey ? `${parentKey}.${key}` : key;
+        
+        if (typeof value === 'string' && value.toLowerCase() === searchValue) {
+          return currentKey;
+        } else if (typeof value === 'object' && value !== null) {
+          const result = searchInObject(value, currentKey);
+          if (result) return result;
+        }
+      }
+      return null;
+    };
+
+    // Search in categories section
+    const categoryGroups = translations?.categories?.groups?.icons;
+    if (categoryGroups) {
+      const key = searchInObject(categoryGroups, 'categories.groups.icons');
+      if (key) return key;
+    }
+
+    return null;
+  }
+
+  private getCategoryIdByName(categoryName: string): number {
+    let id;
+    // First try to find the category key in translations
+    const translationKey = this.findCategoryKeyInTranslations(categoryName);
+    
+    if (translationKey) {
+      // Find category by translation key
+      const category = this.categories.find(c => c.name === translationKey);
+      if (category) {
+        id = category.id || 0;
+      }
+    }
+
+    // If no translation key found, try direct match
+    const category = this.categories.find(c => {
+      const key = c.name.toLowerCase();
+      return key.includes(categoryName.toLowerCase()) || 
+             (c.name.toLowerCase().includes(categoryName.toLowerCase()));
+    });
+
+    id = category?.id || 0; // Return default category id if not found
+
+    return id;
+  }
+
+  startVoiceCommand(event: Event) {
+    event.preventDefault();
+    this.isLongPress = false;
+    this.longPressTimeout = setTimeout(() => {
+      this.isLongPress = true;
+      this.voiceCommandService.startListening();
+    }, 500); // 500ms for long press detection
+  }
+
+  stopVoiceCommand(event: Event) {
+    event.preventDefault();
+    clearTimeout(this.longPressTimeout);
+    if (this.isLongPress) {
+      this.voiceCommandService.stopListening();
+    }
+  }
+
+  handleFabClick(event: Event) {
+    if (!this.isLongPress) {
+      this.router.navigate(['/add-transaction']);
+    }
   }
 
   getMileage(currentTransaction: Transaction): number {
