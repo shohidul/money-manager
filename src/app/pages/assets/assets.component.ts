@@ -3,11 +3,17 @@ import { CommonModule } from '@angular/common';
 import { MobileHeaderComponent } from '../../components/mobile-header/mobile-header.component';
 import { AssetListComponent } from './components/asset-list.component';
 import { AssetChartsComponent } from './components/asset-charts.component';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-assets',
   standalone: true,
-  imports: [CommonModule, MobileHeaderComponent, AssetListComponent, AssetChartsComponent],
+  imports: [
+    CommonModule,
+    MobileHeaderComponent,
+    AssetListComponent,
+    AssetChartsComponent
+  ],
   template: `
     <div class="assets">
       <app-mobile-header
@@ -32,12 +38,15 @@ import { AssetChartsComponent } from './components/asset-charts.component';
   `,
   styles: [`
     .assets {
-      max-width: 800px;
-      margin: 0 auto;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
 
     .content {
+      flex: 1;
       padding: 1rem;
+      overflow-y: auto;
     }
 
     .tabs {
@@ -48,15 +57,16 @@ import { AssetChartsComponent } from './components/asset-charts.component';
 
     .tabs button {
       flex: 1;
-      padding: 0.75rem;
+      padding: 0.5rem;
       border: none;
-      border-radius: 8px;
-      background: var(--background-color-hover);
+      border-radius: 0.5rem;
+      background: var(--background-light);
+      color: var(--text);
       cursor: pointer;
     }
 
     .tabs button.active {
-      background: var(--primary-color);
+      background: var(--primary);
       color: white;
     }
   `]
@@ -64,7 +74,9 @@ import { AssetChartsComponent } from './components/asset-charts.component';
 export class AssetsComponent {
   activeTab: 'list' | 'charts' = 'list';
 
+  constructor(private router: Router) {}
+
   goBack() {
-    window.history.back();
+    this.router.navigate(['/']);
   }
 }

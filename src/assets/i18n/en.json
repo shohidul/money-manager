@@ -365,6 +365,9 @@
     "edit": {
       "edit": "Edit",
       "editFull": "Edit Full"
+    },
+    "delete": {
+      "message": "Are you sure you want to delete this transaction?"
     }
   },
   "asset": {
@@ -396,7 +399,21 @@
       "gallon": "Gallon",
       "meter": "Meter",
       "barrel": "Barrel"
-    }
+    },
+    "stats": {
+      "totalAssets": "Total Assets",
+      "totalAssetValue": "Total Asset Value",
+      "totalIncome": "Total Income",
+      "totalCost": "Total Cost"
+    },
+    "charts": {
+      "assetValues": "Asset Values",
+      "incomeVsCost": "Income vs Cost",
+      "income": "Income",
+      "cost": "Cost"
+    },
+    "purchaseDate": "Purchase Date",
+    "value": "Value"
   },
   "loan": {
     "loans": "Loans",
@@ -491,11 +508,11 @@
     "nearBudget": "Near Budget",
     "budgetReached": "Budget Reached",
     "overBudget": "Over Budget",
-    "goal25Percent": "Great start! 🌱",
-    "goal50Percent": "Halfway there! 🚀",
-    "goal75Percent": "Almost there! 💪",
-    "goal100Percent": "Goal achieved! 🎉",
-    "goalKeepItUp": "Keep pushing! 💰"
+    "goal25Percent": "Great start! ",
+    "goal50Percent": "Halfway there! ",
+    "goal75Percent": "Almost there! ",
+    "goal100Percent": "Goal achieved! ",
+    "goalKeepItUp": "Keep pushing! "
   },
   "settings": {
     "title": "Settings",

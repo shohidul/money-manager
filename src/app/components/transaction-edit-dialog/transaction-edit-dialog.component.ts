@@ -426,7 +426,7 @@ export class TransactionEditDialogComponent implements OnInit {
   show = true;
   isAdvancedMode: boolean = false;
 
-  constructor(private router: Router, private featureFlagService: FeatureFlagService) {}
+  constructor(private router: Router, private featureFlagService: FeatureFlagService, private translate: TranslatePipe) {}
 
   ngOnInit() {
     this.featureFlagService.getAppMode().subscribe(
@@ -456,7 +456,7 @@ export class TransactionEditDialogComponent implements OnInit {
   }
 
   onDelete() {
-    if (confirm('Are you sure you want to delete this transaction?')) {
+    if (confirm(this.translate.transform('transaction.delete.message'))) {
       this.delete.emit();
       this.show = false;
     }
