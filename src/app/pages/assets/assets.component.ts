@@ -41,6 +41,8 @@ import { Router } from '@angular/router';
       height: 100%;
       display: flex;
       flex-direction: column;
+      max-width: 1000px;
+      margin: 0 auto;
     }
 
     .content {
@@ -57,16 +59,15 @@ import { Router } from '@angular/router';
 
     .tabs button {
       flex: 1;
-      padding: 0.5rem;
+      padding: 0.75rem;
       border: none;
-      border-radius: 0.5rem;
-      background: var(--background-light);
-      color: var(--text);
+      border-radius: 8px;
+      background: var(--background-color-hover);
       cursor: pointer;
     }
 
     .tabs button.active {
-      background: var(--primary);
+      background: var(--primary-color);
       color: white;
     }
   `]

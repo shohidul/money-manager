@@ -27,7 +27,7 @@ export class CategoryService {
     // Sort by order to maintain proper sequence
     defaultCategoriesWithDetails.sort((a, b) => (a.order || 0) - (b.order || 0));
 
-    let isNewAdded = false;
+    let isNewAddedOrDeleted = false;
 
     for (const category of defaultCategoriesWithDetails) {
       const exists = existingCategories.some(
@@ -36,14 +36,31 @@ export class CategoryService {
 
       if (!exists) {
         await this.dbService.addCategory(category);
-        isNewAdded = true;
+        isNewAddedOrDeleted = true;
+      }
+    }
+
+    for (const category of existingCategories) {
+      const exists = defaultCategoriesWithDetails.some(
+        c => !c.isCustom && c.id === category.id
+      );
+
+      if (!exists) {
+        console.log('Deleting category', category);
+        const children = await this.getTransactionsByCategory(category.id!);
+        if (children.length > 0) {
+          console.log('Category has children, not deleting');
+          continue;
+        }
+        await this.dbService.deleteCategory(category.id!);
+        isNewAddedOrDeleted = true;
       }
     }
 
     // Clear cache to force reload
     this.clearCategoriesCache();
 
-    if (isNewAdded) {
+    if (isNewAddedOrDeleted) {
       // Save the updated order to the database
       await this.updateCategoryOrder(defaultCategoriesWithDetails);
     }
@@ -78,10 +95,8 @@ export class CategoryService {
     return this.dbService.updateCategory(category);
   }
 
-  async deleteCategory(id: number) {
-    // Clear cache to force reload
-    this.clearCategoriesCache();
-    return this.dbService.deleteCategory(id);
+  async getTransactionsByCategory(categoryId: number) {
+    return this.dbService.getTransactionsByCategory(categoryId);
   }
 
   // Add a method to explicitly clear the cache

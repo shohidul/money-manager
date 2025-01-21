@@ -48,7 +48,7 @@ import { TranslatePipe} from '../../components/shared/translate.pipe';
   `,
   styles: [`
     .fuel {
-      max-width: 800px;
+      max-width: 1000px;
       margin: 0 auto;
     }
 

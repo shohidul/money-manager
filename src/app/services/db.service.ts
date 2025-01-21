@@ -123,6 +123,12 @@ export class DbService {
     }
   }
 
+  async getTransactionsByCategory(categoryId: number): Promise<Transaction[]> {
+    const transactionsStore = this.db.transaction('transactions').store;
+    const allTransactions = await transactionsStore.getAll();
+    return allTransactions.filter(tx => tx.categoryId === categoryId);
+  }
+
   async getTransaction(id: number): Promise<Transaction | undefined> {
     return this.db.get('transactions', id);
   }
