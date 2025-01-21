@@ -7,16 +7,18 @@ import { PersonService } from '../../services/person.service';
 import { LoanService } from '../../services/loan.service';
 import { CategoryService } from '../../services/category.service';
 import { AutocompleteInputComponent } from '../shared/autocomplete-input.component';
-import { isLoanTransaction, isRepaidTransaction, isLoanCostTransaction } from '../../models/transaction-types';
+import { isLoanTransaction, isRepaidTransaction } from '../../models/transaction-types';
+import { TranslateNumberPipe } from "../shared/translate-number.pipe";
+import { TranslationService } from '../../services/translation.service';
 
 
 @Component({
   selector: 'app-loan-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, AutocompleteInputComponent, TranslatePipe],
+  imports: [CommonModule, FormsModule, AutocompleteInputComponent, TranslatePipe, TranslateNumberPipe],
   template: `
     <div class="form-fields">
-      @if (isLoanTransaction(transaction)) {
+      @if (isLoanTransaction(transaction) && isAdvancedMode) {
         <div class="form-group">
           <label for="personName">{{ 'loan.personName' | translate }}</label>
           <app-autocomplete-input
@@ -31,15 +33,28 @@ import { isLoanTransaction, isRepaidTransaction, isLoanCostTransaction } from '.
         </div>
       }
 
-      @if (isRepaidTransaction(transaction) || isLoanCostTransaction(transaction)) {
+      @if (isLoanChargeable(transaction)) {
         <div class="form-group">
-          <label for="parentLoan">{{ (isLoanCostTransaction(transaction) ? 'loan.parent' :'loan.parentLoan') | translate }}</label>
+        <label for="loanCharges">{{ 'loan.loanCharges' | translate }}</label>
+        <input
+          id="loanCharges"
+          type="text"
+          class="form-input"
+          [ngModel]="getLoanCharges() | translateNumber"
+          (input)="onLoanChargesInput($event)"
+          placeholder="{{ '00.0' | translateNumber }}"
+        />
+      </div>
+      }
+
+      @if (isRepaidTransaction(transaction) && isAdvancedMode) {
+        <div class="form-group">
+          <label for="parentLoan">{{ 'loan.parentLoan' | translate }}</label>
           <select 
             id="parentLoan" 
             [(ngModel)]="transaction.parentId" 
             class="form-input"
           >
-          @if (isRepaidTransaction(transaction)) {
             <option [ngValue]="null">{{ 'loan.noParentLoan' | translate }}</option>
             <option 
               *ngFor="let loan of parentLoans" 
@@ -50,45 +65,34 @@ import { isLoanTransaction, isRepaidTransaction, isLoanCostTransaction } from '.
               {{ getCategoryName(loan.categoryId) | translate | titlecase }} • 
               {{ loan.amount | currency:'USD':'symbol':'1.0-0' }}
             </option>
-          }
-          @else if (isLoanCostTransaction(transaction)) {
-            <option [ngValue]="null">{{ 'loan.noParent' | translate }}</option>
-            <option 
-              *ngFor="let loan of costParents" 
-              [ngValue]="loan.id"
-            >
-              {{ 'transaction.types.' + loan.type | translate | titlecase }} | {{'transaction.subTypes.' + loan.subType | translate | titlecase}} • 
-              {{ loan.parentId ? getPersonNameByParentLoanId(loan.parentId) ?? ('Unnamed' | translate) : loan.personName }} • 
-              {{ getCategoryName(loan.categoryId) | translate | titlecase }} • 
-              {{ loan.amount | currency:'USD':'symbol':'1.0-0' }}
-            </option>
-          }
           </select>
         </div>
       }
 
-      @if (isLoanTransaction(transaction)) {
-        <div class="form-group">
-          <label for="loanDate">{{ 'loan.loanDate' | translate }}</label>
-          <input
-            type="date"
-            id="loanDate"
-            [ngModel]="transaction.loanDate | date:'yyyy-MM-dd'"
-            (ngModelChange)="onLoanDateChange($event)"
-            class="form-input"
-            required
-          >
-        </div>
+      @if (isLoanTransaction(transaction) && isAdvancedMode) {
+        <div class="form-inline">
+          <div class="form-group">
+            <label for="loanDate">{{ 'loan.loanDate' | translate }}</label>
+            <input
+              type="date"
+              id="loanDate"
+              [ngModel]="transaction.loanDate | date:'yyyy-MM-dd'"
+              (ngModelChange)="onLoanDateChange($event)"
+              class="form-input"
+              required
+            >
+          </div>
 
-        <div class="form-group">
-          <label for="dueDate">{{ 'loan.dueDate' | translate }}</label>
-          <input
-            type="date"
-            id="dueDate"
-            [ngModel]="transaction.dueDate | date:'yyyy-MM-dd'"
-            (ngModelChange)="onDueDateChange($event)"
-            class="form-input"
-          >
+          <div class="form-group">
+            <label for="dueDate">{{ 'loan.dueDate' | translate }}</label>
+            <input
+              type="date"
+              id="dueDate"
+              [ngModel]="transaction.dueDate | date:'yyyy-MM-dd'"
+              (ngModelChange)="onDueDateChange($event)"
+              class="form-input"
+            >
+          </div>
         </div>
       }
     </div>
@@ -100,10 +104,17 @@ import { isLoanTransaction, isRepaidTransaction, isLoanCostTransaction } from '.
       gap: 16px;
     }
 
+    .form-inline {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
     .form-group {
       display: flex;
       flex-direction: column;
       gap: 8px;
+      flex-grow: 1;
     }
 
     .form-input {
@@ -132,12 +143,12 @@ import { isLoanTransaction, isRepaidTransaction, isLoanCostTransaction } from '.
   `]
 })
 export class LoanFormComponent implements OnInit {
+  @Input() isAdvancedMode = false;
   @Input() transaction!: LoanTransaction;
   @Output() transactionChange = new EventEmitter<LoanTransaction>();
 
   isLoanTransaction = isLoanTransaction;
   isRepaidTransaction = isRepaidTransaction;
-  isLoanCostTransaction = isLoanCostTransaction;
 
   suggestions: string[] = [];
   private lastQuery = '';
@@ -145,7 +156,11 @@ export class LoanFormComponent implements OnInit {
   costParents: LoanTransaction[] = [];
   private categories: { [key: number]: string } = {};
 
-  constructor(private personService: PersonService, private loanService: LoanService, private categoryService: CategoryService) {}
+  constructor(
+    private personService: PersonService, 
+    private loanService: LoanService, 
+    private categoryService: CategoryService, 
+    private translationService: TranslationService) {}
 
   async ngOnInit(): Promise<void> {
     // Load categories first
@@ -157,6 +172,11 @@ export class LoanFormComponent implements OnInit {
     // Then load parent loans
     this.parentLoans = await this.loanService.getParentLoansByType(this.transaction.type === 'income' ? 'expense' : 'income');
     this.costParents = await this.loanService.getCostParents();
+  }
+
+  isLoanChargeable(transaction: LoanTransaction): boolean {
+    return isLoanTransaction(transaction) && transaction.type === 'income' || 
+    isRepaidTransaction(transaction) && transaction.type === 'expense';
   }
 
   getPersonNameByParentLoanId(id: number) {
@@ -187,5 +207,24 @@ export class LoanFormComponent implements OnInit {
 
   getCategoryName(categoryId: number): string {
     return this.categories[categoryId] || '';
+  }
+
+  getLoanCharges(): string {
+    this.transaction.loanCharges = this.transaction.loanCharges || 0;
+    return this.transaction.loanCharges.toString() || '';
+  }
+
+  onLoanChargesInput(event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    const rawInput = inputElement?.value || '';
+  
+    // Remove commas to make it a parseable string
+    const parseableString = rawInput.replace(/,/g, '');
+  
+    // Convert to english numbers before saving
+    const result = new TranslateNumberPipe(this.translationService).transformByLocale(parseableString, 'en');
+  
+    this.transaction.loanCharges = parseFloat(result) || 0;
+    this.transactionChange.emit(this.transaction);
   }
 }

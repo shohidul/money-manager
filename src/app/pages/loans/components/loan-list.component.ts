@@ -29,7 +29,7 @@ import { TranslateNumberPipe } from '../../../components/shared/translate-number
       />
 
       <div class="loan-groups">
-        <div class="loan-section card">
+        <div class="loan-section">
           <h3>{{ 'loan.loansGiven' | translate }}</h3>
           <div class="loan-items">
             @for (group of givenLoans; track group.parentId) {
@@ -41,7 +41,7 @@ import { TranslateNumberPipe } from '../../../components/shared/translate-number
           </div>
         </div>
 
-        <div class="loan-section card">
+        <div class="loan-section">
           <h3>{{ 'loan.loansTaken' | translate }}</h3>
           <div class="loan-items">
             @for (group of takenLoans; track group.parentId) {
@@ -71,8 +71,6 @@ import { TranslateNumberPipe } from '../../../components/shared/translate-number
       display: flex;
       flex-direction: column;
       gap: 1rem;
-      background: var(--surface-color);
-      padding: 1rem;
       height: 100%;
     }
 

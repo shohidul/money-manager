@@ -36,12 +36,15 @@ interface DueStatus {
           </div>
           <span class="amount">
             {{ group.parent.amount | translateNumber:'1.0-2' }}
+            <span class="small-text" *ngIf="group.parent.loanCharges > 0">
+              {{ 'loan.loanCharges' | translate }}: -{{ group.parent.loanCharges | translateNumber:'1.0-2' }}
+            </span>
           </span>
         </div>
         
         <div class="transactions">
           @for (tx of group.transactions; track tx.id) {
-            <div class="transaction-item" [class.repayment]="tx.parentId">
+            <div class="transaction-item left-border" [class.repayment]="tx.parentId">
               <span class="material-symbols-rounded" [class]="tx.type">
                 {{ getCategoryIcon(tx.categoryId) }}
               </span>
@@ -53,7 +56,10 @@ interface DueStatus {
                 </span>
               </div>
               <span class="amount">
-              {{ tx.parentId ? '+' : '' }}{{ tx.amount | translateNumber:'1.0-2' }}
+              {{ tx.parentId ? '-' : '' }}{{ tx.amount | translateNumber:'1.0-2' }}
+              <span class="small-text" *ngIf="tx.loanCharges > 0">
+                {{ 'loan.loanCharges' | translate }}: -{{ tx.loanCharges | translateNumber:'1.0-2' }}
+              </span>
               </span>
             </div>
           }
@@ -66,6 +72,7 @@ interface DueStatus {
           ></div>
         </div>
         <div class="remaining amount">
+          <span class="text-muted" *ngIf="group.status.loanCharges > 0">{{ 'loan.loanCharges' | translate }}: {{ group.status.loanCharges | translateNumber:'1.0-2' }} • </span>
           {{ 'loan.status.remaining' | translate }}: {{ group.status.remainingAmount | translateNumber:'1.0-2' }}
         </div>
       </div>
@@ -78,6 +85,11 @@ interface DueStatus {
       background-color: var(--surface-color);
       box-shadow: 0 2px 4px var(--box-shadow-color-light);
     }
+
+    .left-border{
+      border-left: 8px solid var(--primary-color);
+    }
+
     .transaction-item {
       display: flex;
       align-items: center;
@@ -102,6 +114,17 @@ interface DueStatus {
       font-size: 0.65rem;
       color: #999;
       margin-top: 0.25rem;
+    }
+
+    .amount {
+      text-align: right;
+      font-weight: 500;
+    }
+
+    .amount .small-text {
+      display: block;
+      font-size: 0.65rem;
+      color: #999;
     }
 
     .memo {
@@ -265,7 +288,8 @@ export class LoanItemComponent implements OnInit {
   get progressPercentage(): number {
     if (!this.group) return 0;
     const { totalAmount, paidAmount } = this.group.status;
-    return (paidAmount / totalAmount) * 100;
+    const percentage = (paidAmount / totalAmount) * 100;
+    return percentage > 100 ? 100 : percentage;
   }
 
   getCategoryIcon(categoryId: number): string {

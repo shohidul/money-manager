@@ -44,7 +44,6 @@
       "none": "Regular",
       "loan": "Loan",
       "repaid": "Loan Repaid",
-      "loanCost": "Loan Cost",
       "asset": "Asset",
       "assetCost": "Asset Cost",
       "assetIncome": "Asset Income",
@@ -315,8 +314,7 @@
         "personalLoanTaken": "Personal Loan Taken",
         "bankLoanTaken": "Bank Loan Taken",
         "loanPayment": "Loan Payment",
-        "loan": "Loan",
-        "loanCost": "Loan Cost"
+        "loan": "Loan"
       },
       "asset": {
         "assetCost": "Asset Cost",
@@ -352,7 +350,6 @@
       "none": "Regular",
       "loan": "Loan",
       "repaid": "Repaid",
-      "loanCost": "Loan Cost",
       "asset": "Asset",
       "assetCost": "Asset Cost",
       "assetIncome": "Asset Income",
@@ -450,7 +447,8 @@
     "noLoansTaken": "No loans taken yet",
     "personName": "Person Name",
     "loanDate": "Loan Date",
-    "dueDate": "Due Date"
+    "dueDate": "Due Date",
+    "loanCharges": "Charges"
   },
   "fuel": {
     "price": "Price",

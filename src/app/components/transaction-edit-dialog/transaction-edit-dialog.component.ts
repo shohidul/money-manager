@@ -2,7 +2,7 @@ import { Component, Inject, Input, Output, EventEmitter, OnInit, NgModule } from
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Transaction, isLoanTransaction, isRepaidTransaction, isAssetTransaction, isFuelTransaction, isLoanCostTransaction } from '../../models/transaction-types';
+import { Transaction, isLoanTransaction, isRepaidTransaction, isAssetTransaction, isFuelTransaction } from '../../models/transaction-types';
 import { AssetFormComponent } from '../transaction-forms/asset-form.component';
 import { LoanFormComponent } from '../transaction-forms/loan-form.component';
 import { FuelFormComponent } from '../transaction-forms/fuel-form.component';
@@ -43,7 +43,7 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
 
           <div class="dialog-body">
             <div class="dialog-content-grid" [class.no-form]="editedTransaction.subType === 'none'">
-              @if (editedTransaction.subType === 'none' || !isAdvancedMode) {
+              @if (editedTransaction.subType === 'none' || !isAdvancedMode && !isLoanChargeable(editedTransaction)) {
                 <div class="transaction-summary-column">
                   <div class="summary-item category-item">
                     <div class="category-content">
@@ -77,7 +77,9 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
                     <span class="value">{{ editedTransaction.memo || ('common.noMemo' | translate) }}</span>
                   </div>
                 </div>
-              } @else {
+              } 
+              
+              @else {
                 <div class="form-container">
                   <div class="summary-item category-item compact">
                     <div class="category-content">
@@ -92,8 +94,9 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
                   </div>
 
                   <div class="form-content">
-                    @if (isLoanTransaction(editedTransaction) || isRepaidTransaction(editedTransaction) || isLoanCostTransaction(editedTransaction)) {
+                    @if (isLoanTransaction(editedTransaction) || isRepaidTransaction(editedTransaction)) {
                       <app-loan-form
+                        [isAdvancedMode]="isAdvancedMode"
                         [transaction]="editedTransaction"
                         (transactionChange)="onTransactionChange($event)"
                       />
@@ -420,7 +423,6 @@ export class TransactionEditDialogComponent implements OnInit {
   editedTransaction!: Transaction;
   isLoanTransaction = isLoanTransaction;
   isRepaidTransaction = isRepaidTransaction;
-  isLoanCostTransaction = isLoanCostTransaction;
   isAssetTransaction = isAssetTransaction;
   isFuelTransaction = isFuelTransaction;
   show = true;
@@ -434,6 +436,11 @@ export class TransactionEditDialogComponent implements OnInit {
     );
 
     this.editedTransaction = { ...this.transaction };
+  }
+
+  isLoanChargeable(transaction: Transaction): boolean {
+    return isLoanTransaction(transaction) && transaction.type === 'income' || 
+    isRepaidTransaction(transaction) && transaction.type === 'expense';
   }
 
   onTransactionChange(transaction: Transaction) {

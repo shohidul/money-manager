@@ -179,7 +179,8 @@ export class LoansComponent {
         isCompleted: true,
         dueDate: undefined,
         isOverdue: false,
-        daysUntilDue: undefined
+        daysUntilDue: undefined,
+        loanCharges: 0
       };
     }
 
@@ -206,7 +207,8 @@ export class LoansComponent {
       isOverdue: parentTransaction.dueDate ? new Date() > parentTransaction.dueDate : false,
       daysUntilDue: parentTransaction.dueDate 
         ? differenceInDays(parentTransaction.dueDate, new Date()) 
-        : undefined
+        : undefined,
+      loanCharges: parentTransaction.loanCharges || 0
     };
   }
 

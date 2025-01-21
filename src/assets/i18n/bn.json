@@ -44,7 +44,6 @@
       "none": "সাধারণ",
       "loan": "ঋণ",
       "repaid": "ঋণ ফেরত",
-      "loanCost": "ঋণ খরচ",
       "asset": "সম্পদ",
       "assetCost": "সম্পদ খরচ",
       "assetIncome": "সম্পদ আয়",
@@ -315,8 +314,7 @@
         "personalLoanTaken": "ব্যক্তিগত ঋণ নেওয়া",
         "bankLoanTaken": "ব্যাংক ঋণ নেওয়া",
         "loanPayment": "ঋণ পরিশোধ",
-        "loan": "ঋণ",
-        "loanCost": "ঋণ খরচ"
+        "loan": "ঋণ"
       },
       "asset": {
         "assetCost": "সম্পদ খরচ",
@@ -352,7 +350,6 @@
       "none": "সাধারণ",
       "loan": "ঋণ",
       "repaid": "ফেরত",
-      "loanCost": "ঋণ খরচ",
       "asset": "সম্পদ",
       "assetCost": "সম্পদ খরচ",
       "assetIncome": "সম্পদ আয়",
@@ -450,7 +447,8 @@
     "noLoansTaken": "এখনও কোনো ঋণ নেওয়া হয়নি",
     "personName": "ব্যক্তি/সংস্থার নাম",
     "loanDate": "ঋণের তারিখ",
-    "dueDate": "প্রদানের তারিখ"
+    "dueDate": "প্রদানের তারিখ",
+    "loanCharges": "খরচ"
   },
   "fuel": {
     "price": "মূল্য",

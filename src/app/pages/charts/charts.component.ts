@@ -99,10 +99,15 @@ type ChartType = 'all' | 'income' | 'expense';
                   <span class="material-symbols-rounded" [class]="stat.type">{{ getCategoryIcon(stat.categoryId) }}</span>
                   <span>
                     {{ stat.category | translate  }} 
-                    <span class="percentage text-sm ml-4 text-muted">{{ stat.percentage | translateNumber:'1.1-1' }}%</span>
+                    <span class="percentage text-sm ml-4 text-muted">{{ stat.percentage | translateNumber:'1.1-1' }}% {{stat.totalAmount}}</span>
                   </span> 
                 </div>
-                <span class="amount">{{ stat.amount | translateNumber:'1.0-0' }}</span>
+                <span class="amount">
+                  {{ stat.amount | translateNumber:'1.0-0' }}
+                  <span class="small-text" *ngIf="stat.loanCharges > 0">
+                    {{ 'loan.loanCharges' | translate }}: {{stat.type === 'expense' ? '+' : '-'}}{{ stat.loanCharges | translateNumber:'1.0-2' }}
+                  </span>
+                </span>
               </div>
               @if (categoryBudgets.length > 0) {
                 @if (getBudgetForCategory(stat.categoryId)?.budget) {
@@ -206,6 +211,9 @@ type ChartType = 'all' | 'income' | 'expense';
                         </div>
                         <span class="amount">
                           {{ tx.amount | translateNumber:'1.0-2' }}
+                          <span class="small-text" *ngIf="getLoanCharges(tx) && getLoanCharges(tx) > 0">
+                            {{ 'loan.loanCharges' | translate }}: {{stat.type === 'expense' ? '+' : '-'}}{{ getLoanCharges(tx) | translateNumber:'1.0-2' }}
+                          </span>
                         </span>
                       </div>
                     }
@@ -405,6 +413,17 @@ type ChartType = 'all' | 'income' | 'expense';
     color: #999;
     margin-top: 0.25rem;
   }
+
+  .amount {
+    text-align: right;
+    font-weight: 500;
+  }
+
+  .amount .small-text {
+    display: block;
+    font-size: 0.65rem;
+    color: #999;
+  }
   
   .budget-progress {
     margin-top: 4px;
@@ -555,6 +574,19 @@ export class ChartsComponent implements OnInit, AfterViewInit {
 
   }
 
+  isLoanChargeable(transaction: Transaction): boolean {
+    return isLoanTransaction(transaction) && transaction.type === 'income' || 
+    isRepaidTransaction(transaction) && transaction.type === 'expense';
+  }
+
+  getLoanCharges(transaction: Transaction): number {
+    if (this.isLoanChargeable(transaction)) {
+      const tx = transaction as LoanTransaction;
+      return tx.loanCharges || 0;
+    }
+    return 0;
+  }
+
   calculateStats() {
     const stats = new Map<number, any>();
     let totalAmount = 0;
@@ -571,13 +603,17 @@ export class ChartsComponent implements OnInit, AfterViewInit {
           category: category?.name || 'Unknown',
           type: category.type,
           amount: 0,
+          loanCharges: 0,
+          totalAmount: 0,
           color: this.chartColors[stats.size % this.chartColors.length],
         });
       }
 
       const stat = stats.get(tx.categoryId);
       stat.amount += tx.amount;
-      totalAmount += tx.amount;
+      stat.loanCharges += this.getLoanCharges(tx);
+      totalAmount += tx.amount + (tx.type === 'expense' ? this.getLoanCharges(tx) : (-this.getLoanCharges(tx)));
+      stat.totalAmount += tx.amount + (tx.type === 'expense' ? this.getLoanCharges(tx) : (-this.getLoanCharges(tx)));
     });
 
     this.categoryStats = Array.from(stats.values())

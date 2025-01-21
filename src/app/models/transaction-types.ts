@@ -14,6 +14,7 @@ export interface BaseTransaction {
 export interface LoanTransactionBase extends BaseTransaction {
   subType: 'loan';
   personName: string;
+  loanCharges: number;
   loanDate: Date;
   dueDate?: Date;
   parentId?: number;
@@ -41,10 +42,6 @@ export function isLoanTransaction(tx: Transaction): tx is LoanTransactionBase {
 
 export function isRepaidTransaction(tx: Transaction): tx is LoanTransactionBase {
   return tx.subType === 'repaid';
-}
-
-export function isLoanCostTransaction(tx: Transaction): tx is LoanTransactionBase {
-  return tx.subType === 'loanCost';
 }
 
 export function isAssetTransaction(tx: Transaction): tx is AssetTransaction {

@@ -15,7 +15,8 @@ export function calculateLoanStatus(transactions: LoanTransaction[]): LoanStatus
       isCompleted: true,
       dueDate: undefined,
       isOverdue: false,
-      daysUntilDue: undefined
+      daysUntilDue: undefined,
+      loanCharges: 0
     };
   }
   
@@ -23,11 +24,17 @@ export function calculateLoanStatus(transactions: LoanTransaction[]): LoanStatus
   const paidAmount = transactions
     .filter(isRepaidTransaction)
     .reduce((sum, tx) => sum + tx.amount, 0);
+
+    const loanCharges = transactions
+    .filter(tx => tx.loanCharges > 0)
+    .reduce((sum, tx) => sum + tx.loanCharges, 0);
+  
     
   return {
     totalAmount: parentTx.amount,
     paidAmount,
     remainingAmount: parentTx.amount - paidAmount,
+    loanCharges: loanCharges,
     isCompleted: parentTx.amount <= paidAmount,
     dueDate: parentTx.dueDate instanceof Date ? parentTx.dueDate : new Date(parentTx.dueDate || Date.now()),
     isOverdue: parentTx.dueDate ? new Date() > (parentTx.dueDate instanceof Date ? parentTx.dueDate : new Date(parentTx.dueDate)) : false,

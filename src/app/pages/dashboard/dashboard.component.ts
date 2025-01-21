@@ -32,7 +32,6 @@ import { VoiceCommandOverlayComponent } from '../../components/voice-command-ove
   standalone: true,
   imports: [
     CommonModule,
-    RouterLink,
     MonthPickerComponent,
     TransactionEditDialogComponent,
     TranslatePipe,
@@ -78,7 +77,7 @@ import { VoiceCommandOverlayComponent } from '../../components/voice-command-ove
               <span>{{ group.date | translateDate: 'MM/dd E' }}</span>
               <span class="total">
                 <span *ngIf="group.totalIncome > 0">{{ 'dashboard.income' | translate }}: {{ group.totalIncome | translateNumber:'1.0-2' }}</span>
-                <span *ngIf="group.totalExpense > 0">&nbsp;&nbsp;&nbsp;{{ 'dashboard.expense' | translate }}: {{ group.totalExpense | translateNumber:'1.0-2' }}</span>
+                <span *ngIf="group.totalExpense > 0">&nbsp;&nbsp;&nbsp;{{ 'dashboard.expense' | translate }}: {{ (group.totalExpense + group.loanCharges) | translateNumber:'1.0-2' }}</span>
               </span>
             </div>
             <div *ngFor="let tx of group.transactions" 
@@ -157,6 +156,9 @@ import { VoiceCommandOverlayComponent } from '../../components/voice-command-ove
             </div>
               <span class="amount">
                 {{ tx.type === 'income' ? '' : '-' }}{{ tx.amount | translateNumber:'1.0-2' }}
+                <span class="small-text" *ngIf="tx.loanCharges > 0">
+                  {{ 'loan.loanCharges' | translate }}: -{{ tx.loanCharges | translateNumber:'1.0-2' }}
+                </span>
               </span>
             </div>
           </div>
@@ -260,6 +262,7 @@ import { VoiceCommandOverlayComponent } from '../../components/voice-command-ove
 
   .overview .amount {
     color: var(--text-primary);
+    text-align: center;
   }
 
   .transaction-list {
@@ -304,6 +307,17 @@ import { VoiceCommandOverlayComponent } from '../../components/voice-command-ove
     font-size: 0.65rem;
     color: #999;
     margin-top: 0.25rem;
+  }
+
+  .amount {
+    text-align: right;
+    font-weight: 500;
+  }
+
+  .amount .small-text {
+    display: block;
+    font-size: 0.65rem;
+    color: #999;
   }
 
   .memo {
@@ -428,6 +442,12 @@ export class DashboardComponent implements OnInit {
       .filter((t) => t.type === 'expense')
       .reduce((sum, t) => sum + t.amount, 0);
 
+    const totalLoanCharges = this.transactions
+      .filter(tx => this.isLoanChargeable(tx))
+      .reduce((sum, tx) => sum + (tx as LoanTransaction).loanCharges, 0);
+
+      this.totalExpense = this.totalExpense + totalLoanCharges;
+
     this.balance = this.totalIncome - this.totalExpense;
   }
 
@@ -443,11 +463,14 @@ export class DashboardComponent implements OnInit {
           transactions: [],
           totalIncome: 0,
           totalExpense: 0,
+          loanCharges: 0
         });
       }
 
       const group = groups.get(dateKey);
       group.transactions.push(transaction);
+
+      group.loanCharges += this.getLoanCharges(transaction);
 
       if (transaction.type === 'income') {
         group.totalIncome += transaction.amount;
@@ -456,9 +479,24 @@ export class DashboardComponent implements OnInit {
       }
     });
 
+
+
     this.transactionGroups = Array.from(groups.values()).sort(
       (a, b) => b.date.getTime() - a.date.getTime()
     );
+  }
+
+  isLoanChargeable(transaction: Transaction): boolean {
+    return isLoanTransaction(transaction) && transaction.type === 'income' || 
+    isRepaidTransaction(transaction) && transaction.type === 'expense';
+  }
+
+  getLoanCharges(transaction: Transaction): number {
+    if (this.isLoanChargeable(transaction)) {
+      const tx = transaction as LoanTransaction;
+      return tx.loanCharges || 0;
+    }
+    return 0;
   }
 
   getCategoryIcon(categoryId: number): string {

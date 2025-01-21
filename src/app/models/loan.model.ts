@@ -10,6 +10,7 @@ export interface LoanStatus {
   dueDate?: Date;
   isOverdue?: boolean;
   daysUntilDue?: number;
+  loanCharges: number;
 }
 
 export interface LoanGroup {
