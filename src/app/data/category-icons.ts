@@ -4,7 +4,7 @@ export interface DefaultCategories {
   name: string;
   icon: string;
   type: TransactionType;
-  subType: TransactionSubType;
+  subType: TransactionSubType[];
   version?: number;     // Version when category was added
   order?: number;       // Default position in list
 }
@@ -273,9 +273,9 @@ export const defaultCategories: DefaultCategories[] = [
   { version: 1, order: 12, name: 'categories.defaults.expense.clothing', icon: 'checkroom', type: 'expense', subType: 'none' },
   { version: 1, order: 13, name: 'categories.defaults.expense.snacks', icon: 'icecream', type: 'expense', subType: 'none' },
   { version: 1, order: 14, name: 'categories.defaults.expense.fruits', icon: 'nutrition', type: 'expense', subType: 'none' },
-  { version: 1, order: 15, name: 'categories.defaults.expense.car', icon: 'directions_car', type: 'expense', subType: 'none' },
+  { version: 1, order: 15, name: 'categories.defaults.expense.car', icon: 'directions_car', type: 'expense', subType: 'asset' },
   { version: 1, order: 16, name: 'categories.defaults.fuel.carFuel', icon: 'directions_car', type: 'expense', subType: 'fuel' },
-  { version: 1, order: 17, name: 'categories.defaults.expense.motorcycle', icon: 'two_wheeler', type: 'expense', subType: 'none' },
+  { version: 1, order: 17, name: 'categories.defaults.expense.motorcycle', icon: 'two_wheeler', type: 'expense', subType: 'asset' },
   { version: 1, order: 18, name: 'categories.defaults.fuel.motorcycleFuel', icon: 'two_wheeler', type: 'expense', subType: 'fuel' },
   { version: 1, order: 19, name: 'categories.defaults.expense.fuel', icon: 'local_gas_station', type: 'expense', subType: 'none' },
   { version: 1, order: 20, name: 'categories.defaults.fuel.evCharging', icon: 'ev_station', type: 'expense', subType: 'fuel' },

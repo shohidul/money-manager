@@ -368,7 +368,9 @@
     }
   },
   "asset": {
-    "name": "Asset Name",
+    "name": "Name or Description",
+    "noParentAsset": "No Parent Asset",
+    "parentAsset": "Parent Asset",
     "transactionDate": "Transaction Date",
     "currentValue": "Current Value",
     "quantity": "Quantity",

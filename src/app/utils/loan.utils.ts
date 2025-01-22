@@ -25,7 +25,7 @@ export function calculateLoanStatus(transactions: LoanTransaction[]): LoanStatus
     .filter(isRepaidTransaction)
     .reduce((sum, tx) => sum + tx.amount, 0);
 
-    const loanCharges = transactions
+  const loanCharges = transactions
     .filter(tx => tx.loanCharges > 0)
     .reduce((sum, tx) => sum + tx.loanCharges, 0);
   
@@ -48,21 +48,20 @@ export function calculateLoanStatus(transactions: LoanTransaction[]): LoanStatus
 }
 
 export function groupLoanTransactions(transactions: LoanTransaction[]): LoanGroup[] {
-  const groups = new Map<number | undefined, LoanTransaction[]>();
+  const groups = new Map<number, LoanTransaction[]>();
   const parentTransactions = new Set<number>();
 
-  // First pass: identify parent transactions and create their groups
   transactions.forEach(tx => {
-    if (!tx.parentId && isLoanTransaction(tx)) {
-      parentTransactions.add(tx.id!);
-      groups.set(tx.id, [tx]);
-    }
-  });
+    const { id, parentId, personName } = tx;
 
-  // Second pass: group child transactions with their parents
-  transactions.forEach(tx => {
-    if (tx.parentId && parentTransactions.has(tx.parentId) && isRepaidTransaction(tx)) {
-      groups.get(tx.parentId)!.push(tx);
+    // If it's a parent transaction, add it to the group
+    if (!parentId && isLoanTransaction(tx)) {
+      parentTransactions.add(id!);
+      groups.set(id!, [tx]);
+    } 
+    // If it's a child transaction, add it to the corresponding parent group
+    else if (parentId && parentTransactions.has(parentId) && isRepaidTransaction(tx)) {
+      groups.get(parentId)!.push(tx);
     }
   });
 

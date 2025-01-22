@@ -43,4 +43,26 @@ export class AssetService {
 
     this.lastUpdateTime = now;
   }
+
+  async getParentAssets(): Promise<AssetTransaction[]> {
+    try {
+      let start: Date;
+      let end: Date;
+
+      start = new Date(0);
+      end = new Date();
+
+      const transactions = await this.dbService.getTransactions(start, end);
+      
+      // Filter using the type guard and ensure all required fields are present
+      const parentAssets = transactions
+      .filter(isAssetTransaction)
+      .filter(tx => tx.type === 'expense');
+      
+      return parentAssets;
+    } catch (error) {
+      console.error('Error fetching parent assets:', error);
+      throw error;
+    }
+  }
 }

@@ -38,15 +38,11 @@ import { Router } from '@angular/router';
   `,
   styles: [`
     .assets {
-      height: 100%;
-      display: flex;
-      flex-direction: column;
       max-width: 1000px;
       margin: 0 auto;
     }
 
     .content {
-      flex: 1;
       padding: 1rem;
       overflow-y: auto;
     }

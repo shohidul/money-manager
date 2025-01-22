@@ -63,7 +63,7 @@ interface AssetGroup {
               <div class="asset-details">
                 <span class="asset-name">{{ group.assetName }}</span>
                 <span class="small-text">
-                  {{ group.quantity | translateNumber:'1.0-2' }} {{ group.measurementUnit }} | 
+                  {{ group.quantity | translateNumber:'1.0-2' }} {{ group.measurementUnit | translate }} | 
                   {{ 'asset.purchaseDate' | translate }}: {{ group.purchaseDate | translateDate }} |
                   {{ 'asset.value' | translate }}: {{ group.value | translateNumber:'1.0-2' }}
                 </span>

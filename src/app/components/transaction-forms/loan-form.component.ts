@@ -35,16 +35,16 @@ import { TranslationService } from '../../services/translation.service';
 
       @if (isLoanChargeable(transaction)) {
         <div class="form-group">
-        <label for="loanCharges">{{ 'loan.loanCharges' | translate }}</label>
-        <input
-          id="loanCharges"
-          type="text"
-          class="form-input"
-          [ngModel]="getLoanCharges() | translateNumber"
-          (input)="onLoanChargesInput($event)"
-          placeholder="{{ '00.0' | translateNumber }}"
-        />
-      </div>
+          <label for="loanCharges">{{ 'loan.loanCharges' | translate }}</label>
+          <input
+            id="loanCharges"
+            type="text"
+            class="form-input"
+            [ngModel]="getLoanCharges() | translateNumber"
+            (input)="onLoanChargesInput($event)"
+            placeholder="{{ '00.0' | translateNumber }}"
+          />
+        </div>
       }
 
       @if (isRepaidTransaction(transaction) && isAdvancedMode) {
@@ -153,7 +153,6 @@ export class LoanFormComponent implements OnInit {
   suggestions: string[] = [];
   private lastQuery = '';
   parentLoans: LoanTransaction[] = [];
-  costParents: LoanTransaction[] = [];
   private categories: { [key: number]: string } = {};
 
   constructor(
@@ -171,16 +170,11 @@ export class LoanFormComponent implements OnInit {
 
     // Then load parent loans
     this.parentLoans = await this.loanService.getParentLoansByType(this.transaction.type === 'income' ? 'expense' : 'income');
-    this.costParents = await this.loanService.getCostParents();
   }
 
   isLoanChargeable(transaction: LoanTransaction): boolean {
     return isLoanTransaction(transaction) && transaction.type === 'income' || 
     isRepaidTransaction(transaction) && transaction.type === 'expense';
-  }
-
-  getPersonNameByParentLoanId(id: number) {
-    return this.costParents.find(loan => loan.id === id)?.personName || undefined;
   }
 
   async onPersonNameChange(value: string) {

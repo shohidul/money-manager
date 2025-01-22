@@ -10,61 +10,78 @@ export class CategoryService {
 
   async initializeDefaultCategories() {
     const existingCategories = await this.dbService.getCategories();
-
+  
     const defaultCategoriesWithDetails = defaultCategories
-    .filter(category => category.version! <= CATEGORIES_VERSION)
-    .map((category) => ({
-      id: category.order,  // Use order as ID
-      name: category.name,
-      icon: category.icon,
-      type: category.type,
-      subType: category.subType,
-      isCustom: false,
-      order: category.order,
-      version: category.version
-    }));
-
+      .filter(category => category.version! <= CATEGORIES_VERSION)
+      .map((category) => ({
+        id: category.order,  // Use order as ID
+        name: category.name,
+        icon: category.icon,
+        type: category.type,
+        subType: category.subType,
+        isCustom: false,
+        order: category.order,
+        version: category.version
+      }));
+  
     // Sort by order to maintain proper sequence
     defaultCategoriesWithDetails.sort((a, b) => (a.order || 0) - (b.order || 0));
-
+  
     let isNewAddedOrDeleted = false;
-
+    const operations = [];
+  
+    // Add or update categories
     for (const category of defaultCategoriesWithDetails) {
-      const exists = existingCategories.some(
-        c => c.id === category.id
-      );
-
-      if (!exists) {
-        await this.dbService.addCategory(category);
+      const existingCategory = existingCategories.find(c => c.id === category.id);
+  
+      if (!existingCategory) {
+        // Add new category if not found
+        operations.push(this.dbService.addCategory(category));
         isNewAddedOrDeleted = true;
+      } else {
+        // Check for changes in category properties
+        const hasChanged =
+          existingCategory.name !== category.name ||
+          existingCategory.icon !== category.icon ||
+          existingCategory.type !== category.type ||
+          existingCategory.subType !== category.subType;
+  
+        if (hasChanged) {
+          console.log('Updating category', category);
+          operations.push(this.dbService.updateCategory(category));
+          isNewAddedOrDeleted = true;
+        }
       }
     }
-
-    for (const category of existingCategories) {
-      const exists = defaultCategoriesWithDetails.some(
-        c => !c.isCustom && c.id === category.id
-      );
-
+  
+    // Delete categories that are not in default list
+    for (const category of existingCategories.filter(c => !c.isCustom)) {
+      const exists = defaultCategoriesWithDetails.some(c => c.id === category.id);
+  
       if (!exists) {
         console.log('Deleting category', category);
         const children = await this.getTransactionsByCategory(category.id!);
+  
         if (children.length > 0) {
           console.log('Category has children, not deleting');
           continue;
         }
-        await this.dbService.deleteCategory(category.id!);
+        operations.push(this.dbService.deleteCategory(category.id!));
         isNewAddedOrDeleted = true;
       }
     }
-
+  
+    // Execute all database operations in parallel
+    await Promise.all(operations);
+  
     // Clear cache to force reload
     this.clearCategoriesCache();
-
+  
     if (isNewAddedOrDeleted) {
       // Save the updated order to the database
       await this.updateCategoryOrder(defaultCategoriesWithDetails);
     }
-  }
+  }  
 
   async getAllCategories() {
     if (this.categoriesCache === null) {
