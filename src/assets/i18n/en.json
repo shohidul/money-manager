@@ -47,7 +47,8 @@
       "asset": "Asset",
       "assetCost": "Asset Cost",
       "assetIncome": "Asset Income",
-      "fuel": "Fuel"
+      "fuel": "Fuel",
+      "fuel|assetCost": "Fuel | Asset Cost"
     },
     "filters": {
       "title": "Filters",
@@ -353,7 +354,8 @@
       "asset": "Asset",
       "assetCost": "Asset Cost",
       "assetIncome": "Asset Income",
-      "fuel": "Fuel"
+      "fuel": "Fuel",
+      "fuel|assetCost": "Fuel | Asset Cost"
     },
     "title": {
       "add": "Add Transaction",

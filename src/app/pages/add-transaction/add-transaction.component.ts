@@ -282,7 +282,8 @@ export class AddTransactionComponent implements OnInit {
     const categories = await this.dbService.getCategories();
     return categories.find(c => c.icon === this.selectedIcon.icon && 
                                c.type === this.selectedType &&
-                               c.subType === this.selectedSubType) || 
+                               c.subType.length === this.selectedSubType.length &&
+                               c.subType.every((value, index) => value === this.selectedSubType[index])) || 
            await this.createNewCategory();
   }
 
@@ -291,7 +292,7 @@ export class AddTransactionComponent implements OnInit {
       name: this.selectedIcon.name,
       icon: this.selectedIcon.icon,
       type: this.selectedType,
-      subType: this.selectedSubType,
+      subType: [this.selectedSubType],
       isCustom: false,
     });
     return {

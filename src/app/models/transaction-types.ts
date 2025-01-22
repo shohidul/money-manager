@@ -4,7 +4,7 @@ export type TransactionSubType = 'none' | 'loan' | 'repaid' | 'loanCost' | 'asse
 export interface BaseTransaction {
   id?: number;
   type: TransactionType;
-  subType: TransactionSubType;
+  subType: TransactionSubType | TransactionSubType[];
   amount: number;
   categoryId: number;
   memo: string;
@@ -39,25 +39,31 @@ export interface FuelTransaction extends BaseTransaction {
 export type Transaction = BaseTransaction | LoanTransactionBase | AssetTransaction | FuelTransaction;
 
 export function isLoanTransaction(tx: Transaction): tx is LoanTransactionBase {
-  return tx.subType === 'loan';
+  const subTypeArray = Array.isArray(tx.subType) ? tx.subType : [tx.subType];
+  return subTypeArray.includes('loan');
 }
 
 export function isRepaidTransaction(tx: Transaction): tx is LoanTransactionBase {
-  return tx.subType === 'repaid';
+  const subTypeArray = Array.isArray(tx.subType) ? tx.subType : [tx.subType];
+  return subTypeArray.includes('repaid');
 }
 
 export function isAssetTransaction(tx: Transaction): tx is AssetTransaction {
-  return tx.subType === 'asset';
+  const subTypeArray = Array.isArray(tx.subType) ? tx.subType : [tx.subType];
+  return subTypeArray.includes('asset');
 }
 
 export function isAssetCostTransaction(tx: Transaction): tx is AssetTransaction {
-  return tx.subType === 'assetCost';
+  const subTypeArray = Array.isArray(tx.subType) ? tx.subType : [tx.subType];
+  return subTypeArray.includes('assetCost');
 }
 
 export function isAssetIncomeTransaction(tx: Transaction): tx is AssetTransaction {
-  return tx.subType === 'assetIncome';
+  const subTypeArray = Array.isArray(tx.subType) ? tx.subType : [tx.subType];
+  return subTypeArray.includes('assetIncome');
 }
 
 export function isFuelTransaction(tx: Transaction): tx is FuelTransaction {
-  return tx.subType === 'fuel';
+  const subTypeArray = Array.isArray(tx.subType) ? tx.subType : [tx.subType];
+  return subTypeArray.includes('fuel');
 }

@@ -12,29 +12,30 @@ import { TranslationService } from '../../services/translation.service';
   imports: [CommonModule, FormsModule, TranslatePipe, TranslateNumberPipe],
   template: `
     <div class="form-fields">
-      <div class="form-group">
-        <label for="odometerReading">{{ 'fuel.odometerReading' | translate }}</label>
-        <input
-          id="odometerReading"
-          type="text"
-          class="form-input"
-          [ngModel]="getOdometerReading() | translateNumber"
-          (input)="onOdometerReadingInput($event)"
-          placeholder="{{ '00.0' | translateNumber }}"
-        />
+      <div class="form-inline">
+        <div class="form-group">
+          <label for="odometerReading">{{ 'fuel.odometerReading' | translate }}</label>
+          <input
+            id="odometerReading"
+            type="text"
+            class="form-input"
+            [ngModel]="getOdometerReading() | translateNumber"
+            (input)="onOdometerReadingInput($event)"
+            placeholder="{{ '00.0' | translateNumber }}"
+          />
+        </div>
+        <div class="form-group">
+          <label for="fuelQuantity">{{ 'fuel.fuelQuantity' | translate }}</label>
+          <input
+            id="fuelQuantity"
+            type="text"
+            class="form-input"
+            [ngModel]="getFuelQuantity() | translateNumber"
+            (input)="onFuelQuantityInput($event)"
+            placeholder="{{ '00.0' | translateNumber }}"
+          />
+        </div>
       </div>
-      <div class="form-group">
-        <label for="fuelQuantity">{{ 'fuel.fuelQuantity' | translate }}</label>
-        <input
-          id="fuelQuantity"
-          type="text"
-          class="form-input"
-          [ngModel]="getFuelQuantity() | translateNumber"
-          (input)="onFuelQuantityInput($event)"
-          placeholder="{{ '00.0' | translateNumber }}"
-        />
-      </div>
-
       <div class="form-group">
         <label for="fuelType">{{ 'fuel.fuelType' | translate }}</label>
         <select
@@ -58,12 +59,23 @@ import { TranslationService } from '../../services/translation.service';
       display: flex;
       flex-direction: column;
       gap: 1rem;
+      margin-bottom: 1rem;
+      background: var(--background-color);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .form-inline {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
     }
 
     .form-group {
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
+      flex: 1;
     }
 
     .form-input {

@@ -63,7 +63,7 @@ import { TranslationService } from '../../../services/translation.service';
                 @if (category.budget) {
                   <span class="budget-info">
                     <span>
-                      {{ (category.subType === 'asset' ? 'categories.goal' : 'categories.budget') | translate }}
+                      {{ (category.subType.includes('asset') ? 'categories.goal' : 'categories.budget') | translate }}
                     </span>
                     <span>{{ category.budget | translateNumber }}</span>
                   </span>
@@ -123,6 +123,7 @@ import { TranslationService } from '../../../services/translation.service';
                       <option value="loan">{{ 'categories.subTypes.loan' | translate }}</option>
                       <option value="repaid">{{ 'categories.subTypes.repaid' | translate }}</option>
                       <option value="fuel">{{ 'categories.subTypes.fuel' | translate }}</option>
+                      <option value="fuel|assetCost">{{ 'categories.subTypes.fuel|assetCost' | translate }}</option>
                     </select>
                   </div>
                 </div>
@@ -130,7 +131,7 @@ import { TranslationService } from '../../../services/translation.service';
                 <div class="form-row">
                   <div class="form-group">
                     <label for="categoryBudget-{{category.id}}">
-                      {{ (category.subType === 'asset' || category.type === 'income' ? 
+                      {{ (category.subType.includes('asset') || category.type === 'income' ? 
                         'categories.goal' : 'categories.budget') | translate }}
                     </label>
                     <input
@@ -547,7 +548,7 @@ export class CategoriesCardComponent implements OnInit {
     const updatedCategory = {
       ...this.editingCategory,
       name: this.getEditingCategoryName(),
-      subType: this.getEditingCategorySubType()
+      subType: this.getEditingCategorySubType().split('|') as TransactionSubType[]
     };
     delete (updatedCategory as any).budget;
 
@@ -558,15 +559,16 @@ export class CategoriesCardComponent implements OnInit {
   }
 
   getEditingCategoryName() {
-    return this.editingCategory?.name || '';
+    const translationKey = this.translationService.findCategoryKeyInTranslations(this.editingCategory?.name!);
+    return translationKey ? translationKey : this.editingCategory?.name || '';
   }
 
   getEditingCategoryBudget(): string {
     return this.editingCategory?.budget?.toString() || '';
   }
 
-  getEditingCategorySubType() {
-    return this.editingCategory?.subType || 'none';
+  getEditingCategorySubType(): string {
+    return this.editingCategory?.subType?.join('|') || 'none';
   }
 
   updateEditingCategoryName(name: string) {
@@ -588,7 +590,7 @@ export class CategoriesCardComponent implements OnInit {
 
   updateEditingCategorySubType(subType: TransactionSubType) {
     this.editingCategory = this.editingCategory 
-      ? { ...this.editingCategory, subType: subType } 
+      ? { ...this.editingCategory, subType: subType.split('|') as TransactionSubType[] } 
       : null;
   }
 

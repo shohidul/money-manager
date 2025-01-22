@@ -72,7 +72,7 @@ export class LoanService {
       // Group transactions
       const givenLoans = groupLoanTransactions(
         transactions.filter(tx => 
-          (tx.subType === 'loan' || tx.parentId) // Include both loan and repaid transactions
+          (tx.subType.includes('loan') || tx.parentId) // Include both loan and repaid transactions
         )
       );
       
@@ -97,7 +97,7 @@ export class LoanService {
       // Group transactions
       const takenLoans = groupLoanTransactions(
         transactions.filter(tx => 
-          (tx.subType === 'loan' || tx.parentId) // Include both loan and repaid transactions
+          (tx.subType.includes('loan') || tx.parentId) // Include both loan and repaid transactions
         )
       );
       

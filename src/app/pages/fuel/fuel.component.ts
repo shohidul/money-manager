@@ -140,7 +140,7 @@ export class FuelComponent implements OnInit {
   async extractFuelCategories() {
     // Find fuel categories
     this.fuelCategories = (await this.dbService.getCategories())
-      .filter(cat => cat.subType === 'fuel');
+      .filter(cat => cat.subType?.includes('fuel'));
 
     // Get most used categories
     const mostUsedCategories = await this.getMostUsedCategories();

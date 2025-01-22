@@ -590,48 +590,9 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  private findCategoryKeyInTranslations(categoryName: string): string | null {
-    const searchValue = categoryName.toLowerCase();
-    console.log(searchValue);
-    const translations = this.translationService.getTranslations();
-    console.log(translations);
-    
-    // Helper function to search through nested objects
-    const searchInObject = (obj: any, parentKey: string = ''): string | null => {
-      for (const [key, value] of Object.entries(obj)) {
-        const currentKey = parentKey ? `${parentKey}.${key}` : key;
-        console.log(currentKey + ':' + value);
-        
-        if (typeof value === 'string' && value.toLowerCase() === searchValue) {
-          return currentKey;
-        } else if (typeof value === 'object' && value !== null) {
-          const result = searchInObject(value, currentKey);
-          if (result) return result;
-        }
-      }
-      return null;
-    };
-
-    // Search in defaults categories section
-    const categoryDefaults = translations?.categories?.defaults;
-    if (categoryDefaults) {
-      const key = searchInObject(categoryDefaults, 'categories.defaults');
-      if (key) return key;
-    }
-
-    // Search in groups categories section
-    const categoryGroups = translations?.categories?.groups?.icons;
-    if (categoryGroups) {
-      const key = searchInObject(categoryGroups, 'categories.groups.icons');
-      if (key) return key;
-    }
-
-    return null;
-  }
-
   private getCategoryIdByName(categoryName: string): number {
     // First try to find the category key in translations
-    const translationKey = this.findCategoryKeyInTranslations(categoryName);
+    const translationKey = this.translationService.findCategoryKeyInTranslations(categoryName);
     console.log('Translation key:', translationKey);
     if (translationKey) {
       // Find category by translation key

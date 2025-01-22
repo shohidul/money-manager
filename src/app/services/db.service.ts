@@ -24,7 +24,7 @@ export interface Category {
   name: string;
   icon: string;
   type: TransactionType;
-  subType: TransactionSubType;
+  subType: TransactionSubType[];
   isCustom: boolean;
   order?: number;
   budget?: number;
@@ -112,7 +112,7 @@ export class DbService {
     try {
       const allTransactions = await this.db.getAll('transactions');
       return allTransactions.filter(tx => {
-        const matchesSubType = tx.subType === subType;
+        const matchesSubType = tx.subType.includes(subType);
         const matchesStartDate = !startDate || new Date(tx.date) >= startDate;
         const matchesEndDate = !endDate || new Date(tx.date) <= endDate;
         

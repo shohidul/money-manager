@@ -10,6 +10,14 @@ export class CategoryService {
 
   async initializeDefaultCategories() {
     const existingCategories = await this.dbService.getCategories();
+
+      // Migration: Convert subType from string to array if necessary
+    for (const category of existingCategories) {
+      if (typeof category.subType === 'string') {
+        category.subType = [category.subType];
+        await this.dbService.updateCategory(category);
+      }
+    }
   
     const defaultCategoriesWithDetails = defaultCategories
       .filter(category => category.version! <= CATEGORIES_VERSION)
@@ -44,7 +52,8 @@ export class CategoryService {
           existingCategory.name !== category.name ||
           existingCategory.icon !== category.icon ||
           existingCategory.type !== category.type ||
-          existingCategory.subType !== category.subType;
+          existingCategory.subType.length !== category.subType.length ||
+          !existingCategory.subType.every((value, index) => value === category.subType[index]);
   
         if (hasChanged) {
           console.log('Updating category', category);
@@ -97,7 +106,7 @@ export class CategoryService {
 
   async getCategoriesBySubType(subType: 'fuel' | 'asset' | 'loan' | 'repaid' | 'none') {
     const allCategories = await this.getAllCategories();
-    return allCategories.filter(category => category.subType === subType);
+    return allCategories.filter(category => category.subType.includes(subType));
   }
 
   async addCategory(category: Omit<Category, 'id'>) {

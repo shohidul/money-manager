@@ -102,6 +102,9 @@ import { TranslationService } from '../../services/translation.service';
       display: flex;
       flex-direction: column;
       gap: 16px;
+      background: var(--background-color);
+      border-radius: 8px;
+      padding: 16px;
     }
 
     .form-inline {

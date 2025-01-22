@@ -71,4 +71,40 @@ export class TranslationService {
   getTranslations() {
     return this.translations[this.getCurrentLanguage()] || {};
   }
+
+  findCategoryKeyInTranslations(translatedCategoryName: string): string | null {
+    const searchValue = translatedCategoryName.trim().toLowerCase();
+    const translations = this.getTranslations();
+    
+    // Helper function to search through nested objects
+    const searchInObject = (obj: any, parentKey: string = ''): string | null => {
+      for (const [key, value] of Object.entries(obj)) {
+        const currentKey = parentKey ? `${parentKey}.${key}` : key;
+        
+        if (typeof value === 'string' && value.toLowerCase() === searchValue) {
+          return currentKey;
+        } else if (typeof value === 'object' && value !== null) {
+          const result = searchInObject(value, currentKey);
+          if (result) return result;
+        }
+      }
+      return null;
+    };
+
+    // Search in defaults categories section
+    const categoryDefaults = translations?.categories?.defaults;
+    if (categoryDefaults) {
+      const key = searchInObject(categoryDefaults, 'categories.defaults');
+      if (key) return key;
+    }
+
+    // Search in groups categories section
+    const categoryGroups = translations?.categories?.groups?.icons;
+    if (categoryGroups) {
+      const key = searchInObject(categoryGroups, 'categories.groups.icons');
+      if (key) return key;
+    }
+
+    return null;
+  }
 }

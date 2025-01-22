@@ -168,7 +168,7 @@ export class AssetChartsComponent implements OnInit {
     this.stats.totalAssetValue = Object.values(assetGroups).reduce((sum, group) => sum + group.value, 0);
 
     const incomeTransactions = this.assetTransactions.filter(tx => tx.type === 'income');
-    const costTransactions = this.assetTransactions.filter(tx => tx.type === 'expense' && tx.subType !== 'asset');
+    const costTransactions = this.assetTransactions.filter(tx => tx.type === 'expense' && !isAssetTransaction(tx));
 
     this.stats.totalIncome = incomeTransactions.reduce((sum, tx) => sum + tx.amount, 0);
     this.stats.incomeCount = incomeTransactions.length;

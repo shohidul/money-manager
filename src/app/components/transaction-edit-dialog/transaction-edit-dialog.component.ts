@@ -32,7 +32,7 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
           <div class="dialog-header">
             <h2>{{ 'transaction.title.edit' | translate }}</h2>
             <button class="edit-full-button" (click)="onEditFull()">
-              @if (editedTransaction.subType === 'none' || !isAdvancedMode) {
+              @if (editedTransaction.subType.includes('none') || !isAdvancedMode) {
                 {{ 'transaction.edit.edit' | translate }}
               } @else {
                 {{ 'transaction.edit.editFull' | translate }}
@@ -42,8 +42,8 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
           </div>
 
           <div class="dialog-body">
-            <div class="dialog-content-grid" [class.no-form]="editedTransaction.subType === 'none'">
-              @if (editedTransaction.subType === 'none' || !isAdvancedMode && !isLoanChargeable(editedTransaction)) {
+            <div class="dialog-content-grid" [class.no-form]="editedTransaction.subType.includes('none')">
+              @if (editedTransaction.subType.includes('none') || !isAdvancedMode && !isLoanChargeable(editedTransaction)) {
                 <div class="transaction-summary-column">
                   <div class="summary-item category-item">
                     <div class="category-content">
@@ -85,7 +85,7 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
                     <div class="category-content">
                       <span class="material-symbols-rounded category-icon" [class]="editedTransaction.type">{{ category.icon }}</span>
                       <div class="category-details">
-                        <span class="label">{{ 'transaction.types.' + editedTransaction.type | translate }} | {{ 'transaction.subTypes.' + editedTransaction.subType | translate }}</span>
+                        <span class="label">{{ 'transaction.types.' + editedTransaction.type | translate }} | {{ 'transaction.subTypes.' + getSubType(editedTransaction) | translate }}</span>
                         <span class="category-name">{{ category.name | translate }}</span>
                         <span class="meta-info">{{ editedTransaction.memo || ('common.noMemo' | translate) }} | {{ editedTransaction.date | translateDate:'short'}}</span>
                       </div>
@@ -93,17 +93,10 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
                     <span class="value">{{ editedTransaction.amount | translateNumber:'1.0-2' }}</span>
                   </div>
 
-                  <div class="form-content">
+                  <!-- <div class="form-content"> -->
                     @if (isLoanTransaction(editedTransaction) || isRepaidTransaction(editedTransaction)) {
                       <app-loan-form
                         [isAdvancedMode]="isAdvancedMode"
-                        [transaction]="editedTransaction"
-                        (transactionChange)="onTransactionChange($event)"
-                      />
-                    }
-
-                    @if (isAssetTransaction(editedTransaction) || isAssetCostTransaction(editedTransaction) || isAssetIncomeTransaction(editedTransaction)) {
-                      <app-asset-form
                         [transaction]="editedTransaction"
                         (transactionChange)="onTransactionChange($event)"
                       />
@@ -115,8 +108,15 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
                         (transactionChange)="onTransactionChange($event)"
                       />
                     }
+
+                    @if (isAssetTransaction(editedTransaction) || isAssetCostTransaction(editedTransaction) || isAssetIncomeTransaction(editedTransaction)) {
+                      <app-asset-form
+                        [transaction]="editedTransaction"
+                        (transactionChange)="onTransactionChange($event)"
+                      />
+                    }
                   </div>
-                </div>
+                <!-- </div> -->
               }
             </div>
           </div>
@@ -480,5 +480,10 @@ export class TransactionEditDialogComponent implements OnInit {
     if ((event.target as HTMLElement).classList.contains('dialog-overlay')) {
       this.onCancel();
     }
+  }
+
+  getSubType(tx: Transaction): string {
+    const subTypeArray = Array.isArray(tx.subType) ? tx.subType : [tx.subType];
+    return subTypeArray.join('|');
   }
 }

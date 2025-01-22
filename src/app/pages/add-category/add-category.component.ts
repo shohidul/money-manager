@@ -194,7 +194,7 @@ import { CategoryService } from '../../services/category.service';
 })
 export class AddCategoryComponent implements OnInit {
   type: TransactionType = 'expense';
-  subType: TransactionSubType = 'none';
+  // subType: TransactionSubType[] = ['none'];
   categoryGroups = categoryGroups;
   categoryName = '';
   selectedIcon: CategoryIcon | null = null;
@@ -223,10 +223,10 @@ export class AddCategoryComponent implements OnInit {
     const typeFromQuery = this.route.snapshot.queryParamMap.get('type');
     this.type = typeFromQuery as TransactionType;
 
-    const subTypeFromQuery = this.route.snapshot.queryParamMap.get('subType');
-    if (subTypeFromQuery) {
-      this.subType = subTypeFromQuery as TransactionSubType;
-    }
+    // const subTypeFromQuery = this.route.snapshot.queryParamMap.get('subType');
+    // if (subTypeFromQuery) {
+    //   this.subType = [subTypeFromQuery] as TransactionSubType[];
+    // }
 
     const refererFromQuery = this.route.snapshot.queryParamMap.get('referer');
     this.referer = refererFromQuery || '';
@@ -244,7 +244,7 @@ export class AddCategoryComponent implements OnInit {
     this.selectedIcon = icon;
     this._selectedIconName = icon.name;
     
-    const translation = this.translationService.translate(icon.name);
+    const translation = this.translatedIconName;
     if (!this.categoryName || this.categoryName === this.initialTranslation) {
       this.categoryName = translation;
       this.initialTranslation = translation;
@@ -254,11 +254,16 @@ export class AddCategoryComponent implements OnInit {
   async saveCategory() {
     if (!this.selectedIcon || !this.categoryName.trim()) return;
 
+    // this.categoryName === this._selectedIconName 
+    console.log(this.categoryName, this._selectedIconName, this.translatedIconName);
+
+    const hasChanged = this.categoryName !== this.translatedIconName;
+
     const category = {
-      name: this.categoryName.trim(),
+      name: hasChanged ? this.categoryName.trim() : this._selectedIconName,
       icon: this.selectedIcon.icon,
       type: this.type ?? 'expense',
-      subType: this.subType,
+      subType: ['none'] as TransactionSubType [],
       isCustom: true,
     };
 
@@ -270,7 +275,7 @@ export class AddCategoryComponent implements OnInit {
     this.router.navigate([this.referer], {
       queryParams: { 
         type: this.type ?? 'expense',
-        subType: this.subType 
+        // subType: this.subType 
       },
     });
   }

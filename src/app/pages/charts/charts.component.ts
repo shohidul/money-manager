@@ -699,7 +699,7 @@ export class ChartsComponent implements OnInit, AfterViewInit {
 
   isTypeIncomeOrAsset(categoryId: number): boolean{
     const category = this.getBudgetForCategory(categoryId)?.category;
-    return category?.subType === 'asset' || category?.type === 'income';
+    return category?.subType.includes('asset') || category?.type === 'income';
   }
 
   getBudgetAndSpent(categoryId: number) {
