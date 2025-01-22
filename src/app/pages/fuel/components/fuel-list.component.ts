@@ -58,7 +58,7 @@ import { TranslateDatePipe } from "../../../components/shared/translate-date.pip
       <ng-template #noTransactions>
         <div class="empty-state">
           <span class="material-symbols-rounded">local_gas_station</span>
-          <p>No fuel entries found</p>
+          <p>{{ 'fuel.notFound' | translate }}</p>
         </div>
       </ng-template>
     </div>

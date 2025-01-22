@@ -250,11 +250,16 @@ export class CalculatorSheetComponent implements OnInit, OnDestroy, OnChanges {
   ngOnDestroy() {
     // Remove the event listener to prevent memory leaks
     window.removeEventListener('keydown', this.onGlobalKeyDown.bind(this));
+    this.isVisible = false;
   }
 
   onGlobalKeyDown(event: KeyboardEvent) {
+    if (!this.isVisible) {
+      return;
+    }
+
     const activeElement = document.activeElement as HTMLElement;
-    if (activeElement && activeElement.classList.contains('memo-input') || activeElement.classList.contains('date-input')) {
+    if (activeElement && (activeElement.classList.contains('memo-input') || activeElement.classList.contains('date-input'))) {
       return;
     }
 

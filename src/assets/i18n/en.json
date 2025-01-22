@@ -478,7 +478,8 @@
     "lastFuelPrice": "Last Fuel Price",
     "mileageTrend": "Mileage Trend",
     "priceTrend": "Fuel Price Trend",
-    "odoReading": "Odometer Reading"
+    "odoReading": "Odometer Reading",
+    "notFound": "No fuel entries found"
   },
   "dashboard": {
     "title": "Dashboard",
