@@ -4,7 +4,7 @@ export interface DefaultCategories {
   name: string;
   icon: string;
   type: TransactionType;
-  subType: TransactionSubType[];
+  subType: TransactionSubType;
   version?: number;     // Version when category was added
   order?: number;       // Default position in list
 }
