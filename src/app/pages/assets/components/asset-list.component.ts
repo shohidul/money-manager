@@ -12,7 +12,10 @@ import { FilterBarComponent } from '../../../components/filter-bar/filter-bar.co
 import { FilterOptions } from '../../../utils/transaction-filters';
 
 interface AssetGroup {
+  id: number;
   assetName: string;
+  type: string;
+  categoryId: number;
   quantity: number;
   measurementUnit: string;
   value: number;
@@ -56,12 +59,12 @@ interface AssetGroup {
       </div>
 
       <div class="asset-section">
-        @for (group of assetGroups; track group.assetName) {
+        @for (group of assetGroups; track group.id) {
           <div class="asset-group card">
             <div class="asset-header">
-              <span class="material-symbols-rounded">real_estate_agent</span>
+              <span class="material-symbols-rounded" [class]="group.type">{{ getCategoryIcon(group.categoryId) }}</span>
               <div class="asset-details">
-                <span class="asset-name">{{ group.assetName }}</span>
+                <span class="asset-name">{{ getCategoryName(group.categoryId) | translate }}</span>
                 <span class="small-text">
                   {{ group.quantity | translateNumber:'1.0-2' }} {{ group.measurementUnit | translate }} | 
                   {{ 'asset.purchaseDate' | translate }}: {{ group.purchaseDate | translateDate }} |
@@ -69,23 +72,44 @@ interface AssetGroup {
                 </span>
               </div>
             </div>
-
-            <div class="transactions">
+            <div class="asset-group-body">
+              <div class="transactions-chart"></div>
+              <div class="transactions">
               @for (tx of group.transactions; track tx.id) {
-                <div class="transaction-item" [class.income]="tx.type === 'income'" [class.expense]="tx.type === 'expense'">
+                <div class="transaction-item card" *ngIf="tx.type === 'expense'" [class.expense]="tx.type === 'expense'">
                   <span class="material-symbols-rounded" [class]="tx.type">
                     {{ getCategoryIcon(tx.categoryId) }}
                   </span>
                   <div class="transaction-details">
-                    <span class="small-text">{{ tx.date | translateDate }}, {{ tx.date | translateDate: 'shortTime' }}</span>
                     <span class="memo">{{ getCategoryName(tx.categoryId) | translate }}</span>
-                    <span class="small-text">{{ tx.memo || ('common.noMemo' | translate) }}</span>
+                    <span class="small-text">{{ tx.date | translateDate }}, {{ tx.date | translateDate: 'shortTime' }} {{ tx.memo || ('common.noMemo' | translate) }}</span>
                   </div>
-                  <span class="amount" [class.positive]="tx.type === 'income'" [class.negative]="tx.type === 'expense'">
+                  <span class="amount" [class.negative]="tx.type === 'expense'">
                     {{ tx.amount | translateNumber:'1.0-2' }}
                   </span>
                 </div>
               }
+              </div>
+              <div class="transactions">
+                @for (tx of group.transactions; track tx.id) {
+                  <div class="transaction-item card" *ngIf="tx.type === 'income'" [class.income]="tx.type === 'income'">
+                    <span class="material-symbols-rounded" [class]="tx.type">
+                      {{ getCategoryIcon(tx.categoryId) }}
+                    </span>
+                    <div class="transaction-details">
+                    <div class="transaction-details-header">
+                      <span class="memo">{{ getCategoryName(tx.categoryId) | translate }}</span>
+                      <span class="amount" [class.positive]="tx.type === 'income'">  
+                        {{ tx.amount | translateNumber:'1.0-2' }}
+                      </span>
+                    </div>
+                    <div class="transaction-details-footer">
+                      <span class="small-text">{{ tx.date | translateDate }}, {{ tx.date | translateDate: 'shortTime' }} {{ tx.memo || ('common.noMemo' | translate) }}</span>
+                    </div>
+                    </div>
+                  </div>
+                }
+              </div>
             </div>
           </div>
         }
@@ -123,18 +147,21 @@ interface AssetGroup {
     }
 
     .asset-group {
-      padding: 1rem;
+      padding: 1rem 0 1rem 1rem;
       background: var(--surface-color);
       border-radius: 0.5rem;
       box-shadow: 0 2px 4px var(--box-shadow-color-light);
+    }
+
+    .asset-group-body {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
     }
 
     .asset-header {
       display: flex;
       align-items: center;
       gap: 1rem;
-      margin-bottom: 1rem;
-      padding-bottom: 1rem;
       border-bottom: 1px solid var(--background-color);
     }
 
@@ -153,17 +180,19 @@ interface AssetGroup {
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
+      border-left: 2px solid var(--border-color);
+      padding: 1rem;
     }
 
     .transaction-item {
       display: flex;
       align-items: center;
       gap: 1rem;
-      padding: 0.1rem 1rem 0.8rem 1rem;
-      margin: 0 -1rem;
       transition: background-color 0.2s;
-      border-bottom: 1px solid var(--background-color);
+      border: 1px solid var(--background-color);
       font-size: 0.875rem;
+      background-color: var(--background-color);
+      border-radius: 20px;
     }
 
     .transaction-item:hover {
@@ -174,13 +203,24 @@ interface AssetGroup {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 0.25rem;
+    }
+
+    .transaction-details-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .transaction-details-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
     .material-symbols-rounded {
       padding: 0.5rem;
-      border-radius: 0.5rem;
-      background: var(--background-color);
+      border-radius: 2rem;
+      background: var(--surface-color);
     }
 
     .material-symbols-rounded.income {
@@ -291,13 +331,16 @@ export class AssetListComponent implements OnInit {
   }
 
   private groupTransactionsByAsset(transactions: AssetTransaction[]): AssetGroup[] {
-    const groups = new Map<string, AssetGroup>();
+    const groups = new Map<number, AssetGroup>();
 
-    transactions.forEach((tx) => {
+    transactions.filter(tx => isAssetTransaction(tx)).forEach((tx) => {
       const assetTx = tx as AssetTransaction & { assetName: string };
 
-      groups.set(assetTx.assetName, {
+      groups.set(assetTx.id!, {
+        id: assetTx.id!,
         assetName: assetTx.assetName,
+        type: tx.type,
+        categoryId: assetTx.categoryId,
         quantity: assetTx?.quantity || 0,
         measurementUnit: assetTx?.measurementUnit || '',
         value: assetTx?.amount || 0,
@@ -305,9 +348,10 @@ export class AssetListComponent implements OnInit {
         transactions: []
       });
 
-      if (!isAssetTransaction(assetTx)) { // Only add cost and income transactions
-        groups.get(tx.assetName)!.transactions.push(assetTx);
-      }
+      transactions.filter(tx => tx.parentId === assetTx.id).forEach(tx => {
+        groups.get(assetTx.id!)!.transactions.push(tx);
+      });
+      
     });
 
     return Array.from(groups.values());
