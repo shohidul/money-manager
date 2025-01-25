@@ -8,11 +8,11 @@ import { TranslationService } from '../../services/translation.service';
 export class TranslateNumberPipe implements PipeTransform {
   constructor(private translationService: TranslationService) {}
 
-  transform(value: string | number | null | undefined, format: string = '1.0-2', useGrouping: boolean = false): string {
+  transform(value: string | number | null | undefined, format: string = '1.0-2', useGrouping: boolean = true): string {
     return this.transformByLocale(value, null, format, useGrouping);
   }
 
-  transformByLocale(value: string | number | null | undefined, lang: string | null = null, format: string = '1.0-2', useGrouping: boolean = false): string {
+  transformByLocale(value: string | number | null | undefined, lang: string | null = null, format: string = '1.0-2', useGrouping: boolean = true): string {
     if (value == null || value === '') return ''; // Handle null or undefined
 
     const currentLang = lang || this.translationService.getCurrentLanguage();
@@ -37,10 +37,10 @@ export class TranslateNumberPipe implements PipeTransform {
           '৮': '8',
           '৯': '9',
         };
-      
+
         // Replace Bengali digits with English digits
         const translatedValue = value.replace(/[০-৯]/g, (bengaliDigit) => bengaliToEnglishMap[bengaliDigit]);
-      
+
         // Split the translated string into numeric and non-numeric parts
         const parts = translatedValue.match(/\d+|\D+/g); // Match numbers and non-numbers separately
         if (!parts) return value;
@@ -76,12 +76,12 @@ export class TranslateNumberPipe implements PipeTransform {
     const minFractionDigits = fractionPart ? parseInt(fractionPart.split('-')[0], 10) : 0;
     const maxFractionDigits = fractionPart ? parseInt(fractionPart.split('-')[1], 10) : 2;
 
-    // Format the number
+    // Format the number with grouping (comma separation)
     return new Intl.NumberFormat(lang, {
       minimumIntegerDigits: minIntegerDigits,
       minimumFractionDigits: minFractionDigits,
       maximumFractionDigits: maxFractionDigits,
-      useGrouping: useGrouping
+      useGrouping: useGrouping // Ensure comma grouping is applied
     }).format(value);
   }
 }

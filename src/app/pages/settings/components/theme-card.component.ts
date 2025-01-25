@@ -162,7 +162,8 @@ export class ThemeCardComponent implements OnInit, OnDestroy {
     { name: 'Red', value: '#F44336' },
     { name: 'Teal', value: '#009688' },
     { name: 'Pink', value: '#E91E63' },
-    { name: 'Indigo', value: '#3F51B5' }
+    { name: 'Indigo', value: '#3F51B5' },
+    { name: 'Black', value: '#000000' }
   ];
 
   constructor(
