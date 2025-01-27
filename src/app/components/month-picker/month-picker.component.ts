@@ -22,7 +22,7 @@ import { TranslateNumberPipe } from "../shared/translate-number.pipe";
           <button (click)="prevYear()">
             <span class="material-icons">chevron_left</span>
           </button>
-          <span>{{ selectedYear | translateNumber }}</span>
+          <span>{{ selectedYear | translateNumber: '1-0-0': false  }}</span>
           <button (click)="nextYear()">
             <span class="material-icons">chevron_right</span>
           </button>

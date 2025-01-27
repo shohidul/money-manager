@@ -10,8 +10,9 @@ import { TranslatePipe } from "../../../components/shared/translate.pipe";
 import { TranslateDatePipe } from "../../../components/shared/translate-date.pipe";
 import { FilterBarComponent } from '../../../components/filter-bar/filter-bar.component';
 import { FilterOptions } from '../../../utils/transaction-filters';
+import { Router } from '@angular/router';
 
-interface AssetGroup {
+export interface AssetGroup {
   id: number;
   assetName: string;
   type: string;
@@ -21,6 +22,8 @@ interface AssetGroup {
   value: number;
   purchaseDate: Date;
   transactions: Transaction[];
+  totalCost: number;
+  totalIncome: number;
 }
 
 @Component({
@@ -43,7 +46,7 @@ interface AssetGroup {
         (endDateChange)="onEndDateChange($event)"
       />
 
-      <div class="asset-summary card">
+      <!-- <div class="asset-summary card">
         <div class="summary-item">
           <span class="label">{{ 'asset.stats.totalAssets' | translate }} <span class="text-muted text-sm">({{ totalAssets | translateNumber:'1.0-2' }})</span></span>
           <span class="amount positive">{{ totalAssetValue | translateNumber:'1.0-2' }}</span>
@@ -56,60 +59,59 @@ interface AssetGroup {
           <span class="label">{{ 'asset.stats.totalCost' | translate }} <span class="text-muted text-sm">({{ totalCostCount | translateNumber:'1.0-2' }})</span></span>
           <span class="amount negative">{{ totalCost | translateNumber:'1.0-2' }}</span>
         </div>
-      </div>
+      </div> -->
 
       <div class="asset-section">
         @for (group of assetGroups; track group.id) {
-          <div class="asset-group card">
+          <div class="asset-group card" (click)="gotoAssetDetails(group)">
             <div class="asset-header">
               <span class="material-symbols-rounded" [class]="group.type">{{ getCategoryIcon(group.categoryId) }}</span>
               <div class="asset-details">
                 <span class="asset-name">{{ getCategoryName(group.categoryId) | translate }}</span>
                 <span class="small-text">
+                  {{ group.assetName | translate }} | 
                   {{ group.quantity | translateNumber:'1.0-2' }} {{ group.measurementUnit | translate }} | 
-                  {{ 'asset.purchaseDate' | translate }}: {{ group.purchaseDate | translateDate }} |
                   {{ 'asset.value' | translate }}: {{ group.value | translateNumber:'1.0-2' }}
                 </span>
               </div>
             </div>
             <div class="asset-group-body">
-              <div class="transactions-chart"></div>
-              <div class="transactions">
-              @for (tx of group.transactions; track tx.id) {
-                <div class="transaction-item card" *ngIf="tx.type === 'expense'" [class.expense]="tx.type === 'expense'">
+              <span>Cost: {{group.totalCost | translateNumber:'1.0-2'}}</span> 
+              <span>|</span> 
+              <span>Income: {{group.totalIncome | translateNumber:'1.0-2'}}</span>
+              <!-- <div class="transactions-chart"></div> -->
+              <!-- <div class="transactions"> -->
+              <!-- @for (tx of group.transactions; track tx.id) {
+                <div class="transaction-item" *ngIf="tx.type === 'expense'" [class.expense]="tx.type === 'expense'">
                   <span class="material-symbols-rounded" [class]="tx.type">
                     {{ getCategoryIcon(tx.categoryId) }}
                   </span>
                   <div class="transaction-details">
                     <span class="memo">{{ getCategoryName(tx.categoryId) | translate }}</span>
-                    <span class="small-text">{{ tx.date | translateDate }}, {{ tx.date | translateDate: 'shortTime' }} {{ tx.memo || ('common.noMemo' | translate) }}</span>
+                    <span class="small-text">{{ tx.date | translateDate }}</span>
                   </div>
                   <span class="amount" [class.negative]="tx.type === 'expense'">
                     {{ tx.amount | translateNumber:'1.0-2' }}
                   </span>
                 </div>
               }
-              </div>
-              <div class="transactions">
+              </div> -->
+              <!-- <div class="transactions">
                 @for (tx of group.transactions; track tx.id) {
-                  <div class="transaction-item card" *ngIf="tx.type === 'income'" [class.income]="tx.type === 'income'">
+                  <div class="transaction-item" *ngIf="tx.type === 'income'" [class.income]="tx.type === 'income'">
                     <span class="material-symbols-rounded" [class]="tx.type">
                       {{ getCategoryIcon(tx.categoryId) }}
                     </span>
                     <div class="transaction-details">
-                    <div class="transaction-details-header">
                       <span class="memo">{{ getCategoryName(tx.categoryId) | translate }}</span>
-                      <span class="amount" [class.positive]="tx.type === 'income'">  
-                        {{ tx.amount | translateNumber:'1.0-2' }}
-                      </span>
+                      <span class="small-text">{{ tx.date | translateDate }}</span>
                     </div>
-                    <div class="transaction-details-footer">
-                      <span class="small-text">{{ tx.date | translateDate }}, {{ tx.date | translateDate: 'shortTime' }} {{ tx.memo || ('common.noMemo' | translate) }}</span>
-                    </div>
-                    </div>
+                    <span class="amount" [class.negative]="tx.type === 'income'">
+                      {{ tx.amount | translateNumber:'1.0-2' }}
+                    </span>
                   </div>
                 }
-              </div>
+              </div> -->
             </div>
           </div>
         }
@@ -142,34 +144,54 @@ interface AssetGroup {
 
     .asset-section {
       display: flex;
-      flex-direction: column;
-      gap: 1rem;
+      column-gap: 2rem;
+      flex-wrap: wrap;
+      margin-top: 2rem;
     }
 
     .asset-group {
-      padding: 1rem 0 1rem 1rem;
+      padding: 1rem;
       background: var(--surface-color);
       border-radius: 0.5rem;
       box-shadow: 0 2px 4px var(--box-shadow-color-light);
+      cursor: pointer;
+      width: 468px;
+    }
+
+    @media (max-width: 768px) {
+      .asset-group {
+        width: 100%;
+      }
+    }
+
+    .asset-group:hover{
+      box-shadow: 0 4px 16px var(--box-shadow-color-light);
     }
 
     .asset-group-body {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      display: flex;
+      justify-content: space-around;
+      font-size: x-small;
+      background-color: var(--background-color);
+      padding: 0.5rem;
+      border-radius: 5px;
+    }
+
+    .asset-group-body span {
+      width: -webkit-fill-available;
+      text-align: center;
     }
 
     .asset-header {
       display: flex;
       align-items: center;
-      gap: 1rem;
-      border-bottom: 1px solid var(--background-color);
+      padding-bottom: 0.5rem;
     }
 
     .asset-details {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 0.25rem;
     }
 
     .asset-name {
@@ -179,9 +201,8 @@ interface AssetGroup {
     .transactions {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
       border-left: 2px solid var(--border-color);
-      padding: 1rem;
+      padding: 0.5rem 1rem;
     }
 
     .transaction-item {
@@ -189,10 +210,11 @@ interface AssetGroup {
       align-items: center;
       gap: 1rem;
       transition: background-color 0.2s;
-      border: 1px solid var(--background-color);
       font-size: 0.875rem;
-      background-color: var(--background-color);
-      border-radius: 20px;
+      padding: 0.5rem 1rem;
+      margin: 0 -1rem;
+      cursor: pointer;
+      border-bottom: 1px solid var(--background-color);
     }
 
     .transaction-item:hover {
@@ -218,6 +240,7 @@ interface AssetGroup {
     }
 
     .material-symbols-rounded {
+      font-size: xx-large;
       padding: 0.5rem;
       border-radius: 2rem;
       background: var(--surface-color);
@@ -276,6 +299,7 @@ export class AssetListComponent implements OnInit {
   private categories: { [key: number]: Category } = {};
 
   constructor(
+    private router: Router,
     private dbService: DbService,
     private categoryService: CategoryService
   ) {}
@@ -314,13 +338,19 @@ export class AssetListComponent implements OnInit {
     }, {});
 
       // Load transactions
-      const transactions = await this.dbService.getTransactions(startDate, endDate) as AssetTransaction[];
-      const assetTransactions = transactions.filter(tx => 
-        isAssetTransaction(tx) || isAssetCostTransaction(tx) || isAssetIncomeTransaction(tx)
+      const parent = await this.dbService.getTransactions(new Date(0), new Date()) as AssetTransaction[];
+      const parentTransactions = parent.filter(tx => 
+        isAssetTransaction(tx)
+      );
+      const children = await this.dbService.getTransactions(startDate, endDate) as AssetTransaction[];
+      const childTransactions = children.filter(tx => 
+        isAssetCostTransaction(tx) || isAssetIncomeTransaction(tx)
       );
 
+      const allTransactions = [...parentTransactions, ...childTransactions];
+
       // Group transactions by asset
-      const groupedTransactions = this.groupTransactionsByAsset(assetTransactions);
+      const groupedTransactions = this.groupTransactionsByAsset(allTransactions);
       this.assetGroups = groupedTransactions;
 
       // Calculate totals
@@ -345,13 +375,17 @@ export class AssetListComponent implements OnInit {
         measurementUnit: assetTx?.measurementUnit || '',
         value: assetTx?.amount || 0,
         purchaseDate: assetTx?.date || new Date(),
-        transactions: []
+        transactions: [],
+        totalCost: 0,
+        totalIncome: 0
       });
 
       transactions.filter(tx => tx.parentId === assetTx.id).forEach(tx => {
         groups.get(assetTx.id!)!.transactions.push(tx);
+        groups.get(assetTx.id!)!.totalCost += tx.type === 'expense' ? (tx.amount || 0) : 0;
+        groups.get(assetTx.id!)!.totalIncome += tx.type === 'income' ? (tx.amount || 0) : 0;
       });
-      
+
     });
 
     return Array.from(groups.values());
@@ -407,5 +441,13 @@ export class AssetListComponent implements OnInit {
   onEndDateChange(date: Date) {
     this.filters.endDate = date;
     this.loadData();
+  }
+
+  gotoAssetDetails(group: AssetGroup) {
+    this.router.navigate(["/asset-details"], {
+      queryParams: { 
+        group: JSON.stringify(group),
+      },
+    });
   }
 }

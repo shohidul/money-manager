@@ -99,7 +99,7 @@ type ChartType = 'all' | 'income' | 'expense';
                   <span class="material-symbols-rounded" [class]="stat.type">{{ getCategoryIcon(stat.categoryId) }}</span>
                   <span>
                     {{ stat.category | translate  }} 
-                    <span class="percentage text-sm ml-4 text-muted">{{ stat.percentage | translateNumber:'1.1-1' }}% {{stat.totalAmount}}</span>
+                    <span class="percentage text-sm ml-4 text-muted">{{ stat.percentage | translateNumber:'1.1-1' }}%</span>
                   </span> 
                 </div>
                 <span class="amount">

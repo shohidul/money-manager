@@ -42,6 +42,11 @@ export const routes: Routes = [
           import('./pages/assets/assets.component').then(m => m.AssetsComponent)
       },
       {
+        path: 'asset-details',
+        loadComponent: () => 
+          import('./pages/assets/components/asset-details.component').then(m => m.AssetDetailsComponent)
+      },
+      {
         path: 'export',
         loadComponent: () => 
           import('./pages/export/export.component').then(m => m.ExportComponent)

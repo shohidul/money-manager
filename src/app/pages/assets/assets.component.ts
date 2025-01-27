@@ -23,10 +23,10 @@ import { Router } from '@angular/router';
       />
 
       <div class="content">
-        <div class="tabs">
+        <!-- <div class="tabs">
           <button [class.active]="activeTab === 'list'" (click)="activeTab = 'list'">Assets</button>
           <button [class.active]="activeTab === 'charts'" (click)="activeTab = 'charts'">Analytics</button>
-        </div>
+        </div> -->
 
         @if (activeTab === 'list') {
           <app-asset-list />
