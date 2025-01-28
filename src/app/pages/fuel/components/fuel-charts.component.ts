@@ -71,7 +71,7 @@ import { TranslationService } from '../../../services/translation.service';
     }
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
       gap: 1rem;
       margin: 1rem 0;
     }
@@ -87,6 +87,7 @@ import { TranslationService } from '../../../services/translation.service';
       display: block;
       color: var(--text-secondary);
       margin-bottom: 0.5rem;
+      font-size: small;
     }
 
     .stat-item .value {

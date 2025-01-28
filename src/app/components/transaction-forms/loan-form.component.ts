@@ -63,7 +63,7 @@ import { TranslationService } from '../../services/translation.service';
               {{ 'transaction.types.' + loan.type | translate | titlecase }} | {{'transaction.subTypes.' + loan.subType | translate | titlecase}} • 
               {{ loan.personName }} • 
               {{ getCategoryName(loan.categoryId) | translate | titlecase }} • 
-              {{ loan.amount | currency:'USD':'symbol':'1.0-0' }}
+              {{ loan.amount | translateNumber }}
             </option>
           </select>
         </div>

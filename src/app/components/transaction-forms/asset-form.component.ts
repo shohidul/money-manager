@@ -15,7 +15,7 @@ import { CategoryService } from '../../services/category.service';
   imports: [CommonModule, FormsModule, AutocompleteInputComponent, TranslatePipe, TranslateNumberPipe],
   template: `
     <div class="form-fields">
-      <div class="form-group">
+      <div class="form-group" *ngIf="isAssetTransaction(transaction)">
         <label for="assetName">{{ 'asset.name' | translate }}</label>
         <app-autocomplete-input
           id="assetName"
@@ -43,7 +43,7 @@ import { CategoryService } from '../../services/category.service';
             {{ 'transaction.types.' + asset.type | translate | titlecase }} | {{'transaction.subTypes.' + asset.subType | translate | titlecase}} • 
             {{ asset.assetName }} • 
             {{ getCategoryName(asset.categoryId) | translate | titlecase }} • 
-            {{ asset.amount | currency:'USD':'symbol':'1.0-0' }}
+            {{ asset.amount | translateNumber }}
           </option>
         </select>
       </div>

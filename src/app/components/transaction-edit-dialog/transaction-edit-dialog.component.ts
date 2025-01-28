@@ -353,8 +353,8 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
     }
 
     .category-item.compact .category-icon {
-      font-size: 24px !important;
-      padding: 8px;
+      font-size: 32px !important;
+      padding: 12px;
     }
 
     .category-item.compact .category-details {

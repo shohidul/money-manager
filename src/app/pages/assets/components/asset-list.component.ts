@@ -46,7 +46,7 @@ export interface AssetGroup {
         (endDateChange)="onEndDateChange($event)"
       />
 
-      <!-- <div class="asset-summary card">
+      <div class="asset-summary card">
         <div class="summary-item">
           <span class="label">{{ 'asset.stats.totalAssets' | translate }} <span class="text-muted text-sm">({{ totalAssets | translateNumber:'1.0-2' }})</span></span>
           <span class="amount positive">{{ totalAssetValue | translateNumber:'1.0-2' }}</span>
@@ -59,7 +59,7 @@ export interface AssetGroup {
           <span class="label">{{ 'asset.stats.totalCost' | translate }} <span class="text-muted text-sm">({{ totalCostCount | translateNumber:'1.0-2' }})</span></span>
           <span class="amount negative">{{ totalCost | translateNumber:'1.0-2' }}</span>
         </div>
-      </div> -->
+      </div>
 
       <div class="asset-section">
         @for (group of assetGroups; track group.id) {

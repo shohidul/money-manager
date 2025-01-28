@@ -84,7 +84,7 @@ type ChartType = 'income' | 'expense';
                     {{ 'charts.types.' + stat.type  | translate }} <span class="percentage text-muted text-sm">{{ stat.percentage | translateNumber:'1.1-1' }}%</span>
                   </span>
                 </div>
-                <span class="percentage">{{ stat.amount | translateNumber:'1.1-1' }}</span>
+                <span class="percentage">{{ stat.amount | translateNumber:'1.0-2' }}</span>
               </div>
             }
           </div>
@@ -113,7 +113,7 @@ type ChartType = 'income' | 'expense';
               <span *ngIf="group.totalExpense > 0">{{ 'dashboard.expense' | translate }}: {{ (group.totalExpense) | translateNumber:'1.0-2' }}</span>
             </span>
           </div>
-          @for (tx of group.transactions; track tx.id) {
+          <!-- @for (tx of group.transactions; track tx.id) {
               <div class="transaction-item">
                   <span class="material-symbols-rounded" [class]="tx.type">{{ getCategoryIcon(tx.categoryId) }}</span>
                   <div class="transaction-details">
@@ -129,10 +129,78 @@ type ChartType = 'income' | 'expense';
                       </span>                          
                   </div>
                 <span class="amount">
-                  {{ tx.amount | translateNumber:'1.0-0' }}
+                  {{ tx.amount | translateNumber:'1.0-2' }}
                 </span>
             </div>
-            }
+            } -->
+            @for (stat of categoryStats(group.transactions); track stat.categoryId) {
+            <div class="category-details">
+              <div class="category-header" (click)="toggleCategory(stat.categoryId)">
+                <div class="category-info">
+                  <span class="material-symbols-rounded" [class]="stat.type">{{ getCategoryIcon(stat.categoryId) }}</span>
+                  <span>
+                    {{ stat.category | translate  }} 
+                    <span class="percentage text-sm ml-4 text-muted">{{ stat.percentage | translateNumber:'1.1-1' }}%</span>
+                  </span> 
+                </div>
+                <span class="amount">
+                  {{ stat.amount | translateNumber:'1.0-0' }}
+                  <span class="small-text" *ngIf="stat.loanCharges > 0">
+                    {{ 'loan.loanCharges' | translate }}: {{stat.type === 'expense' ? '+' : '-'}}{{ stat.loanCharges | translateNumber:'1.0-2' }}
+                  </span>
+                </span>
+              </div>
+              @if (categoryBudgets.length > 0) {
+                @if (getBudgetForCategory(stat.categoryId)?.budget) {
+                  <div class="budget-progress">
+                    <div class="progress-bar-container">
+                      <div 
+                        class="progress-bar" 
+                        [class.danger]="is100PercentOver(stat.categoryId) && !isTypeIncomeOrAsset(stat.categoryId)"
+                        [style.width.%]="calculateBudgetPercentage(stat.categoryId)"
+                      ></div>
+                    </div>
+                    <span class="budget-text">
+                      <span *ngIf="isTypeIncomeOrAsset(stat.categoryId)">{{(
+                        is25Percent(stat.categoryId) ? 'charts.goal25Percent' : 
+                        is50Percent(stat.categoryId) ? 'charts.goal50Percent': 
+                        is75Percent(stat.categoryId) ? 'charts.goal75Percent' : 
+                        is100Percent(stat.categoryId) ? 'charts.goal100Percent' : 'charts.goalKeepItUp') | translate}}</span>
+                      <!-- <span *ngIf="!isTypeIncomeOrAsset(stat.categoryId)">{{(is75Percent(stat.categoryId) ? 'charts.nearBudget' : is100Percent(stat.categoryId) ? 'charts.budgetReached' : is100PercentOver(stat.categoryId) ? 'charts.overBudget' : 'charts.inBudget') | translate}}</span> -->
+                      <span>{{ getBudgetForCategory(stat.categoryId)?.spent | translateNumber:'1.0-2'}} / {{ getBudgetForCategory(stat.categoryId)?.budget  | translateNumber:'1.0-2'}}</span>
+                    </span>
+                  </div>
+                }
+              }
+              @if (expandedCategories.includes(stat.categoryId)) {
+                <div class="category-transactions">
+                  <canvas [id]="'chart-' + stat.categoryId"></canvas>
+                  <div class="transaction-list">
+                    @for (tx of getTransactionsByCategory(stat.categoryId); let i = $index; track tx.id) {
+                      <div class="transaction-item">
+                        <span class="material-symbols-rounded" [class]="tx.type">
+                          {{ getCategoryIcon(tx.categoryId) }}
+                        </span>
+                        <div class="transaction-details">
+                          <span class="small-text">{{ tx.date | translateDate: 'short' }}</span>
+                          <span class="memo">
+                            {{ (stat.category | translate) }}
+                            <span class="percentage text-sm ml-4 text-muted">{{ (tx.amount / stat.amount) * 100 | translateNumber:'1.1-1' }}%</span>
+                          </span>
+                              <span class="small-text">
+                                {{ tx.memo || ('common.noMemo' | translate) }} 
+                              </span>
+                        </div>
+                        <span class="amount">
+                          {{ tx.amount | translateNumber:'1.0-2' }}
+                        </span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
           </div>        
       </div>
     </div>
@@ -164,7 +232,7 @@ type ChartType = 'income' | 'expense';
   .date-header {
     display: flex;
     justify-content: space-between;
-    padding: 0 0.5rem 0.5rem 1rem;
+    padding: 0.5rem 0;
     color: var(--text-secondary);
     font-size: 0.875rem;
     border-bottom: 1px solid var(--background-color);
@@ -193,13 +261,6 @@ type ChartType = 'income' | 'expense';
 
   .asset-name {
     font-weight: 500;
-  }
-
-  .material-symbols-rounded {
-    font-size: xx-large;
-    padding: 0.5rem;
-    border-radius: 2rem;
-    background: var(--surface-color);
   }
 
   .small-text {
@@ -329,6 +390,27 @@ type ChartType = 'income' | 'expense';
     }
   }
 
+  .category-details {
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem 0;
+  }
+
+  .category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  .category-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .category-transactions {
+    padding: 1rem;
+  }
 
   .transaction-list {
     margin-top: 1rem;
@@ -338,7 +420,7 @@ type ChartType = 'income' | 'expense';
     display: flex;
     align-items: center;
     gap: 1rem;
-    padding: 0.8rem 0.5rem 0.8rem 0.5rem;
+    padding: 0.1rem 0.5rem 0.8rem 0.5rem;
     transition: background-color 0.2s;
     border-bottom: 1px solid #f5f5f5;
     font-size: 0.875rem;
@@ -366,6 +448,45 @@ type ChartType = 'income' | 'expense';
     color: #999;
   }
   
+  .budget-progress {
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+  
+  .progress-bar-container {
+    background: var(--background-color);
+    overflow: hidden;
+    position: relative;
+    flex: 3;
+    height: 3px;
+    border-radius: 3px;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: var(--text-success);
+    transition: width 0.3s ease;
+  }
+  
+  .progress-bar.warning {
+    background: var(--warning-color);
+  }
+  
+  .progress-bar.danger {
+    background: var(--danger-color);
+  }
+
+  .budget-text {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    display: contents;
+    flex: 1;
+  }
+  
 `,
   ],
 })
@@ -383,8 +504,8 @@ export class AssetDetailsComponent implements OnInit, AfterViewInit {
   parentLoanTransactions: LoanTransaction[] = [];
 
   currentMonth = format(new Date(), 'yyyy-MM');
-  selectedType: ChartType = 'income';
-  chartTypes: ChartType[] = ['income', 'expense'];
+  selectedType: ChartType = 'expense';
+  chartTypes: ChartType[] = ['expense', 'income'];
   transactions: Transaction[] = [];
   categories: any[] = [];
   categoryTypeStats: any[] = [];
@@ -428,6 +549,7 @@ export class AssetDetailsComponent implements OnInit, AfterViewInit {
     }
 
     await this.loadData();
+    await this.loadCategoryBudgets();
   }
 
   ngAfterViewInit() {
@@ -495,6 +617,8 @@ export class AssetDetailsComponent implements OnInit, AfterViewInit {
   setType(type: ChartType) {
     this.selectedType = type;
     this.groupTransactions();
+    
+    this.expandedCategories.forEach(id => this.toggleCategory(id));
     // this.calculateStats();
 
     // Wait for the DOM update before creating the chart
@@ -566,7 +690,166 @@ export class AssetDetailsComponent implements OnInit, AfterViewInit {
     return this.categories.find((c) => c.id === categoryId)?.name || 'Unknown';
   }
 
+  getTransactionsByCategory(categoryId: number) {
+    return this.getTransactions()
+      .filter((tx) => tx.categoryId === categoryId)
+      .sort((a, b) => {
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+        return dateB.getTime() - dateA.getTime();
+      });
+      
+  }
+
+  toggleCategory(categoryId: number) {
+    const index = this.expandedCategories.indexOf(categoryId);
+    if (index === -1) {
+      this.expandedCategories.push(categoryId);
+      setTimeout(() => this.createCategoryChart(categoryId), 0);
+    } else {
+      this.expandedCategories.splice(index, 1);
+      this.chartService.destroyChart(`chart-${categoryId}`);
+    }
+  }
+
+  createCategoryChart(categoryId: number) {
+    const canvas = document.getElementById(
+      `chart-${categoryId}`
+    ) as HTMLCanvasElement;
+    if (!canvas) return;
+
+    const transactions = this.getTransactionsByCategory(categoryId);
+    const tdp = new TranslateDatePipe(this.translationService);
+    
+    const chartData = {
+      labels: transactions.map((tx) => tdp.transform(tx.date, 'MMM d')),
+      values: transactions.map((tx) => tx.amount),
+    };
+
+    this.chartService.createLineChart(
+      canvas,
+      chartData,
+      this.categoryStats(transactions).find((stat) => stat.categoryId === categoryId)?.color
+    );
+  }
+
   goBack() {
     this.router.navigate(['/assets']);
+  }
+
+
+  categoryStats(transactions: Transaction[]): any[] {
+    const stats = new Map<number, any>();
+    let totalAmount = 0;
+
+    // const filteredTransactions = this.transactions.filter(
+    //   (tx) => this.selectedType === 'all' || tx.type === this.selectedType
+    // );
+
+    transactions.forEach((tx) => {
+      if (!stats.has(tx.categoryId)) {
+        const category = this.categories.find((c) => c.id === tx.categoryId);
+        stats.set(tx.categoryId, {
+          categoryId: tx.categoryId,
+          category: category?.name || 'Unknown',
+          type: category.type,
+          amount: 0,
+          totalAmount: 0,
+          color: this.chartColors[stats.size % this.chartColors.length],
+        });
+      }
+
+      const stat = stats.get(tx.categoryId);
+      stat.amount += tx.amount;
+      totalAmount += tx.amount;
+      stat.totalAmount += tx.amount;
+    });
+
+    return Array.from(stats.values())
+      .map((stat) => ({
+        ...stat,
+        percentage: (stat.amount / totalAmount) * 100,
+      }))
+      .sort((a, b) => b.amount - a.amount);
+  }
+
+  isTypeIncomeOrAsset(categoryId: number): boolean{
+    const category = this.getBudgetForCategory(categoryId)?.category;
+    return category?.subType.includes('asset') || category?.type === 'income';
+  }
+
+  getBudgetAndSpent(categoryId: number) {
+    const budgetInfo = this.categoryBudgets.find(b => b.category.id === categoryId);
+    return {
+      spent: budgetInfo?.spent || 0,
+      budget: budgetInfo?.budget || 0
+    };
+  }
+  
+  is25Percent(categoryId: number): boolean {
+    const { spent, budget } = this.getBudgetAndSpent(categoryId);
+    return spent >= budget * 0.25 && spent < budget * 0.50;
+  }
+  
+  is50Percent(categoryId: number): boolean {
+    const { spent, budget } = this.getBudgetAndSpent(categoryId);
+    return spent >= budget * 0.50 && spent < budget * 0.75;
+  }
+  
+  is75Percent(categoryId: number): boolean {
+    const { spent, budget } = this.getBudgetAndSpent(categoryId);
+    return spent >= budget * 0.75 && spent < budget;
+  }
+  
+  is100Percent(categoryId: number): boolean {
+    const { spent, budget } = this.getBudgetAndSpent(categoryId);
+    return spent == budget;
+  }  
+  
+  is100PercentOver(categoryId: number): boolean {
+    const { spent, budget } = this.getBudgetAndSpent(categoryId);
+    return spent > budget;
+  }  
+
+  getBudgetForCategory(categoryId: number) {
+    const budget = this.categoryBudgets.find((budget) => budget.category.id === categoryId);
+    return budget;
+  }
+
+  calculateBudgetPercentage(categoryId: number) {
+    const budget = this.getBudgetForCategory(categoryId);
+    if (!budget || !budget.category || budget.budget == null) {
+      return 0;
+    }
+    const percentage = (budget.spent / budget.budget) * 100;
+    return percentage;
+  }
+
+  async loadCategoryBudgets() {
+    const startDate = startOfMonth(new Date(this.currentMonth));
+    const endDate = endOfMonth(startDate);
+    const transactions = await this.dbService.getTransactions(startDate, endDate);
+    const categories = await this.dbService.getCategories();
+    
+    // Calculate spent amount for each category
+    const spentByCategory = transactions.reduce((acc, tx) => {
+      if (tx.type === 'expense' || tx.type === 'income') {
+        acc[tx.categoryId] = (acc[tx.categoryId] || 0) + tx.amount;
+      }
+      return acc;
+    }, {} as { [key: number]: number });
+
+    // Get budgets for each category
+    const budgetCategories = categories.filter(c => c.type === 'expense' || c.type === 'income');
+    this.categoryBudgets = await Promise.all(
+      budgetCategories.map(async category => {
+        const budget = await this.dbService.getBudgetForDate(category.id!, startDate);
+        return {
+          category,
+          spent: spentByCategory[category.id!] || 0,
+          budget
+        };
+      })
+    );
   }
 }

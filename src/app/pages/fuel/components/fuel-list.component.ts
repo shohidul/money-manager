@@ -114,7 +114,7 @@ import { TranslateDatePipe } from "../../../components/shared/translate-date.pip
       padding: 1rem 2rem;
       transition: background-color 0.2s;
       border-bottom: 1px solid var(--background-color);
-      font-size: 0.875rem;
+      font-size: 0.8rem;
     }
 
     .transaction-item:hover {
