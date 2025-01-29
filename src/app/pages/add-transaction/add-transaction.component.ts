@@ -257,7 +257,7 @@ export class AddTransactionComponent implements OnInit {
   async saveTransaction() {
     if (!this.selectedIcon || !this.amount) return;
 
-    const category = await this.ensureCategory();
+    const category = this.selectedIcon;
     const transaction = {
       ...(this.editingTransaction || {}),
       ...(this.editingTransaction ? { id: this.editingTransaction.id } : {}),
@@ -278,32 +278,32 @@ export class AddTransactionComponent implements OnInit {
     this.router.navigate(['/']);
   }
 
-  private async ensureCategory() {
-    const categories = await this.dbService.getCategories();
-    return categories.find(c => c.icon === this.selectedIcon.icon && 
-                               c.type === this.selectedType &&
-                               c.subType.length === this.selectedSubType.length &&
-                               c.subType.every((value, index) => value === this.selectedSubType[index])) || 
-           await this.createNewCategory();
-  }
+  // private async ensureCategory() {
+  //   const categories = await this.dbService.getCategories();
+  //   return categories.find(c => c.icon === this.selectedIcon.icon && 
+  //                              c.type === this.selectedType &&
+  //                              c.subType.length === this.selectedSubType.length &&
+  //                              c.subType.every((value, index) => value === this.selectedSubType[index])) || 
+  //          await this.createNewCategory();
+  // }
 
-  private async createNewCategory() {
-    const id = await this.dbService.addCategory({
-      name: this.selectedIcon.name,
-      icon: this.selectedIcon.icon,
-      type: this.selectedType,
-      subType: [this.selectedSubType],
-      isCustom: false,
-    });
-    return {
-      id,
-      name: this.selectedIcon.name,
-      icon: this.selectedIcon.icon,
-      type: this.selectedType,
-      subType: this.selectedSubType,
-      isCustom: false,
-    };
-  }
+  // private async createNewCategory() {
+  //   const id = await this.dbService.addCategory({
+  //     name: this.selectedIcon.name,
+  //     icon: this.selectedIcon.icon,
+  //     type: this.selectedType,
+  //     subType: [this.selectedSubType],
+  //     isCustom: false,
+  //   });
+  //   return {
+  //     id,
+  //     name: this.selectedIcon.name,
+  //     icon: this.selectedIcon.icon,
+  //     type: this.selectedType,
+  //     subType: this.selectedSubType,
+  //     isCustom: false,
+  //   };
+  // }
 
   goBack() {
     this.router.navigate(['/']);
