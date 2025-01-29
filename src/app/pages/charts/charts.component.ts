@@ -76,9 +76,9 @@ type ChartType = 'all' | 'income' | 'expense';
               <canvas #donutChart></canvas>
             </div>
             <div class="legend">
-            @for (stat of categoryStats.slice(0, 5); track stat.categoryId) {
+            @for (stat of categoryStats.slice(0, 5); track stat.categoryId; let i = $index) {
               <div class="legend-item">
-                <div class="legend-color" [style.background-color]="stat.color"></div>
+                <div class="legend-color" [style.background-color]="chartColors[i]"></div>
                 <div class="legend-info">
                   <span class="category-name">
                     <span class="material-symbols-rounded">{{ getCategoryIcon(stat.categoryId) }}</span>
@@ -486,13 +486,11 @@ export class ChartsComponent implements OnInit, AfterViewInit {
   expandedCategories: number[] = [];
   chartColors = [
     '#FF6384',
+    '#FF9F40',
     '#36A2EB',
-    '#FFCE56',
     '#4BC0C0',
     '#9966FF',
-    '#FF9F40',
-    '#FF6384',
-    '#36A2EB',
+    '#FFCE56',
   ];
   
   isAdvancedMode: boolean = false;
@@ -634,7 +632,7 @@ export class ChartsComponent implements OnInit, AfterViewInit {
     this.chartService.createDonutChart(
       ctx,
       this.categoryStats.slice(0, 5),
-      this.categoryStats.map((stat) => stat.color)
+      this.chartColors
     );
   }
 
