@@ -288,6 +288,7 @@ export const defaultCategories: DefaultCategories[] = [
   { version: 1, order: 27, name: 'categories.defaults.expense.donation', icon: 'payments', type: 'expense', subType: ['none'] },
   { version: 1, order: 28, name: 'categories.defaults.expense.insurance', icon: 'verified_user', type: 'expense', subType: ['none'] },
   { version: 1, order: 29, name: 'categories.defaults.expense.tax', icon: 'description', type: 'expense', subType: ['none'] },
+  { version: 2, order: 29.1, name: 'categories.defaults.expense.pf', icon: 'description', type: 'expense', subType: ['none'] },
   { version: 1, order: 30, name: 'categories.defaults.expense.telephone', icon: 'phone_in_talk', type: 'expense', subType: ['none'] },
   { version: 1, order: 31, name: 'categories.defaults.expense.cigarette', icon: 'smoking_rooms', type: 'expense', subType: ['none'] },
   { version: 1, order: 32, name: 'categories.defaults.expense.sport', icon: 'sports_and_outdoors', type: 'expense', subType: ['none'] },
