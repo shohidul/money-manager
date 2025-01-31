@@ -55,7 +55,7 @@ import { CategoryService } from '../../services/category.service';
             id="quantity"
             type="text"
             class="form-input"
-            [ngModel]="getQuantity() | translateNumber"
+            [ngModel]="getQuantity() | translateNumber :'1.0-0' :false"
             (input)="onQuantityInput($event)"
             placeholder="{{ '00.0' | translateNumber }}"
           />
@@ -112,7 +112,7 @@ import { CategoryService } from '../../services/category.service';
             id="currentValue"
             type="text"
             class="form-input"
-            [ngModel]="getCurrentValue() | translateNumber"
+            [ngModel]="getCurrentValue() | translateNumber :'1.0-2' :false"
             (input)="onCurrentValueInput($event)"
             placeholder="{{ '00.0' | translateNumber }}"
           />
@@ -164,6 +164,7 @@ export class AssetFormComponent {
 
   categories: Record<string, string> = {};
   parentAssets: AssetTransaction[] = [];
+  currentLanuage = '';
 
   constructor(
     private assetService: AssetService, 
@@ -178,6 +179,8 @@ export class AssetFormComponent {
     );
 
     this.parentAssets = await this.assetService.getParentAssets();
+
+    this.currentLanuage = this.translationService.getCurrentLanguage();
   }
 
   async onAssetNameChange(value: string) {
@@ -208,16 +211,24 @@ export class AssetFormComponent {
 
   onQuantityInput(event: Event): void {
     const inputElement = event.target as HTMLInputElement;
-    const rawInput = inputElement?.value || '';
-  
-    // Remove commas to make it a parseable string
-    const parseableString = rawInput.replace(/,/g, '');
-  
-    // Convert to english numbers before saving
-    const result = new TranslateNumberPipe(this.translationService).transformByLocale(parseableString, 'en');
-  
-    this.transaction.quantity = parseFloat(result) || 0;
+    let rawInput = inputElement?.value || '';
+
+    if(this.currentLanuage !== 'en'){
+      rawInput = new TranslateNumberPipe(this.translationService).transformByLocale(rawInput, 'en', '1.0-0', false);
+    }    
+
+    // Remove all non-numeric characters
+    rawInput = rawInput.replace(/\D/g, '');
+
+    this.transaction.quantity = parseInt(rawInput) || 0;
     this.transactionChange.emit(this.transaction);
+    
+    if(this.currentLanuage !== 'en'){
+      rawInput = new TranslateNumberPipe(this.translationService).transformByLocale(rawInput, this.currentLanuage, '1.0-0', false);
+    }
+
+    // Update input field to reflect the changes
+    inputElement.value = rawInput;
   }
 
   getCurrentValue(): string {
@@ -227,15 +238,34 @@ export class AssetFormComponent {
 
   onCurrentValueInput(event: Event): void {
     const inputElement = event.target as HTMLInputElement;
-    const rawInput = inputElement?.value || '';
+    let rawInput = inputElement?.value || '';
+
+    if(this.currentLanuage !== 'en'){
+      rawInput = new TranslateNumberPipe(this.translationService).transformByLocale(rawInput, 'en', '1.0-0', false);
+    }    
   
-    // Remove commas to make it a parseable string
-    const parseableString = rawInput.replace(/,/g, '');
+    // Allow only numbers and one decimal point
+    rawInput = rawInput.replace(/[^0-9.]/g, '');
+
+    // Ensure only one decimal point exists
+    const parts = rawInput.split('.');
+    if (parts.length > 2){
+      rawInput = parts[0] + '.' + parts.slice(1).join('');
+    }
+
+    // Limit to 2 decimal places
+    if (parts.length === 2) {
+      rawInput = `${parts[0]}.${parts[1].slice(0, 2)}`;
+    }
   
-    // Convert to english numbers before saving
-    const result = new TranslateNumberPipe(this.translationService).transformByLocale(parseableString, 'en');
-  
-    this.transaction.currentValue = parseFloat(result) || 0;
+    this.transaction.currentValue = parseFloat(rawInput) || 0;
     this.transactionChange.emit(this.transaction);
+
+    if(this.currentLanuage !== 'en'){
+      rawInput = new TranslateNumberPipe(this.translationService).transformByLocale(rawInput, this.currentLanuage, '1.0-0', false);
+    }
+
+    // Update input field to reflect the changes
+    inputElement.value = rawInput;
   }
 }

@@ -130,10 +130,10 @@ import { VoiceCommandOverlayComponent } from '../../components/voice-command-ove
                     {{ tx.fuelType === undefined 
                       ? ('categories.subTypes.fuel' | translate) 
                       : ('fuel.types.' + tx.fuelType | lowercase | translate) }}
-                    {{ tx.fuelQuantity || 0 | translateNumber:'1.1-1' }} {{ 'fuel.L' | translate }} | 
+                    {{ tx.fuelQuantity || 0 | translateNumber:'1.0-2' }} {{ 'fuel.L' | translate }} | 
                     {{ (tx.odometerReading || 0) | translateNumber:'1.0-0' }} {{ 'fuel.km' | translate }} | 
-                    {{ (getMileage(tx) || 0) | translateNumber:'1.1-1' }} {{ 'fuel.kmPerLiter' | translate }} |
-                    {{ tx.fuelQuantity ? (tx.amount / tx.fuelQuantity) : 0 | translateNumber:'1.1-1' }}/- |
+                    {{ (getMileage(tx) || 0) | translateNumber:'1.0-2' }} {{ 'fuel.kmPerLiter' | translate }} |
+                    {{ (tx.fuelQuantity ? (tx.amount / tx.fuelQuantity) : 0) | translateNumber:'1.0-2' }}/- |
                     {{ tx.memo || ('common.noMemo' | translate) }}
                   </span>
                 }

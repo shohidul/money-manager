@@ -255,7 +255,8 @@ export class AddTransactionComponent implements OnInit {
   }
 
   async saveTransaction() {
-    if (!this.selectedIcon || !this.amount) return;
+    // if (!this.selectedIcon || !this.amount) return;
+    if (!this.selectedIcon) return;
 
     const category = this.selectedIcon;
     const transaction = {

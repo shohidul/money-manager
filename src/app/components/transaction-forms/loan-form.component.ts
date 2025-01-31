@@ -40,7 +40,7 @@ import { TranslationService } from '../../services/translation.service';
             id="loanCharges"
             type="text"
             class="form-input"
-            [ngModel]="getLoanCharges() | translateNumber"
+            [ngModel]="getLoanCharges() | translateNumber :'1.0-2' :false "
             (input)="onLoanChargesInput($event)"
             placeholder="{{ '00.0' | translateNumber }}"
           />
@@ -157,6 +157,7 @@ export class LoanFormComponent implements OnInit {
   private lastQuery = '';
   parentLoans: LoanTransaction[] = [];
   private categories: { [key: number]: string } = {};
+  currentLanuage = '';
 
   constructor(
     private personService: PersonService, 
@@ -213,15 +214,34 @@ export class LoanFormComponent implements OnInit {
 
   onLoanChargesInput(event: Event): void {
     const inputElement = event.target as HTMLInputElement;
-    const rawInput = inputElement?.value || '';
+    let rawInput = inputElement?.value || '';
+
+    if(this.currentLanuage !== 'en'){
+      rawInput = new TranslateNumberPipe(this.translationService).transformByLocale(rawInput, 'en', '1.0-0', false);
+    }    
   
-    // Remove commas to make it a parseable string
-    const parseableString = rawInput.replace(/,/g, '');
+    // Allow only numbers and one decimal point
+    rawInput = rawInput.replace(/[^0-9.]/g, '');
+
+    // Ensure only one decimal point exists
+    const parts = rawInput.split('.');
+    if (parts.length > 2){
+      rawInput = parts[0] + '.' + parts.slice(1).join('');
+    }
+
+    // Limit to 2 decimal places
+    if (parts.length === 2) {
+      rawInput = `${parts[0]}.${parts[1].slice(0, 2)}`;
+    }
   
-    // Convert to english numbers before saving
-    const result = new TranslateNumberPipe(this.translationService).transformByLocale(parseableString, 'en');
-  
-    this.transaction.loanCharges = parseFloat(result) || 0;
+    this.transaction.loanCharges = parseFloat(rawInput) || 0;
     this.transactionChange.emit(this.transaction);
+
+    if(this.currentLanuage !== 'en'){
+      rawInput = new TranslateNumberPipe(this.translationService).transformByLocale(rawInput, this.currentLanuage, '1.0-0', false);
+    }
+
+    // Update input field to reflect the changes
+    inputElement.value = rawInput;
   }
 }

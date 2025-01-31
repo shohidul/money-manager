@@ -169,7 +169,6 @@
           "dance": "নৃত্য",
           "sportsAndOutdoors": "ক্রীড়া এবং বাইরের কাজ",
           "featuredSeasonalAndGifts": "উপহার",
-          "book5": "বই ৫",
           "kingBed": "রাজার বিছানা"
         },
         "healthFitness": {
@@ -214,7 +213,7 @@
           "babyProducts": "শিশু পণ্য",
           "education": "শিক্ষা",
           "pregnancy": "গর্ভাবস্থা",
-          "playground": "খেলার মাঠ",
+          "toy": "খেলনা",
           "parenting": "অভিভাবকত্ব",
           "person": "ব্যক্তি",
           "group": "দল"
@@ -247,7 +246,6 @@
           "salary": "বেতন",
           "business": "ব্যবসা",
           "freelance": "ফ্রিল্যান্স",
-          "investment": "বিনিয়োগ",
           "rental": "ভাড়া",
           "gift": "উপহার",
           "interest": "সুদ",

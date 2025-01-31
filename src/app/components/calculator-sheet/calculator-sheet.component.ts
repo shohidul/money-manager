@@ -437,11 +437,11 @@ private handleDecimalPoint() {
 }
 
   private handleEquals() {
-    if (this.amount === '0') {
-      this.toggle.emit();
-    } else {
+    // if (this.amount === '0') {
+    //   this.toggle.emit();
+    // } else {
       this.calculateResult();
-    }
+    // }
   }
 
   private handleNumericInput(key: string) {

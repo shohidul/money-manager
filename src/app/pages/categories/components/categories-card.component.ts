@@ -138,9 +138,9 @@ import { TranslationService } from '../../../services/translation.service';
                       id="categoryBudget-{{category.id}}"
                       type="text"
                       class="form-control"
-                      [ngModel]="getEditingCategoryBudget() | translateNumber"
+                      [ngModel]="getEditingCategoryBudget() | translateNumber :'1.0-2' :false"
                       (input)="onCategoryBudgetInput($event)"
-                      placeholder="{{ '00.0' | translateNumber }}"
+                      placeholder="{{ '0.00' | translateNumber }}"
                       name="categoryBudget"
                     />
                   </div>
@@ -443,6 +443,7 @@ export class CategoriesCardComponent implements OnInit {
 
   expandedCategoryId: number | undefined = undefined;
   editingCategory: Category | null = null;
+  currentLanuage = '';
 
   constructor(
     private router: Router,
@@ -577,9 +578,7 @@ export class CategoriesCardComponent implements OnInit {
       : null;
   }
 
-  updateEditingCategoryBudget(budget: string) {
-    // Convert to english numbers before saving
-    const result = new TranslateNumberPipe(this.translationService).transformByLocale(budget, 'en');
+  updateEditingCategoryBudget(result: string) {
     if (this.editingCategory) {
       this.editingCategory = {
         ...this.editingCategory,
@@ -596,12 +595,34 @@ export class CategoriesCardComponent implements OnInit {
 
   onCategoryBudgetInput(event: Event): void {
     const inputElement = event.target as HTMLInputElement;
-    const rawInput = inputElement?.value || '';
+    let rawInput = inputElement?.value || '';
+
+    if(this.currentLanuage !== 'en'){
+      rawInput = new TranslateNumberPipe(this.translationService).transformByLocale(rawInput, 'en', '1.0-0', false);
+    }    
   
-    // Remove commas to make it a parseable string
-    const parseableString = rawInput.replace(/,/g, '');
+    // Allow only numbers and one decimal point
+    rawInput = rawInput.replace(/[^0-9.]/g, '');
+
+    // Ensure only one decimal point exists
+    const parts = rawInput.split('.');
+    if (parts.length > 2){
+      rawInput = parts[0] + '.' + parts.slice(1).join('');
+    }
+
+    // Limit to 2 decimal places
+    if (parts.length === 2) {
+      rawInput = `${parts[0]}.${parts[1].slice(0, 2)}`;
+    }
   
     // Update the editing category budget using the parseable string
-    this.updateEditingCategoryBudget(parseableString);
+    this.updateEditingCategoryBudget(rawInput);
+
+    if(this.currentLanuage !== 'en'){
+      rawInput = new TranslateNumberPipe(this.translationService).transformByLocale(rawInput, this.currentLanuage, '1.0-0', false);
+    }
+
+    // Update input field to reflect the changes
+    inputElement.value = rawInput;
   }
 }

@@ -19,9 +19,9 @@ import { TranslationService } from '../../services/translation.service';
             id="odometerReading"
             type="text"
             class="form-input"
-            [ngModel]="getOdometerReading() | translateNumber"
+            [ngModel]="getOdometerReading() | translateNumber :'1.0-0' :false"
             (input)="onOdometerReadingInput($event)"
-            placeholder="{{ '00.0' | translateNumber }}"
+            placeholder="{{ '0' | translateNumber }}"
           />
         </div>
         <div class="form-group">
@@ -30,9 +30,9 @@ import { TranslationService } from '../../services/translation.service';
             id="fuelQuantity"
             type="text"
             class="form-input"
-            [ngModel]="getFuelQuantity() | translateNumber"
+            [ngModel]="getFuelQuantity() | translateNumber :'1.0-2' :false"
             (input)="onFuelQuantityInput($event)"
-            placeholder="{{ '00.0' | translateNumber }}"
+            placeholder="{{ '0.00' | translateNumber }}"
           />
         </div>
       </div>
@@ -86,11 +86,18 @@ import { TranslationService } from '../../services/translation.service';
     }
   `]
 })
+
 export class FuelFormComponent {
   @Input() transaction!: FuelTransaction;
   @Output() transactionChange = new EventEmitter<FuelTransaction>();
 
+  currentLanuage = '';
+
   constructor(private translationService: TranslationService) {}
+
+  ngOnInit(){
+    this.currentLanuage = this.translationService.getCurrentLanguage();
+  }
 
   onChange() {
     this.transactionChange.emit(this.transaction);
@@ -103,17 +110,26 @@ export class FuelFormComponent {
 
   onOdometerReadingInput(event: Event): void {
     const inputElement = event.target as HTMLInputElement;
-    const rawInput = inputElement?.value || '';
-  
-    // Remove commas to make it a parseable string
-    const parseableString = rawInput.replace(/,/g, '');
-  
-    // Convert to english numbers before saving
-    const result = new TranslateNumberPipe(this.translationService).transformByLocale(parseableString, 'en');
-  
-    this.transaction.odometerReading = parseFloat(result) || 0;
+    let rawInput = inputElement?.value || '';
+
+    if(this.currentLanuage !== 'en'){
+      rawInput = new TranslateNumberPipe(this.translationService).transformByLocale(rawInput, 'en', '1.0-0', false);
+    }    
+
+    // Remove all non-numeric characters
+    rawInput = rawInput.replace(/\D/g, '');
+    
+    this.transaction.odometerReading = parseInt(rawInput) || 0;
     this.transactionChange.emit(this.transaction);
+  
+    if(this.currentLanuage !== 'en'){
+      rawInput = new TranslateNumberPipe(this.translationService).transformByLocale(rawInput, this.currentLanuage, '1.0-0', false);
+    }
+
+    // Update input field to reflect the changes
+    inputElement.value = rawInput;
   }
+  
 
   getFuelQuantity(): string {
     this.transaction.fuelQuantity = this.transaction.fuelQuantity || 0;
@@ -122,15 +138,34 @@ export class FuelFormComponent {
 
   onFuelQuantityInput(event: Event): void {
     const inputElement = event.target as HTMLInputElement;
-    const rawInput = inputElement?.value || '';
+    let rawInput = inputElement?.value || '';
+
+    if(this.currentLanuage !== 'en'){
+      rawInput = new TranslateNumberPipe(this.translationService).transformByLocale(rawInput, 'en', '1.0-0', false);
+    }    
   
-    // Remove commas to make it a parseable string
-    const parseableString = rawInput.replace(/,/g, '');
-  
-    // Convert to english numbers before saving
-    const result = new TranslateNumberPipe(this.translationService).transformByLocale(parseableString, 'en');
-  
-    this.transaction.fuelQuantity = parseFloat(result) || 0;
+    // Allow only numbers and one decimal point
+    rawInput = rawInput.replace(/[^0-9.]/g, '');
+
+    // Ensure only one decimal point exists
+    const parts = rawInput.split('.');
+    if (parts.length > 2){
+      rawInput = parts[0] + '.' + parts.slice(1).join('');
+    }
+
+    // Limit to 2 decimal places
+    if (parts.length === 2) {
+      rawInput = `${parts[0]}.${parts[1].slice(0, 2)}`;
+    }
+
+    this.transaction.fuelQuantity = parseFloat(rawInput) || 0;
     this.transactionChange.emit(this.transaction);
+
+    if(this.currentLanuage !== 'en'){
+      rawInput = new TranslateNumberPipe(this.translationService).transformByLocale(rawInput, this.currentLanuage, '1.0-0', false);
+    }
+
+    // Update input field to reflect the changes
+    inputElement.value = rawInput;
   }
 }

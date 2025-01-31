@@ -42,10 +42,10 @@ import { TranslateDatePipe } from "../../../components/shared/translate-date.pip
                   ? ('categories.subTypes.fuel' | translate) 
                   : ('fuel.types.' + transaction.fuelType | lowercase | translate) }}
 
-                {{ transaction.fuelQuantity || 0 | translateNumber:'1.1-1' }} {{ 'fuel.L' | translate }} | 
+                {{ transaction.fuelQuantity || 0 | translateNumber:'1.0-2' }} {{ 'fuel.L' | translate }} | 
                 {{ 'fuel.odo' | translate }} {{ transaction.odometerReading || 0 | translateNumber:'1.0-0' }} {{ 'fuel.km' | translate }} | 
-                {{ 'fuel.mileage' | translate }} {{ getMileage(transaction) || 0 | translateNumber:'1.1-1' }} {{ 'fuel.kmPerLiter' | translate }} |
-                {{ 'fuel.price' | translate }} {{ transaction.fuelQuantity ? (transaction.amount / transaction.fuelQuantity) : 0 | translateNumber:'1.1-1' }} 
+                {{ 'fuel.mileage' | translate }} {{ getMileage(transaction) || 0 | translateNumber:'1.0-2' }} {{ 'fuel.kmPerLiter' | translate }} |
+                {{ 'fuel.price' | translate }} {{ (transaction.fuelQuantity ? (transaction.amount / transaction.fuelQuantity) : 0) | translateNumber:'1.0-2' }} 
               </span>
               <span class="memo" *ngIf="transaction.memo">{{ transaction.memo }}</span>
             </div>

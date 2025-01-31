@@ -169,7 +169,6 @@
           "dance": "Dance",
           "sportsAndOutdoors": "Sports and Outdoors",
           "featuredSeasonalAndGifts": "Gifts",
-          "book5": "Book 5",
           "kingBed": "King Bed"
         },
         "healthFitness": {
@@ -214,7 +213,7 @@
           "babyProducts": "Baby Products",
           "education": "Education",
           "pregnancy": "Pregnancy",
-          "playground": "Playground",
+          "toy": "Toy",
           "parenting": "Parenting",
           "person": "Person",
           "group": "Group"
@@ -247,7 +246,6 @@
           "salary": "Salary",
           "business": "Business",
           "freelance": "Freelance",
-          "investment": "Investment",
           "rental": "Rental",
           "gift": "Gift",
           "interest": "Interest",
