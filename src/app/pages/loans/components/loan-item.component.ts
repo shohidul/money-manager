@@ -20,7 +20,7 @@ interface DueStatus {
   template: `
     @if (group) {
       <div class="loan-item" [class.completed]="group.status.isCompleted">
-        <div class="transaction-item ">
+        <div class="transaction-item" (click)="toggleLoan(group.parentId!)">
           <span class="material-symbols-rounded" [class]="group.parent.type">
             {{ getCategoryIcon(group.parent.categoryId) }}
           </span>
@@ -42,28 +42,30 @@ interface DueStatus {
           </span>
         </div>
         
-        <div class="transactions">
-          @for (tx of group.transactions; track tx.id) {
-            <div class="transaction-item left-border" [class.repayment]="tx.parentId">
-              <span class="material-symbols-rounded" [class]="tx.type">
-                {{ getCategoryIcon(tx.categoryId) }}
-              </span>
-              <div class="transaction-details">
-                <span class="small-text">{{ tx.date | translateDate }}, {{ tx.date | translateDate: 'shortTime' }}</span>
-                <span class="memo">{{ getCategoryName(tx.categoryId) | translate }}</span>
-                <span class="small-text">
-                {{ tx.memo || ('common.noMemo' | translate) }}
+        @if (expandedCategories.includes(group.parentId!)) {
+          <div class="transactions">
+            @for (tx of group.transactions; track tx.id) {
+              <div class="transaction-item left-border" [class.repayment]="tx.parentId">
+                <span class="material-symbols-rounded" [class]="tx.type">
+                  {{ getCategoryIcon(tx.categoryId) }}
+                </span>
+                <div class="transaction-details">
+                  <span class="small-text">{{ tx.date | translateDate }}, {{ tx.date | translateDate: 'shortTime' }}</span>
+                  <span class="memo">{{ getCategoryName(tx.categoryId) | translate }}</span>
+                  <span class="small-text">
+                  {{ tx.memo || ('common.noMemo' | translate) }}
+                  </span>
+                </div>
+                <span class="amount">
+                {{ tx.parentId ? '-' : '' }}{{ tx.amount | translateNumber:'1.0-2' }}
+                <span class="small-text" *ngIf="tx.loanCharges > 0">
+                  {{ 'loan.loanCharges' | translate }}: -{{ tx.loanCharges | translateNumber:'1.0-2' }}
+                </span>
                 </span>
               </div>
-              <span class="amount">
-              {{ tx.parentId ? '-' : '' }}{{ tx.amount | translateNumber:'1.0-2' }}
-              <span class="small-text" *ngIf="tx.loanCharges > 0">
-                {{ 'loan.loanCharges' | translate }}: -{{ tx.loanCharges | translateNumber:'1.0-2' }}
-              </span>
-              </span>
-            </div>
-          }
-        </div>
+            }
+          </div>
+        }
         
         <div class="progress-bar">
           <div 
@@ -99,6 +101,7 @@ interface DueStatus {
       transition: background-color 0.2s;
       border-bottom: 1px solid var(--background-color);
       font-size: 0.875rem;
+      cursor: pointer;
     }
 
     .transaction-item:hover {
@@ -184,7 +187,7 @@ interface DueStatus {
       height: 3px;
       background-color: var(--background-color);
       border-radius: 2px;
-      margin: 1.5rem 0 0.5rem 0;
+      margin: 0.5rem 0;
     }
 
     .progress {
@@ -198,6 +201,7 @@ interface DueStatus {
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
+      margin-bottom: 1rem;
     }
 
     .transaction {
@@ -260,6 +264,7 @@ interface DueStatus {
 export class LoanItemComponent implements OnInit {
   @Input() group!: LoanGroup;
   categories: any[] = [];
+  expandedCategories: number[] = [];
 
   constructor(private loanService: LoanService, private categoryService: CategoryService,) {}
 
@@ -303,5 +308,14 @@ export class LoanItemComponent implements OnInit {
   getCategory(categoryId: number): Category | null {
     const category = this.categories.find((c) => c.id === categoryId);
     return category || null;
+  }
+
+  toggleLoan(parentId: number) {
+    const index = this.expandedCategories.indexOf(parentId);
+    if (index === -1) {
+      this.expandedCategories.push(parentId);
+    } else {
+      this.expandedCategories.splice(index, 1);
+    }
   }
 }

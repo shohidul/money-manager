@@ -74,6 +74,14 @@
   color: var(--primary-color);
 }
 
+.text-primary{
+  color: var(--text-primary);
+}
+
+.text-secondary{
+  color: var(--text-secondary);
+}
+
 .text-muted{
   color: var(--text-muted);
 }
@@ -99,6 +107,7 @@ button {
   color: var(--text-primary);
   text-align: center;
   font-size: 13px;
+  cursor: pointer;
 }
 
 .card {
@@ -204,4 +213,33 @@ button {
 
 .ml-4 {
   margin-left: 4px;
+}
+
+/* Custom Checkbox */
+input[type="checkbox"] {
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--primary-color);
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, border 0.2s;
+  position: relative;
+}
+
+/* Checked State */
+input[type="checkbox"]:checked {
+  border-color: var(--primary-color);
+}
+
+/* Inner Box */
+input[type="checkbox"]:checked::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  background-color: var(--primary-color);
+  position: absolute;
 }

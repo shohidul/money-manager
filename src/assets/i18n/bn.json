@@ -415,7 +415,11 @@
       "cost": "ব্যয়"
     },
     "purchaseDate": "ক্রয়ের তারিখ",
-    "value": "মূল্য"
+    "value": "মূল্য",
+    "income": "আয়",
+    "cost": "ব্যয়",
+    "settings": "সেটিংস",
+    "groupAssets": "সম্পদ গ্রুপ করুন"
   },
   "loan": {
     "loans": "ঋণ",

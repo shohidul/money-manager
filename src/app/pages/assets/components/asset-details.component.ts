@@ -107,7 +107,7 @@ type ChartType = 'income' | 'expense';
         <div *ngFor="let group of transactionGroups"  class="transactions-by-category card">
         <!-- <span>{{ 'charts.types.' + selectedType | translate }} {{ 'charts.list' | translate }}</span> -->
           <div class="date-header">
-            <span>{{ group.month }} {{ group.year }}</span>
+            <span>{{ group.month }} {{ group.year | translateNumber :'1.0-0' :false}}</span>
             <span class="total">
               <span *ngIf="group.totalIncome > 0">{{ 'dashboard.income' | translate }}: {{ group.totalIncome | translateNumber:'1.0-2' }}</span>
               <span *ngIf="group.totalExpense > 0">{{ 'dashboard.expense' | translate }}: {{ (group.totalExpense) | translateNumber:'1.0-2' }}</span>
@@ -246,6 +246,13 @@ type ChartType = 'income' | 'expense';
     border-bottom: 1px solid var(--border-color);
     box-shadow: 0 2px 4px var(--box-shadow-color-light);
     cursor: pointer;
+  }
+
+  .material-symbols-rounded {
+    font-size: xx-large;
+    padding: 0.5rem;
+    border-radius: 2rem;
+    background: var(--surface-color);
   }
 
   .asset-header {
@@ -587,7 +594,7 @@ export class AssetDetailsComponent implements OnInit, AfterViewInit {
 
       if (!groups.has(yearMonthKey)) {
         groups.set(yearMonthKey, {
-          month: date.toLocaleString('default', { month: 'short' }), // Get the month name
+          month: date.toLocaleString(this.translationService.getCurrentLanguage(), { month: 'short' }), // Get the month name
           year: date.getFullYear(),
           transactions: [],
           totalIncome: 0,

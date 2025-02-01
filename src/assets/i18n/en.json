@@ -415,7 +415,11 @@
       "cost": "Cost"
     },
     "purchaseDate": "Purchase Date",
-    "value": "Value"
+    "value": "Value",
+    "income": "Income",
+    "cost": "Cost",
+    "settings": "Settings",
+    "groupAssets": "Group assets"
   },
   "loan": {
     "loans": "Loans",

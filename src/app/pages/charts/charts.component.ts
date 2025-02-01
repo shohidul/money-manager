@@ -249,7 +249,6 @@ type ChartType = 'all' | 'income' | 'expense';
     gap: 0.5rem;
     background-color: var(--surface-color);
     padding: 0.5rem;
-    border-radius: 8px;
     box-shadow: 0 2px 4px var(--box-shadow-color-light);
   }
 
