@@ -64,7 +64,8 @@ export const categoryGroups: CategoryGroup[] = [
     icons: [
       { name: 'categories.groups.icons.finance.salary', icon: 'payments' },
       { name: 'categories.groups.icons.finance.investment', icon: 'trending_up' },
-      { name: 'categories.groups.icons.finance.savings', icon: 'savings' },
+      { name: 'categories.groups.icons.finance.savings', icon: 'money_bag' },
+      { name: 'categories.groups.icons.finance.gold', icon: 'real_estate_agent' },
       { name: 'categories.groups.icons.finance.bills', icon: 'receipt' },
       { name: 'categories.groups.icons.finance.bank', icon: 'account_balance' },
       { name: 'categories.groups.icons.finance.creditCard', icon: 'credit_card' },
@@ -304,10 +305,10 @@ export const defaultCategories: DefaultCategories[] = [
   { version: 1, order: 44, name: 'categories.defaults.loan.loanPayment', icon: 'person_outline', type: 'expense', subType: ['repaid'] },
   { version: 1, order: 45, name: 'categories.defaults.loan.businessLoanGiven', icon: 'business', type: 'expense', subType: ['loan'] },
   { version: 1, order: 46, name: 'categories.defaults.loan.loan', icon: 'account_balance_wallet', type: 'expense', subType: ['loan'] },
-  { version: 1, order: 47, name: 'categories.defaults.asset.savings', icon: 'savings', type: 'expense', subType: ['asset'] },
+  { version: 1, order: 47, name: 'categories.defaults.asset.savings', icon: 'money_bag', type: 'expense', subType: ['asset'] },
+  { version: 2, order: 47.1, name: 'categories.defaults.asset.gold', icon: 'real_estate_agent', type: 'expense', subType: ['asset'] },
   { version: 1, order: 48, name: 'categories.defaults.asset.purchaseAsset', icon: 'apartment', type: 'expense', subType: ['asset'] },
   { version: 2, order: 48.1, name: 'categories.defaults.asset.assetCost', icon: 'payments', type: 'expense', subType: ['assetCost'] },
-  // { version: 2, order: 48.2, name: 'categories.defaults.asset.gold', icon: 'real_estate_agent', type: 'expense', subType: ['asset'] },
   // Income categories
   { version: 1, order: 49, name: 'categories.defaults.income.salary', icon: 'payments', type: 'income', subType: ['none'] },
   { version: 1, order: 50, name: 'categories.defaults.income.business', icon: 'store', type: 'income', subType: ['none'] },

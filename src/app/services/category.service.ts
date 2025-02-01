@@ -89,6 +89,7 @@ export class CategoryService {
     if (isNewAddedOrDeleted) {
       // Save the updated order to the database
       const existingCategories = await this.dbService.getCategories();
+      existingCategories.sort((a, b) => (a.id || 0) - (b.id || 0));
       await this.updateCategoryOrder(existingCategories);
     }
   }  

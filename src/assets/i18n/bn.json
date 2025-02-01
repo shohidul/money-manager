@@ -102,6 +102,7 @@
           "salary": "বেতন",
           "investment": "বিনিয়োগ",
           "savings": "সঞ্চয়",
+          "gold": "স্বর্ণ",
           "bills": "বিল",
           "bank": "ব্যাংক",
           "creditCard": "ক্রেডিট কার্ড",
@@ -321,7 +322,8 @@
         "assetIncome": "সম্পদ আয়",
         "purchaseAsset": "সম্পদ ক্রয়",
         "sellAsset": "সম্পদ বিক্রয়",
-        "savings": "সঞ্চয়"
+        "savings": "সঞ্চয়",
+        "gold": "স্বর্ণ"
       },
       "fuel": {
         "carFuel": "গাড়ির জ্বালানি",
