@@ -16,6 +16,7 @@ export class FeatureFlagService {
     { id: 'fuel', name: 'Fuel Logs', isAdvanced: true, isBeta: false },
     { id: 'loans', name: 'Loan Management', isAdvanced: true, isBeta: true },
     { id: 'assets', name: 'Asset Management', isAdvanced: true, isBeta: true },
+    { id: 'savings', name: 'Saving Goals', isAdvanced: true, isBeta: true },
   ];
 
   private isAdvancedMode = new BehaviorSubject<boolean>(false);

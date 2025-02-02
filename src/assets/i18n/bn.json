@@ -27,6 +27,7 @@
     "fuelLogs": "জ্বালানি লগ",
     "loanManagement": "ঋণ ব্যবস্থাপনা",
     "assetManagement": "সম্পদ ব্যবস্থাপনা",
+    "savingGoals": "সঞ্চয় লক্ষ্য",
     "export": "সংরক্ষণ",
     "settings": "সেটিংস",
     "howToUse": "ব্যবহার পদ্ধতি",
@@ -47,6 +48,7 @@
       "asset": "সম্পদ",
       "assetCost": "সম্পদ খরচ",
       "assetIncome": "সম্পদ আয়",
+      "savings": "সঞ্চয়",
       "fuel": "জ্বালানি",
       "fuel|assetCost": "জ্বালানি | সম্পদ খরচ"
     },

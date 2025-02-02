@@ -27,6 +27,7 @@
     "fuelLogs": "Fuel Logs",
     "loanManagement": "Loan Management",
     "assetManagement": "Asset Management",
+    "savingGoals": "Saving Goals",
     "export": "Export",
     "settings": "Settings",
     "howToUse": "How to Use",
@@ -47,6 +48,7 @@
       "asset": "Asset",
       "assetCost": "Asset Cost",
       "assetIncome": "Asset Income",
+      "savings": "Savings",
       "fuel": "Fuel",
       "fuel|assetCost": "Fuel | Asset Cost"
     },

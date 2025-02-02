@@ -170,7 +170,7 @@ export interface AssetGroup {
 
     .asset-summary {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
       gap: 1rem;
       text-align: center;
       margin-bottom: 1rem;
@@ -179,10 +179,20 @@ export interface AssetGroup {
     .summary-item {
       display: flex;
       flex-direction: column;
+      justify-content: center;
+      align-items: center;
       gap: 0.5rem;
-      padding: 1rem;
+      padding: 1rem 0.5rem;
       background: var(--surface-color);
       box-shadow: 0 2px 4px var(--box-shadow-color-light);
+    }
+
+    .summary-item .label {
+      font-size: small;
+    }
+
+    .summary-item .value {
+      font-size: 1.1rem;
     }
 
     .asset-tools {

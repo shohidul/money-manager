@@ -1,5 +1,5 @@
 export type TransactionType = 'income' | 'expense';
-export type TransactionSubType = 'none' | 'loan' | 'repaid' | 'loanCost' | 'asset' | 'assetCost' | 'assetIncome' | 'fuel';
+export type TransactionSubType = 'none' | 'loan' | 'repaid' | 'loanCost' | 'asset' | 'assetCost' | 'assetIncome' | 'savings' | 'fuel';
 
 export interface BaseTransaction {
   id?: number;

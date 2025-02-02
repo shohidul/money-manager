@@ -86,7 +86,7 @@ import { DbService } from '../../../services/db.service';
 
     .label {
       color: var(--text-secondary);
-      font-size: 0.875rem;
+      font-size: small;
       display: flex;
       justify-content: center;
       align-items: center;

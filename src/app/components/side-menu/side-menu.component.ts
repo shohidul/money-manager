@@ -44,6 +44,12 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
           <span class="beta-badge" *ngIf="isFeatureBeta('assets')">BETA</span>
         </a>
 
+        <a *ngIf="isFeatureEnabled('savings')" routerLink="/savings" routerLinkActive="active" (click)="close()">
+          <span class="material-icons">money</span>
+          {{ 'menu.savingGoals' | translate }}
+          <span class="beta-badge" *ngIf="isFeatureBeta('savings')">BETA</span>
+        </a>
+
         <a routerLink="/export" routerLinkActive="active" (click)="close()">
           <span class="material-icons">download</span>
           {{ 'menu.export' | translate }}

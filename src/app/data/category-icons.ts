@@ -305,7 +305,7 @@ export const defaultCategories: DefaultCategories[] = [
   { version: 1, order: 44, name: 'categories.defaults.loan.loanPayment', icon: 'person_outline', type: 'expense', subType: ['repaid'] },
   { version: 1, order: 45, name: 'categories.defaults.loan.businessLoanGiven', icon: 'business', type: 'expense', subType: ['loan'] },
   { version: 1, order: 46, name: 'categories.defaults.loan.loan', icon: 'account_balance_wallet', type: 'expense', subType: ['loan'] },
-  { version: 1, order: 47, name: 'categories.defaults.asset.savings', icon: 'money_bag', type: 'expense', subType: ['asset'] },
+  { version: 1, order: 47, name: 'categories.defaults.asset.savings', icon: 'money_bag', type: 'expense', subType: ['savings'] },
   { version: 2, order: 47.1, name: 'categories.defaults.asset.gold', icon: 'real_estate_agent', type: 'expense', subType: ['asset'] },
   { version: 1, order: 48, name: 'categories.defaults.asset.purchaseAsset', icon: 'apartment', type: 'expense', subType: ['asset'] },
   { version: 2, order: 48.1, name: 'categories.defaults.asset.assetCost', icon: 'payments', type: 'expense', subType: ['assetCost'] },

@@ -63,7 +63,7 @@ import { TranslationService } from '../../../services/translation.service';
                 @if (category.budget) {
                   <span class="budget-info">
                     <span>
-                      {{ (category.subType.includes('asset') ? 'categories.goal' : 'categories.budget') | translate }}
+                      {{ (category.subType.includes('savings') ? 'categories.goal' : 'categories.budget') | translate }}
                     </span>
                     <span>{{ category.budget | translateNumber }}</span>
                   </span>
@@ -120,6 +120,7 @@ import { TranslationService } from '../../../services/translation.service';
                       <option value="asset">{{ 'categories.subTypes.asset' | translate }}</option>
                       <option value="assetCost">{{ 'categories.subTypes.assetCost' | translate }}</option>
                       <option value="assetIncome">{{ 'categories.subTypes.assetIncome' | translate }}</option>
+                      <option value="savings">{{ 'categories.subTypes.savings' | translate }}</option>
                       <option value="loan">{{ 'categories.subTypes.loan' | translate }}</option>
                       <option value="repaid">{{ 'categories.subTypes.repaid' | translate }}</option>
                       <option value="fuel">{{ 'categories.subTypes.fuel' | translate }}</option>
@@ -131,7 +132,7 @@ import { TranslationService } from '../../../services/translation.service';
                 <div class="form-row">
                   <div class="form-group">
                     <label for="categoryBudget-{{category.id}}">
-                      {{ (category.subType.includes('asset') || category.type === 'income' ? 
+                      {{ (category.subType.includes('savings') || category.type === 'income' ? 
                         'categories.goal' : 'categories.budget') | translate }}
                     </label>
                     <input
@@ -268,10 +269,10 @@ import { TranslationService } from '../../../services/translation.service';
     }
     .category-edit-form {
       width: 100%;
-      padding: 16px;
-      background-color: var(--background-secondary);
+      padding: 3rem;
       border-radius: 8px;
-      margin-top: 8px;
+      border: 1px solid var(--border-color-light);
+      margin-bottom: 1rem;
     }
     .category-edit-form .form-row {
       display: flex;
@@ -296,11 +297,11 @@ import { TranslationService } from '../../../services/translation.service';
     .category-edit-form .form-actions {
       display: flex;
       justify-content: space-between;
+      gap: 1rem;
       margin-top: 16px;
     }
     .category-edit-form .form-actions button {
       flex: 1;
-      margin: 0 4px;
     }
 
     .order-number {
