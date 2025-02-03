@@ -11,13 +11,13 @@ export class CategoryService {
   async initializeDefaultCategories() {
     const existingCategories = await this.dbService.getCategories();
 
-      // Migration: Convert subType from string to array if necessary
-    for (const category of existingCategories) {
-      if (typeof category.subType === 'string') {
-        category.subType = [category.subType];
-        await this.dbService.updateCategory(category);
-      }
-    }
+    // Migration: Convert subType from string to array if necessary
+    // for (const category of existingCategories) {
+    //   if (typeof category.subType === 'string') {
+    //     category.subType = [category.subType];
+    //     await this.dbService.updateCategory(category);
+    //   }
+    // }    
   
     const defaultCategoriesWithDetails = defaultCategories
       .filter(category => category.version! <= CATEGORIES_VERSION)
@@ -58,6 +58,27 @@ export class CategoryService {
         if (hasChanged) {
           console.log('Updating category', category);
           operations.push(this.dbService.updateCategory(category));
+          
+          // Update type and subType of transactions matching its category if necessary
+          const children = await this.getTransactionsByCategory(category.id!);
+          if (children.length > 0) {
+            console.log('Category has children, need to update type and subType');
+          }
+
+          children.forEach(child => {
+            if (child.type !== category.type) {
+              console.log('Updating type', child);
+              child.type = category.type;
+            }
+            if (!Array.isArray(child.subType) || 
+            child.subType.length !== category.subType.length || 
+            !child.subType.every((value, index) => value === category.subType[index])) {
+              console.log('Updating subType', child);
+              child.subType = category.subType;
+            }
+            operations.push(this.dbService.updateTransaction(child));
+          })
+          
           isNewAddedOrDeleted = true;
         }
       }
@@ -70,7 +91,6 @@ export class CategoryService {
       if (!exists) {
         console.log('Deleting category', category);
         const children = await this.getTransactionsByCategory(category.id!);
-  
         if (children.length > 0) {
           console.log('Category has children, not deleting');
           continue;
